@@ -60,6 +60,8 @@ public class Game extends GameBase {
             "setting sail..."
     };
 
+
+
     int[] keys = {0,0, 0, 0};//l,r,u,d
     public void resetKeys() {
         keys[0] = 0;
@@ -77,6 +79,7 @@ public class Game extends GameBase {
 
     public void roundRect(float x, float y, float w, float h, float r, float s) {
         s = s || 1;
+
         if (w < 2 * r) r = w / 2;
         if (h < 2 * r) r = h / 2;
         this.beginPath();

@@ -303,10 +303,10 @@ function changeSkin(val) {
     if (!renderedSkins[skinIndex]) {
         var tmpCanvas = document.createElement('canvas');
         tmpCanvas.width = tmpCanvas.height = skinDisplayIconSize;
-        var tmpContext = tmpCanvas.getContext('2d');
-        tmpContext.translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
-        tmpContext.lineJoin = "round";
-        renderPlayer(tmpContext, {
+        var shapeRenderer(fill) = tmpCanvas.getContext('2d');
+        shapeRenderer(fill).translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
+        shapeRenderer(fill).lineJoin = "round";
+        renderPlayer(shapeRenderer(fill), {
             dir: (MathPI),
             width: 60,
             length: 125,
@@ -531,30 +531,30 @@ var updateGameLoop = function (delta) {
                     tmpSID = (tmpObj.name + "-" + tmpObj.lvl + "-" + szMult);
                     if (tmpObj.nameSpriteID != tmpSID) {
                         var tmpCanvas = document.createElement("canvas");
-                        var tmpContext = tmpCanvas.getContext('2d');
+                        var shapeRenderer(fill) = tmpCanvas.getContext('2d');
                         var nameTextSize = 25 * szMult;
-                        tmpContext.font = nameTextSize + "px regularF";
-                        var nameMeasure = tmpContext.measureText(tmpObj.name);
-                        tmpContext.font = (nameTextSize * 1.3) + "px regularF";
-                        var lvlMeasure = tmpContext.measureText(tmpObj.lvl ? tmpObj.lvl + "" : "");
-                        tmpContext.font = nameTextSize + "px regularF";
+                        shapeRenderer(fill).font = nameTextSize + "px regularF";
+                        var nameMeasure = shapeRenderer(fill).measureText(tmpObj.name);
+                        shapeRenderer(fill).font = (nameTextSize * 1.3) + "px regularF";
+                        var lvlMeasure = shapeRenderer(fill).measureText(tmpObj.lvl ? tmpObj.lvl + "" : "");
+                        shapeRenderer(fill).font = nameTextSize + "px regularF";
                         tmpCanvas.width = (nameMeasure.width + (lvlMeasure.width * 2)) + 20;
                         tmpCanvas.height = (nameTextSize * 2);
-                        tmpContext.translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
-                        tmpContext.font = nameTextSize + "px regularF";
-                        tmpContext.fillStyle = '#ffffff';
-                        tmpContext.strokeStyle = darkColor;
-                        tmpContext.lineWidth = 6.5;
-                        tmpContext.textAlign = "center";
+                        shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
+                        shapeRenderer(fill).font = nameTextSize + "px regularF";
+                        shapeRenderer(fill).fillStyle = '#ffffff';
+                        shapeRenderer(fill).strokeStyle = darkColor;
+                        shapeRenderer(fill).lineWidth = 6.5;
+                        shapeRenderer(fill).textAlign = "center";
                         if (tmpCanvas.width <= 600) {
-                            tmpContext.strokeText(tmpObj.name, 0, 0);
-                            tmpContext.fillText(tmpObj.name, 0, 0);
+                            shapeRenderer(fill).strokeText(tmpObj.name, 0, 0);
+                            shapeRenderer(fill).fillText(tmpObj.name, 0, 0);
                             if (tmpObj.lvl) {
-                                tmpContext.font = (nameTextSize * 1.3) + "px regularF";
+                                shapeRenderer(fill).font = (nameTextSize * 1.3) + "px regularF";
                                 var tmpLvlX = -(nameMeasure.width / 2) - (10 + (lvlMeasure.width / 2));
-                                tmpContext.strokeStyle = darkColor;
-                                tmpContext.strokeText(tmpObj.lvl, tmpLvlX, 0);
-                                tmpContext.fillText(tmpObj.lvl, tmpLvlX, 0);
+                                shapeRenderer(fill).strokeStyle = darkColor;
+                                shapeRenderer(fill).strokeText(tmpObj.lvl, tmpLvlX, 0);
+                                shapeRenderer(fill).fillText(tmpObj.lvl, tmpLvlX, 0);
                             }
                         }
                         tmpObj.nameSpriteID = tmpSID;
@@ -923,74 +923,74 @@ function renderGameObject(tmpObj, ctxt) {
     var tmpSprt = gameObjSprites[tmpIndx];
     if (!tmpSprt) {
         var tmpCanvas = document.createElement("canvas");
-        var tmpContext = tmpCanvas.getContext('2d');
+        var shapeRenderer(fill) = tmpCanvas.getContext('2d');
         tmpCanvas.width = (tmpObj.s * 2) + 10;
         tmpCanvas.height = tmpCanvas.width;
-        tmpContext.strokeStyle = darkColor;
-        tmpContext.lineWidth = 8.5;
-        tmpContext.translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
+        shapeRenderer(fill).strokeStyle = darkColor;
+        shapeRenderer(fill).lineWidth = 8.5;
+        shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
         if (tmpObj.c == 0) {
-            tmpContext.fillStyle = '#797979';
+            shapeRenderer(fill).fillStyle = '#797979';
         } else if (tmpObj.c == 1) {
-            tmpContext.fillStyle = '#e89360';
+            shapeRenderer(fill).fillStyle = '#e89360';
         } else if (tmpObj.c == 2) {
-            tmpContext.fillStyle = '#c8c8c8';
+            shapeRenderer(fill).fillStyle = '#c8c8c8';
         } else if (tmpObj.c == 3) {
-            tmpContext.fillStyle = '#e9cd5f';
+            shapeRenderer(fill).fillStyle = '#e9cd5f';
         } else if (tmpObj.c == 4) {
-            tmpContext.fillStyle = '#EB6565';
+            shapeRenderer(fill).fillStyle = '#EB6565';
         } else if (tmpObj.c == 5) {
-            tmpContext.fillStyle = '#6FE8E2';
+            shapeRenderer(fill).fillStyle = '#6FE8E2';
         } else if (tmpObj.c == 6) {
-            tmpContext.fillStyle = '#7BE86F';
+            shapeRenderer(fill).fillStyle = '#7BE86F';
         }
         if (tmpObj.shp == 1) {
             var spikes = 6;
             var rot = MathPI / 2 * 3;
             var rad = tmpObj.s / 2;
             var step = MathPI / spikes;
-            tmpContext.beginPath();
-            tmpContext.moveTo(0, -rad);
+            shapeRenderer(fill).beginPath();
+            shapeRenderer(fill).moveTo(0, -rad);
             for (var s = 0; s < spikes; s++) {
-                tmpContext.lineTo(MathCOS(rot) * rad, MathSIN(rot) * rad);
+                shapeRenderer(fill).lineTo(MathCOS(rot) * rad, MathSIN(rot) * rad);
                 rot += step;
-                tmpContext.lineTo(MathCOS(rot) * (rad * 0.8), MathSIN(rot) * (rad * 0.8));
+                shapeRenderer(fill).lineTo(MathCOS(rot) * (rad * 0.8), MathSIN(rot) * (rad * 0.8));
                 rot += step;
             }
-            tmpContext.lineTo(0, -rad);
-            tmpContext.closePath();
-            tmpContext.stroke();
-            tmpContext.fill();
+            shapeRenderer(fill).lineTo(0, -rad);
+            shapeRenderer(fill).closePath();
+            shapeRenderer(fill).stroke();
+            shapeRenderer(fill).fill();
         } else if (tmpObj.shp == 2) {
             var rad = tmpObj.s / 1.6;
-            tmpContext.beginPath();
-            tmpContext.moveTo(0, -rad);
-            tmpContext.lineTo(rad, 0);
-            tmpContext.lineTo(0, rad);
-            tmpContext.lineTo(-rad, 0);
-            tmpContext.closePath();
-            tmpContext.stroke();
-            tmpContext.fill();
+            shapeRenderer(fill).beginPath();
+            shapeRenderer(fill).moveTo(0, -rad);
+            shapeRenderer(fill).lineTo(rad, 0);
+            shapeRenderer(fill).lineTo(0, rad);
+            shapeRenderer(fill).lineTo(-rad, 0);
+            shapeRenderer(fill).closePath();
+            shapeRenderer(fill).stroke();
+            shapeRenderer(fill).fill();
         } else if (tmpObj.shp == 3) {
             var rad = tmpObj.s / 1.6;
-            tmpContext.beginPath();
-            tmpContext.moveTo(0, -rad);
-            tmpContext.lineTo(rad / 1.5, 0);
-            tmpContext.lineTo(0, rad);
-            tmpContext.lineTo(-rad / 1.5, 0);
-            tmpContext.closePath();
-            tmpContext.stroke();
-            tmpContext.fill();
+            shapeRenderer(fill).beginPath();
+            shapeRenderer(fill).moveTo(0, -rad);
+            shapeRenderer(fill).lineTo(rad / 1.5, 0);
+            shapeRenderer(fill).lineTo(0, rad);
+            shapeRenderer(fill).lineTo(-rad / 1.5, 0);
+            shapeRenderer(fill).closePath();
+            shapeRenderer(fill).stroke();
+            shapeRenderer(fill).fill();
         } else {
-            tmpContext.beginPath();
-            tmpContext.arc(0, 0, tmpObj.s / 2, 0, 2 * Math.PI);
-            tmpContext.stroke();
-            tmpContext.fill();
+            shapeRenderer(fill).beginPath();
+            shapeRenderer(fill).arc(0, 0, tmpObj.s / 2, 0, 2 * Math.PI);
+            shapeRenderer(fill).stroke();
+            shapeRenderer(fill).fill();
         }
         gameObjSprites[tmpIndx] = tmpCanvas;
         tmpSprt = gameObjSprites[tmpIndx];
     }
-    ctxt.drawImage(tmpSprt, -tmpSprt.width / 2, -tmpSprt.height / 2,
+    spriteBatch().draw(tmpSprt, -tmpSprt.width / 2, -tmpSprt.height / 2,
         tmpSprt.width, tmpSprt.height);
 }
 
@@ -1023,15 +1023,15 @@ function drawIsland(x, y, s, indx, ctxt) {
             tmpIsl = islandInfo[0];
         }
         var tmpCanvas = document.createElement("canvas");
-        var tmpContext = tmpCanvas.getContext('2d');
+        var shapeRenderer(fill) = tmpCanvas.getContext('2d');
         tmpCanvas.width = (s * 2) + (indx < 3 ? 300 : 10);
         tmpCanvas.height = tmpCanvas.width;
-        tmpContext.fillStyle = tmpIsl.color;
-        tmpContext.strokeStyle = darkColor;
-        tmpContext.translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
+        shapeRenderer(fill).fillStyle = tmpIsl.color;
+        shapeRenderer(fill).strokeStyle = darkColor;
+        shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
         var tmpOff = (s * tmpIsl.offsets[0]);
-        tmpContext.beginPath();
-        tmpContext.moveTo((tmpOff * MathCOS(0)), (tmpOff * MathSIN(0)));
+        shapeRenderer(fill).beginPath();
+        shapeRenderer(fill).moveTo((tmpOff * MathCOS(0)), (tmpOff * MathSIN(0)));
 
         // ISLAND BASE:
         var offIndx = 0;
@@ -1040,20 +1040,20 @@ function drawIsland(x, y, s, indx, ctxt) {
             if (offIndx >= tmpIsl.offsets.length - 1)
                 offIndx = 0;
             var tmpOff = (s * tmpIsl.offsets[offIndx]);
-            tmpContext.lineTo((tmpOff * MathCOS(i * 2 * MathPI / tmpIsl.sides)), (tmpOff * MathSIN(i * 2 * MathPI / tmpIsl.sides)));
+            shapeRenderer(fill).lineTo((tmpOff * MathCOS(i * 2 * MathPI / tmpIsl.sides)), (tmpOff * MathSIN(i * 2 * MathPI / tmpIsl.sides)));
         }
-        tmpContext.closePath();
+        shapeRenderer(fill).closePath();
         if (indx < 3) {
-            tmpContext.lineWidth = 300;
-            tmpContext.globalAlpha = 0.1;
-            tmpContext.stroke();
-            tmpContext.lineWidth = 120;
-            tmpContext.stroke();
+            shapeRenderer(fill).lineWidth = 300;
+            shapeRenderer(fill).globalAlpha = 0.1;
+            shapeRenderer(fill).stroke();
+            shapeRenderer(fill).lineWidth = 120;
+            shapeRenderer(fill).stroke();
         }
-        tmpContext.lineWidth = 8.5;
-        tmpContext.globalAlpha = 1;
-        tmpContext.stroke();
-        tmpContext.fill();
+        shapeRenderer(fill).lineWidth = 8.5;
+        shapeRenderer(fill).globalAlpha = 1;
+        shapeRenderer(fill).stroke();
+        shapeRenderer(fill).fill();
 
         // PALM TREES:
 
@@ -1061,7 +1061,7 @@ function drawIsland(x, y, s, indx, ctxt) {
         islandSprites[tmpIndx] = tmpCanvas;
         tmpSprt = islandSprites[tmpIndx];
     }
-    ctxt.drawImage(tmpSprt, x - tmpSprt.width / 2, y - tmpSprt.height / 2,
+    spriteBatch().draw(tmpSprt, x - tmpSprt.width / 2, y - tmpSprt.height / 2,
         tmpSprt.width, tmpSprt.height);
 }
 
