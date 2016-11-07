@@ -38,14 +38,14 @@ public class Game extends GameBase {
 
     }
 
-
-    String socket, port;
+    String socket;
+    int port;
     int targetFPS = 60;
-    int delta, delta2, currentTime, oldTime = 0;
+    public static float delta, delta2;
+    public static long currentTime, oldTime ;
     int gameState = 0;
     Object gameData;
     boolean upgradesHidden = false;
-    int instructionsIndex = 0;
     int instructionsSpeed = 5500;
     int insturctionsCountdown = 0;
     String[] instructionsList = {
@@ -75,6 +75,39 @@ public class Game extends GameBase {
 //            cid = Utility.getUniqueID();
             Utility.saveString("sckt", cid);
         }
+    }
+
+    int mouseX, mouseY;
+    boolean forceTarget = true, shooting;
+   String userNameInput = Utility.getString("lstnmdbl");
+
+    public static void toggleUpgrades(){
+
+    }
+
+    // GAME INPUT:
+    public static void enterGame() {
+        if (SocketManager.isConnected) {
+            showMainMenuText(randomLoadingTexts[UTILS.randInt(0, randomLoadingTexts.length - 1)]);
+            socket.emit('respawn', {
+                    name: userNameInput.value,
+                    skin: skinIndex
+            });
+            Utility.saveString("lstnmdbl", userNameInput.value);
+            mainCanvas.focus();
+        }
+    }
+
+    // LEAVE GAME TO MENU:
+    public static void leaveGame() {
+        gameState = 0;
+        toggleGameUI(false);
+        toggleMenuUI(true);
+    }
+
+    // DO UPGRADE:
+    public static void doUpgrade(index, pos, tp) {
+        socket.emit('3', index, pos, tp);
     }
 
     public void roundRect(float x, float y, float w, float h, float r, float s) {

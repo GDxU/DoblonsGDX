@@ -1,5 +1,5 @@
 
-var partyKey = null;
+String partyKey = null;
 var player = null;
 var modeList = null;
 var modeIndex = null;
@@ -33,7 +33,7 @@ var screenWidth, screenHeight;
 var darkColor = "#4d4d4d";
 
 // PAGE IS READY:
-function getURLParam(name, url) {
+public static void getURLParam(name, url) {
     if (!url) url = location.href;
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
     var regexS = "[\\?&]" + name + "=([^&#]*)";
@@ -48,79 +48,12 @@ if (lobbyURLIP) {
     lobbyURLIP = tmpL[0];
     lobbyRoomID = tmpL[1];
 }
-window.onload = function () {
-    // SETUP MENU BUTTON LISTENERS:
 
 
-    // CONNECT TO SERVER:
-    $.get("/getIP", {sip: lobbyURLIP}, function (data) {
-        port = data.port;
-
-        // SETUP SOCKET:
-        if (!socket) {
-            socket = io.connect('http://' + (data.ip) + ':' + data.port, {
-                'connect timeout': 3000,
-                'reconnection': true,
-                'query': ('cid=' + cid + '&rmid=' + lobbyRoomID + '&apid=19ytahhsb')
-            });
-            setupSocket();
-        }
-    });
-}
-
-// GAME INPUT:
-
-var mouseX, mouseY;
-var forceTarget = true;
-
-var shooting = false;
-
-
-
-
-toggleUpgrades();
-
-function toggleUpgrades() {
-    if (upgradesHidden) {
-        upgradeContainer.style.display = 'inline-block'
-    } else {
-        upgradeContainer.style.display = 'none'
-    }
-
-    upgradesHidden = (!upgradesHidden);
-}
-
-// ENTER THE GAME:
-if (hasStorage && localStorage.getItem("lstnmdbl")) {
-    userNameInput.value = localStorage.getItem("lstnmdbl");
-}
-function enterGame() {
-    if (socket) {
-        showMainMenuText(randomLoadingTexts[UTILS.randInt(0, randomLoadingTexts.length - 1)]);
-        socket.emit('respawn', {
-            name: userNameInput.value,
-            skin: skinIndex
-        });
-        Utility.saveString("lstnmdbl", userNameInput.value);
-        mainCanvas.focus();
-    }
-}
-
-// LEAVE GAME TO MENU:
-function leaveGame() {
-    gameState = 0;
-    toggleGameUI(false);
-    toggleMenuUI(true);
-}
-
-// DO UPGRADE:
-function doUpgrade(index, pos, tp) {
-    socket.emit('3', index, pos, tp);
-}
 
 // WEAPON POPUP:
 var activePopup;
-function showWeaponPopup(indx) {
+public static void showWeaponPopup(indx) {
     for (var i = 0; i < 4; i++) {
         var tmpDiv = document.getElementById('popupRow' + i);
         if (tmpDiv) {
@@ -139,8 +72,8 @@ var skullIconSize = 50;
 var iconsList = [];
 for (var i = 1; i < iconsCount; ++i) {
     var tmpImg = new Image();
-    tmpImg.onload = (function (val) {
-        return function () {
+    tmpImg.onload = (public static void (val) {
+        return public static void () {
             this.onLoad = null;
             iconsList[val] = this;
         }
@@ -294,7 +227,7 @@ var userSkins = [{
 }];
 var renderedSkins = [];
 var skinDisplayIconSize = 200;
-function changeSkin(val) {
+public static void changeSkin(val) {
     skinIndex += val;
     if (skinIndex >= userSkins.length)
         skinIndex = 0;
@@ -325,7 +258,7 @@ function changeSkin(val) {
     }
 }
 changeSkin(0);
-$('#skinSelector').bind("contextmenu", function (e) {
+$('#skinSelector').bind("contextmenu", public static void (e) {
     changeSkin(-1);
     return false;
 });
@@ -334,7 +267,7 @@ if (hasStorage) {
         unlockSkins(0);
     }
 }
-function unlockSkins(indx) {
+public static void unlockSkins(indx) {
     if (!indx) {
         skinInfo.style.display = "inline-block";
         skinSelector.style.display = "inline-block";
@@ -346,7 +279,7 @@ function unlockSkins(indx) {
 
 // UPDATE THE GAME:
 var playerContext = playerCanvas.getContext('2d');
-var updateGameLoop = function (delta) {
+var updateGameLoop = public static void (delta) {
 
     // IF PLAYER IS SET:
     if (player) {
@@ -605,7 +538,7 @@ var updateGameLoop = function (delta) {
 }
 
 // RENDER PLAYER:
-function renderPlayer(contxt, tmpObj, tmpX, tmpY, tmpS, delta) {
+public static void renderPlayer(contxt, tmpObj, tmpX, tmpY, tmpS, delta) {
 
     // RENDER PLAYER SHIP:
     contxt.lineWidth = 8.5;
@@ -909,7 +842,7 @@ function renderPlayer(contxt, tmpObj, tmpX, tmpY, tmpS, delta) {
 }
 
 // DRAW CIRCLE:
-function drawCircle(x, y, s, ctxt) {
+public static void drawCircle(x, y, s, ctxt) {
     ctxt.beginPath();
     ctxt.arc(x, y, s, 0, 2 * Math.PI);
     ctxt.stroke();
@@ -918,7 +851,7 @@ function drawCircle(x, y, s, ctxt) {
 
 // RENDER GAME OBJECT:
 var gameObjSprites = [];
-function renderGameObject(tmpObj, ctxt) {
+public static void renderGameObject(tmpObj, ctxt) {
     var tmpIndx = (tmpObj.c + "-" + tmpObj.shp + "-" + tmpObj.s);
     var tmpSprt = gameObjSprites[tmpIndx];
     if (!tmpSprt) {
@@ -1014,7 +947,7 @@ var islandInfo = [{
 }];
 var islandSprites = [];
 var tmpIsl;
-function drawIsland(x, y, s, indx, ctxt) {
+public static void drawIsland(x, y, s, indx, ctxt) {
     var tmpIndx = (s + "-" + indx);
     var tmpSprt = islandSprites[tmpIndx];
     if (!tmpSprt) {
@@ -1066,7 +999,7 @@ function drawIsland(x, y, s, indx, ctxt) {
 }
 
 // UPDATE MENU:
-function updateMenuLoop(delta) {
+public static void updateMenuLoop(delta) {
     if (gameState != 1) {
 
         // MENU INSTRUCTIONS TEXT:
@@ -1086,7 +1019,7 @@ var sendFrequency = (10);
 var tUpdateFrequency = (10);
 var lastUpdated = 0;
 var lastSent = 0;
-function sendTarget(force) {
+public static void sendTarget(force) {
     var tmpTime = currentTime;
     if (player && !player.dead) {
         target = MathATAN2(mouseY - (screenHeight / 2), mouseX - (screenWidth / 2));
@@ -1113,7 +1046,7 @@ function sendTarget(force) {
         }
     }
 }
-function sendMoveTarget() {
+public static void sendMoveTarget() {
     if (!keys.r && !keys.l)
         turnDir = 0;
     if (!keys.u && !keys.d)
@@ -1130,7 +1063,7 @@ var scoreDisplayTime = 1500;
 for (var i = 0; i < 20; ++i) {
     animTexts.push(new animText());
 }
-function updateAnimTexts(delta) {
+public static void updateAnimTexts(delta) {
 
     // UPDATE COOLDOWNS:
     if (scoreCountdown) {
@@ -1151,7 +1084,7 @@ function updateAnimTexts(delta) {
     }
     mainContext.globalAlpha = 1;
 }
-function animText() {
+public static void animText() {
     this.x = 0;
     this.y = 0;
     this.alpha = 0;
@@ -1163,7 +1096,7 @@ function animText() {
     this.fadeSpeed = 0;
     this.text = "";
     this.active = false;
-    this.update = function (delta) {
+    this.update = public static void (delta) {
         if (this.active) {
             // UPDATE:
             this.scale += this.scalePlus * delta;
@@ -1192,7 +1125,7 @@ function animText() {
             }
         }
     };
-    this.show = function (x, y, txt, scale, fadeDelay, sclPlus) {
+    this.show = public static void (x, y, txt, scale, fadeDelay, sclPlus) {
         this.x = x;
         this.y = y;
         this.scale = scale;
@@ -1206,7 +1139,7 @@ function animText() {
         this.active = true;
     };
 };
-function showAnimText(x, y, txt, scale, fadeDelay, type, sclPlus) {
+public static void showAnimText(x, y, txt, scale, fadeDelay, type, sclPlus) {
     var tmpText = animTexts[animTextIndex];
     tmpText.show(x, y, txt, scale, fadeDelay, sclPlus);
     tmpText.type = type;
@@ -1216,24 +1149,24 @@ function showAnimText(x, y, txt, scale, fadeDelay, type, sclPlus) {
 };
 
 // NOTIFICATIONS:
-function hideNotifByType(type) {
+public static void hideNotifByType(type) {
     for (var i = 0; i < animTexts.length; ++i) {
         if (animTexts[i].type == type)
             animTexts[i].active = false;
     }
 }
-function showNotification(text) {
+public static void showNotification(text) {
     for (var i = 0; i < animTexts.length; ++i) {
         if (animTexts[i].type == "notif")
             animTexts[i].active = false;
     }
     showAnimText(maxScreenWidth / 2, maxScreenHeight / 1.27, text, 42, 1500, "notif", 0.19);
 }
-function showBigNotification(text) {
+public static void showBigNotification(text) {
     hideNotifByType("bNotif");
     showAnimText(maxScreenWidth / 2, screenHeight / 3, text, 130, 1000, "bNotif", 0.26);
 }
-function showScoreNotif(value) {
+public static void showScoreNotif(value) {
     hideNotifByType("sNotif");
     lastScore += value;
     showAnimText(maxScreenWidth / 2, maxScreenHeight / 1.34, ("+" + lastScore), 35, scoreDisplayTime, "sNotif", 0.16);
@@ -1246,13 +1179,13 @@ var screenShackeScale = 0;
 var screenSkY = 0;
 var screenSkRed = 0.5;
 var screenSkDir = 0;
-function screenShake(scl, dir) {
+public static void screenShake(scl, dir) {
     if (screenShackeScale < scl) {
         screenShackeScale = scl;
         screenSkDir = dir;
     }
 }
-function updateScreenShake(delta) {
+public static void updateScreenShake(delta) {
     if (screenShackeScale > 0) {
         screenSkX = screenShackeScale * MathCOS(screenSkDir);
         screenSkY = screenShackeScale * MathSIN(screenSkDir);
@@ -1264,7 +1197,7 @@ function updateScreenShake(delta) {
 
 // KICK PLAYER:
 var kickReason = null;
-function kickPlayer(reason) {
+public static void kickPlayer(reason) {
     leaveGame();
     if (!kickReason)
         kickReason = reason;
@@ -1274,7 +1207,7 @@ function kickPlayer(reason) {
 }
 
 // UPDATE OR PUSH PLAYER:
-function updateOrPushUser(user) {
+public static void updateOrPushUser(user) {
     var tmpIndx = getPlayerIndex(user.sid);
     if (tmpIndx != null) {
         users[tmpIndx] = user;
@@ -1284,7 +1217,7 @@ function updateOrPushUser(user) {
 }
 
 // CHECK IF PLAYER IS IN ARRAY:
-function objectExists(obj) {
+public static void objectExists(obj) {
     for (var i = 0; i < users.length; ++i) {
         if (users[i].sid == obj.sid)
             return true;
@@ -1293,14 +1226,14 @@ function objectExists(obj) {
 }
 
 // FIND PLAYER INDEX:
-function getPlayerIndex(sid) {
+public static void getPlayerIndex(sid) {
     for (var i = 0; i < users.length; ++i) {
         if (users[i].sid == sid)
             return i;
     }
     return null;
 }
-function getPlayerIndexById(id) {
+public static void getPlayerIndexById(id) {
     for (var i = 0; i < users.length; ++i) {
         if (users[i].id == id)
             return i;
@@ -1309,22 +1242,22 @@ function getPlayerIndexById(id) {
 }
 
 // SHOW A TEXT IN THE MENU:
-function showMainMenuText(text) {
+public static void showMainMenuText(text) {
     userInfoContainer.style.display = "none";
     loadingContainer.style.display = "block";
     loadingContainer.innerHTML = text;
 }
-function hideMainMenuText() {
+public static void hideMainMenuText() {
     userInfoContainer.style.display = "block";
     loadingContainer.style.display = "none";
 }
 
 // TOGGLE UI:
-function toggleGameUI(visible) {
+public static void toggleGameUI(visible) {
     var display = visible ? "block" : "none";
     gameUiContainer.style.display = display;
 }
-function toggleMenuUI(visible) {
+public static void toggleMenuUI(visible) {
 
     // SHOWING MAIN MENU:
     if (visible) {
@@ -1353,17 +1286,17 @@ resize();
 
 // GAME UPDATE LOOP:
 var then = window.performance.now();
-window.requestAnimFrame = (function () {
+window.requestAnimFrame = (public static void () {
     return window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
         window.msRequestAnimationFrame ||
-        function (callback, element) {
+        public static void (callback, element) {
             window.setTimeout(callback, 1000 / targetFPS);
         };
 })();
-function callUpdate() {
+public static void callUpdate() {
     requestAnimFrame(callUpdate);
     currentTime = window.performance.now();
     var elapsed = currentTime - then;
@@ -1376,16 +1309,16 @@ callUpdate();
 
 var app = {
     // Application Constructor
-    initialize: function () {
+    initialize: public static void () {
         this.bindEvents();
     },
     // Bind any event listeners that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
-    bindEvents: function () {
+    bindEvents: public static void () {
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
 
-    onDeviceReady: function () {
+    onDeviceReady: public static void () {
         Utility.log('device ready')
         app.receivedEvent('deviceready');
 
@@ -1393,11 +1326,11 @@ var app = {
 
     },
     // Update DOM on a Received Event
-    receivedEvent: function (id) {
+    receivedEvent: public static void (id) {
     }
 };
 
-setTimeout(function () {
+setTimeout(public static void () {
     initAds();
     document.addEventListener("pause", onPause, false);
     document.addEventListener("resume", onResume, false);
@@ -1405,7 +1338,7 @@ setTimeout(function () {
 
 var flipOrientation = screen.orientation != "landscape-primary";
 
-window.addEventListener("orientationchange", function () {
+window.addEventListener("orientationchange", public static void () {
     flipOrientation = screen.orientation != "landscape-primary";
     // Utility.log("flipOrientation: " + flipOrientation);
 });
@@ -1415,20 +1348,20 @@ app.initialize();
 var forceTarget = true;
 
 
-Math.toDegrees = function (radians) {
+Math.toDegrees = public static void (radians) {
     return radians * 180 / Math.PI;
 };
 
 
 
 
-function initAds() {
+public static void initAds() {
     ShowAds.initInterstitialAd({adId: "ca-app-pub-6350309116730071/9878078741", isTest: true});
 }
 
 var lastAdShown = Date.now();
 
-function showAd() {
+public static void showAd() {
     Utility.log("showAds")
     if (!paused && (1200 < (Date.now() - lastAdShown))) {
         lastAdShown = Date.now();
@@ -1438,12 +1371,12 @@ function showAd() {
 
 var paused = false;
 
-function onPause() {
+public static void onPause() {
     pauseSounds();
     paused = true;
 }
 
-function onResume() {
+public static void onResume() {
     resumeSounds();
     paused = false;
 }
@@ -1451,7 +1384,7 @@ function onResume() {
 var shouldSendData = 0;
 var tmpDelta = 0;
 
-function connectToServer(data) {
+public static void connectToServer(data) {
     try {
         data = JSON.parse(data);
     } catch (e) {
