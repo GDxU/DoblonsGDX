@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.StringBuilder;
 
 import java.util.Random;
 
@@ -218,4 +219,24 @@ public class Utility {
         }
         return p;
     }
+
+    public static float getDistance (float a, float b, float c, float d) {
+        return (float) Math.sqrt((c -= a) * c + (d -= b) * d);
+    }
+    public static float getDirection (float x1,float y1,float x2,float y2) {
+        return (float) Math.atan2(y1 - y2, x1 - x2);
+    }
+//    private static final String pattern = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+
+//    public static  String getUniqueID () {
+//        final StringBuilder builder = new StringBuilder(36);
+//        for (int i = 0; i < pattern.length(); i++) {
+//
+//        }
+//    }
+//
+//    private static String subString(String a){
+//        int b = randInt(0,16);
+//        return ("x" == a ? b : b & 3 | 8).toString(16);
+//    }
 }

@@ -1,128 +1,4 @@
-// INIT:
-var targetFPS = 60;
-var delta, delta2, currentTime, oldTime = 0;
-var gameState = 0;
-var gameData;
-var upgradesHidden = false;
 
-
-// SOCKET:
-var socket, port;
-
-// OVERWRITES:
-Number.prototype.round = function (places) {
-    return +this.toFixed(places);
-}
-CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r, s) {
-    s = s || 1;
-    if (w < 2 * r) r = w / 2;
-    if (h < 2 * r) r = h / 2;
-    this.beginPath();
-    this.moveTo(x + r, y);
-    this.arcTo(x + w * s, y, x + w * s, y + h, r);
-    this.arcTo(x + w, y + h, x, y + h, r);
-    this.arcTo(x, y + h, x, y, r);
-    this.arcTo(x * (s == 1 ? s : (s * 1.2)), y, x + w * s, y, r);
-    this.closePath();
-    return this;
-}
-
-// MATHS:
-var MathPI = Math.PI;
-var MathCOS = Math.cos;
-var MathSIN = Math.sin;
-var MathABS = Math.abs;
-var MathPOW = Math.pow;
-var MathMIN = Math.min;
-var MathMAX = Math.max;
-var MathATAN2 = Math.atan2;
-
-// HTML ELEMENTS:
-var mainCanvas = document.getElementById('mainCanvas');
-var mainContext = mainCanvas.getContext('2d');
-var gameTitle = document.getElementById('gameTitle');
-var instructionsText = document.getElementById('instructionsText');
-var gameUiContainer = document.getElementById('gameUiContainer');
-var fireButton = document.getElementById('fireButton');
-var userInfoContainer = document.getElementById('userInfoContainer');
-var loadingContainer = document.getElementById('loadingContainer');
-var enterGameButton = document.getElementById('enterGameButton');
-var userNameInput = document.getElementById('userNameInput');
-var menuContainer = document.getElementById('menuContainer');
-var darkener = document.getElementById('darkener');
-var leaderboardText = document.getElementById('leaderboardText');
-var leaderboardList = document.getElementById('leaderboardList');
-var upgradeContainer = document.getElementById('upgradeContainer');
-var upgrades = document.getElementById('upgrades');
-var coinDisplay = document.getElementById('coinDisplay');
-var upgradeList = document.getElementById('upgradeList');
-var upgradesText = document.getElementById('upgradesText');
-var scoreText = document.getElementById('scoreText');
-var className = document.getElementById('className');
-var minimap = document.getElementById('minimap');
-var minimapContext = minimap.getContext('2d');
-var weaponsProgress = document.getElementById('weaponsProgress');
-var wpnsProgressBar = document.getElementById('wpnsProgressBar');
-var weaponsList = document.getElementById('weaponsList');
-var weaponsPopups = document.getElementById('weaponsPopups');
-var upgradesInfo = document.getElementById('upgradesInfo');
-var skinInfo = document.getElementById('skinInfo');
-var skinSelector = document.getElementById('skinSelector');
-var skinName = document.getElementById('skinName');
-var skinIcon = document.getElementById('skinIcon');
-var wpnsProgressTxt = document.getElementById('wpnsProgressTxt');
-
-// SRTINGS:
-var instructionsIndex = 0;
-var instructionsSpeed = 5500;
-var insturctionsCountdown = 0;
-var instructionsList = [
-    "use A & D or Arrow Keys control the direction of your ship",
-    "use your mouse to aim and fire your cannons",
-    "destroy enemy ships and collect doblons to upgrade your ship"
-];
-instructionsIndex = UTILS.randInt(0, instructionsList.length - 1);
-var randomLoadingTexts = [
-    "discovering treasure...",
-    "setting sail..."
-];
-
-// INPUTS:
-var upgrInputsToIndex = {
-    "k48": 9,
-    "k49": 0,
-    "k50": 1,
-    "k51": 2,
-    "k52": 3,
-    "k53": 4,
-    "k54": 5,
-    "k55": 6,
-    "k56": 7,
-    "k57": 8,
-    "k84": 10,
-    "k89": 11
-};
-
-var keys = {
-    l: 0,
-    r: 0,
-    u: 0,
-    d: 0
-};
-function resetKeys() {
-    keys.l = 0;
-    keys.r = 0;
-}
-
-// GAMEOBJECTS & VALUES:
-var hasStorage = (typeof(Storage) !== "undefined");
-if (hasStorage) {
-    var cid = localStorage.getItem("sckt");
-    if (!cid) {
-        cid = UTILS.getUniqueID();
-        localStorage.setItem("sckt", cid);
-    }
-}
 var partyKey = null;
 var player = null;
 var modeList = null;
@@ -144,24 +20,6 @@ if (hasStorage) {
     if (contIndx)
         controlIndex = contIndx;
 }
-// var controlShemes = [{
-//     id: 1,
-//     name: "<i style='vertical-align: middle;' class='material-icons'>&#xE312;</i> Keyboard & Mouse"
-// }, {
-//     id: 2,
-//     name: "<i style='vertical-align: middle;' class='material-icons'>&#xE323;</i> Mouse Only"
-// }];
-// function setControlSheme(indx) {
-//     controlsButton.innerHTML = controlShemes[indx].name;
-//     localStorage.setItem("contrlSt", indx);
-//     socket.emit('6', 'cont', indx);
-// }
-// function toggleControls() {
-//     controlIndex++;
-//     if (controlIndex >= controlShemes.length)
-//         controlIndex = 0;
-//     setControlSheme(controlIndex);
-// }
 
 // SCALING:
 var viewMult = 1;
@@ -191,19 +49,8 @@ if (lobbyURLIP) {
     lobbyRoomID = tmpL[1];
 }
 window.onload = function () {
-
     // SETUP MENU BUTTON LISTENERS:
-    enterGameButton.onclick = function () {
-        enterGame();
-    }
-    userNameInput.addEventListener('keypress', function (e) {
-        var key = e.which || e.keyCode;
-        if (key === 13) {
-            if (true || validNick()) {
-                enterGame();
-            }
-        }
-    });
+
 
     // CONNECT TO SERVER:
     $.get("/getIP", {sip: lobbyURLIP}, function (data) {
@@ -222,125 +69,14 @@ window.onload = function () {
 }
 
 // GAME INPUT:
-mainCanvas.addEventListener('mousemove', gameInput, false);
-mainCanvas.addEventListener('mousedown', mouseDown, false);
-mainCanvas.addEventListener('mouseup', mouseUp, false);
+
 var mouseX, mouseY;
 var forceTarget = true;
-function gameInput(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    sendTarget(false || forceTarget);
-    forceTarget = false;
-}
-function mouseDown(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    socket.emit('2', 1);
-}
-function mouseUp(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (socket && player && !player.dead) {
-        socket.emit('2');
-    }
-}
+
 var shooting = false;
 
-fireButton.addEventListener('touchstart', function () {
-    socket.emit('2', 1);
-});
 
-fireButton.addEventListener('touchend', function () {
-    socket.emit('2');
-});
 
-upgrades.addEventListener('touchstart', function () {
-    toggleUpgrades();
-});
-window.onkeyup = function (event) {
-    var keyNum = event.keyCode ? event.keyCode : event.which;
-    if (socket && player && !player.dead) {
-
-        // UPGRADES:
-        if (upgrInputsToIndex["k" + keyNum] != undefined) {
-            doUpgrade(upgrInputsToIndex["k" + keyNum], 0, 1);
-        }
-
-        // STOP SHOOTING:
-        if (keyNum == 32) {
-            shooting = false;
-            socket.emit('2');
-        }
-
-        // MOVEMENT:
-        if ((keyNum == 65 || keyNum == 37)) {
-            keys.l = 0;
-            sendMoveTarget();
-        }
-        if ((keyNum == 68 || keyNum == 39)) {
-            keys.r = 0;
-            sendMoveTarget();
-        }
-        if ((keyNum == 87 || keyNum == 38)) {
-            keys.u = 0;
-            sendMoveTarget();
-        }
-        if ((keyNum == 83 || keyNum == 40)) {
-            keys.d = 0;
-            sendMoveTarget();
-        }
-
-        // AUTO SHOOT:
-        if (keyNum == 69) {
-            socket.emit('as');
-        }
-
-        // GIVE COIN:
-        if (keyNum == 70) {
-            socket.emit('5');
-        }
-    }
-};
-window.onkeydown = function (event) {
-    var keyNum = event.keyCode ? event.keyCode : event.which;
-    if (socket && player && !player.dead) {
-
-        // START SHOOTING:
-        if (!shooting && keyNum == 32) {
-            shooting = true;
-            socket.emit('2', 1);
-        }
-
-        // MOVEMENT:
-        if ((keyNum == 65 || keyNum == 37) && !keys.l) {
-            keys.l = 1;
-            keys.r = 0;
-            turnDir = -1;
-            sendMoveTarget();
-        }
-        if ((keyNum == 68 || keyNum == 39) && !keys.r) {
-            keys.r = -1;
-            keys.l = 0;
-            turnDir = 1;
-            sendMoveTarget();
-        }
-        if ((keyNum == 87 || keyNum == 38) && !keys.u) {
-            keys.u = 1;
-            keys.d = 0;
-            speedInc = 1;
-            sendMoveTarget();
-        }
-        if ((keyNum == 83 || keyNum == 40) && !keys.d) {
-            keys.d = 1;
-            keys.u = 0;
-            speedInc = -1;
-            sendMoveTarget();
-        }
-    }
-};
 
 toggleUpgrades();
 
@@ -354,349 +90,6 @@ function toggleUpgrades() {
     upgradesHidden = (!upgradesHidden);
 }
 
-// SETUP SOCKET:
-function setupSocket() {
-
-    // ERROR HANDLING:
-    socket.on('connect_error', function () {
-        if (lobbyURLIP) {
-            kickPlayer("Connection failed. Please check your lobby ID");
-        } else {
-            kickPlayer("Connection failed. Check your internet and firewall settings");
-        }
-    });
-    socket.on('disconnect', function (reason) {
-        kickPlayer("Disconnected.");
-        console.log("Send this to the dev: " + reason);
-    });
-    socket.on('error', function (err) {
-        kickPlayer("Disconnected. The server may have updated.");
-        console.log("Send this to the dev: " + err);
-    });
-    socket.on('kick', function (reason) {
-        kickPlayer(reason);
-    });
-
-    // LOBBY KEY:
-    socket.on('lk', function (lKey) {
-        partyKey = lKey;
-    });
-
-    // MODES LIST:
-    socket.on('mds', function (data, crnt) {
-        modeList = data;
-        // Todo modeSelector.innerHTML = data[crnt].name + "  <i style='vertical-align: middle;' class='material-icons'>&#xE5C5;</i>";
-        modeIndex = crnt;
-        currentMode = modeList[crnt];
-    });
-
-    // VIEW MULT:
-    socket.on('v', function (sw, sh, mult) {
-        if (viewMult != mult) {
-            viewMult = mult;
-            maxScreenWidth = Math.round(sw * mult);
-            maxScreenHeight = Math.round(sh * mult);
-            resize();
-        }
-    });
-
-    // YOU SPAWN:
-    socket.on('spawn', function (gameObject, data) {
-        if (!objectExists(gameObject)) {
-            users.push(gameObject);
-        } else {
-            updateOrPushUser(gameObject);
-        }
-        player = gameObject;
-        gameState = 1;
-        toggleMenuUI(false);
-        toggleGameUI(true);
-        mainCanvas.focus();
-        if (data) {
-            gameData = data;
-            gameObjects.length = 0;
-            for (var i = 0; i < data.objCount; ++i) {
-                gameObjects.push({});
-            }
-            data = null;
-        }
-        targetD = 1;
-        resetKeys();
-        gameObject = null;
-    });
-
-    // USER LEFT:
-    socket.on('d', function (id) {
-        var tmpIndx = getPlayerIndexById(id);
-        if (tmpIndx != null) {
-            users.splice(tmpIndx, 1);
-        }
-    });
-
-    // DAY/NIGHT TIME:
-    socket.on('dnt', function (timeStr, dnt) {
-        // timeDisplay.innerHTML = timeStr;
-        dayTimeValue = dnt;
-    });
-
-    // GET LEADERBOARD DATA:
-    socket.on('0', function (list) {
-        var rank = 1;
-        var pos = -1;
-
-        for (var i = 0; i < list.length;) {
-            if (player && list[i] == player.sid)
-                pos = rank;
-            i += 4;
-            rank++;
-        }
-
-        leaderboardText.innerHTML = "pos " + (pos < 0 ? '10+' : pos) + ' of ' + rank;
-
-        // CLEAR:
-        delete list;
-    });
-
-    // GET USER DATA:
-    function updateUserData(singleObj, listObj) {
-        if (singleObj) {
-            singleObj.visible = true;
-            updateOrPushUser(singleObj);
-            delete singleObj;
-        } else if (listObj) {
-            for (var i = 0; i < users.length; ++i) {
-                if (!users[i].visible)
-                    users[i].forcePos = 1;
-                users[i].visible = false;
-            }
-            var tmpIndx;
-            for (var i = 0; i < listObj.length;) {
-                tmpIndx = getPlayerIndex(listObj[i]);
-                if (tmpIndx != null) {
-                    users[tmpIndx].x = listObj[i + 1];
-                    users[tmpIndx].y = listObj[i + 2];
-                    users[tmpIndx].dir = listObj[i + 3];
-                    users[tmpIndx].targetDir = listObj[i + 4];
-                    users[tmpIndx].aimDir = listObj[i + 5];
-                    users[tmpIndx].visible = true;
-                }
-                i += 6;
-            }
-            delete listObj;
-        }
-    }
-
-    socket.on('1', updateUserData);
-
-    // UPGRADES LIST & COINS:
-    socket.on('2', function (upgrC, fleetC, data, points) {
-        if (data) {
-            var tmpHTML = "";
-            upgradesText.innerHTML = "~ Upgrades " + upgrC + ' ~ Fleet ' + fleetC;
-            var num = 1;
-            for (var i = 0; i < data.length;) {
-                var tmpW = ((data[i + 2] - 1) / (data[i + 3] - 1)) * (39 / 65 * weaponsProgress.clientWidth);
-                if (num == 9)
-                    tmpHTML += "</br>"
-                tmpHTML += "<div class='upgradeItem' onclick='doUpgrade(" + (num - 1) + ",0,1)'><div class='upgrProg' style='width:" + tmpW + "px'></div>" +
-                    (data[i]) + " <span class='greyMenuText'>" + ((data[i + 2] != data[i + 3]) ? ("$" + data[i + 1]) : "max")
-                    + "</span></div></br>";
-                i += 4;
-                num++;
-            }
-            upgradeList.innerHTML = tmpHTML;
-            if (!upgradesHidden)
-                upgradeContainer.style.display = "inline-block";
-        }
-        if (points != undefined)
-            coinDisplay.innerHTML = "Coins <span class='greyMenuText'>$" + (points || 0) + "</span>";
-    });
-
-    // WEAPONS LIST AND PROGRESS:
-    socket.on('8', function (data, points, prog) {
-        if (!data && points == undefined && prog == undefined) {
-            weaponsProgress.style.display = "none";
-            weaponsList.style.display = "none";
-            weaponsPopups.style.display = "none";
-            upgradesInfo.style.display = "none";
-        } else {
-            if (!points) {
-                weaponsProgress.style.display = "inline-block";
-                weaponsList.style.display = "none";
-                weaponsPopups.style.display = "none";
-                upgradesInfo.style.display = "none";
-            } else if (data) {
-                weaponsProgress.style.display = "none";
-                weaponsList.style.display = "block";
-                weaponsPopups.style.display = "block";
-
-                // WEAPONS LIST:
-                var tmpHTML = "";
-                var tmpHTML2 = "";
-                var num = 0;
-                var bot = 32;
-                for (var i = 0; i < data.length;) {
-                    tmpHTML += "<div onclick='showWeaponPopup(" + num + ")' class='weaponItem'><div class='upgradeTxt'>" + data[i] + "</div><div class='upgradeNum'>Tier " +
-                        data[i + 1] + "</div></div>";
-                    tmpHTML2 += "<div id='popupRow" + num + "' class='weaponPopupRow'>";
-                    for (var x = 0; x < data[i + 2].length; ++x) {
-                        tmpHTML2 += "<div onclick='doUpgrade(" + x + "," + num + ")' class='weaponPopupItem' style='bottom:" + (bot * x / 3) + "vh'>" + data[i + 2][x] + "</div>";
-                    }
-                    tmpHTML2 += "</div>";
-                    i += 3;
-                    num++;
-                }
-                weaponsList.innerHTML = tmpHTML;
-                weaponsPopups.innerHTML = tmpHTML2;
-            }
-            if (prog != undefined) {
-                wpnsProgressBar.style.width = weaponsProgress.clientWidth * prog + 'px';
-                wpnsProgressTxt.innerHTML = Math.round(prog * 100) + "%";
-            }
-            if (points) {
-                upgradesInfo.style.display = "inline-block";
-                upgradesInfo.innerHTML = "Items (" + points + ")";
-            }
-        }
-        data = null;
-        points = null;
-        prog = null;
-    });
-
-    // UPDATE VALUE:
-    socket.on('3', function (sid, values) {
-        var tmpIndx = getPlayerIndex(sid);
-        if (tmpIndx != null) {
-            var tmpUser = users[tmpIndx];
-            for (var i = 0; i < values.length;) {
-                tmpUser[values[i]] = values[i + 1];
-                i += 2;
-            }
-        }
-    });
-
-    // UPDATE GAMEOBJECT:
-    var tmpObj;
-    socket.on('4', function (indx, data) {
-        tmpObj = gameObjects[indx];
-        if (tmpObj) {
-            if (data) {
-                tmpObj.x = data[0];
-                tmpObj.xS = data[1];
-                tmpObj.y = data[2];
-                tmpObj.yS = data[3];
-                tmpObj.s = data[4];
-                tmpObj.c = data[5];
-                tmpObj.shp = data[6];
-                tmpObj.active = true;
-            } else {
-                tmpObj.active = false;
-            }
-        }
-    });
-
-    // SOMEONE SHOT:
-    socket.on('5', function (sid, wpnIndex) {
-        var tmpIndx = getPlayerIndex(sid);
-        if (tmpIndx != null) {
-            var tmpUser = users[tmpIndx];
-            if (!tmpUser.animMults)
-                tmpUser.animMults = [{mult: 1}, {mult: 1}, {mult: 1}, {mult: 1}];
-            tmpUser.animMults[wpnIndex].plus = -0.03;
-        }
-    });
-
-    // CHANGE HEALTH:
-    socket.on('6', function (sid, value) {
-        var tmpIndx = getPlayerIndex(sid);
-        if (tmpIndx != null) {
-            var tmpUser = users[tmpIndx];
-            tmpUser.health = value;
-            if (tmpUser.health <= 0) {
-                tmpUser.dead = true;
-                if (player && sid == player.sid) {
-                    player.dead = (value <= 0);
-                    if (player.dead) {
-                        hideMainMenuText();
-                        leaveGame();
-                        showAd();
-                    }
-                }
-            }
-        }
-    });
-
-    // CHANGE SCORE:
-    socket.on('7', function (value) {
-        scoreText.innerHTML = value;
-    });
-
-    // NOTIFICATION:
-    socket.on('n', function (txt) {
-        showNotification(txt);
-    });
-
-    // SCORE NOTIFICATION:
-    socket.on('s', function (val) {
-        showScoreNotif(val);
-    });
-
-    // MINIMAP:
-    var pingColors = ["#fff", "#fff", "#ff6363", "#ff6363", "rgba(103,255,62,0.3)", "rgba(255,255,255,0.4)", "#63b0ff"];
-    socket.on('m', function (data) {
-        minimap.width = minimap.width;
-        for (var i = 0; i < data.length;) {
-            minimapContext.fillStyle = pingColors[data[i]];
-            minimapContext.font = "10px regularF";
-            minimapContext.beginPath();
-            minimapContext.arc(((data[i + 1] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width,
-                ((data[i + 2] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height, data[i + 3] * 2, 0, MathPI * 2, true);
-            minimapContext.closePath();
-            minimapContext.fill();
-            i += 4;
-        }
-        data = null;
-    });
-
-    // LOAD DATA:
-    // setControlSheme(controlIndex);
-    localStorage.setItem("contrlSt", 1);
-    socket.emit('6', 'cont', 1);
-    controlIndex = 1;
-}
-
-// MODE:
-/* Todo modes function showModeList() {
- if (modeList) {
- if (modeListView.style.display == "block") {
- modeListView.style.display = "none";
- } else {
- var tmpHTML = "";
- for (var i = 0; i < modeList.length; ++i) {
- tmpHTML += "<div onclick='changeMode(" + i + ")' class='modeListItem'>" + modeList[i].name + "</div>";
- }
- modeListView.style.display = "block";
- modeListView.innerHTML = tmpHTML;
- }
- }
- }
- function changeMode(indx) {
- if (modeList && modeList[indx] && indx !== modeIndex) {
- modeListView.style.display = "none";
- modeSelector.innerHTML = modeList[indx].name + "<i style='vertical-align: middle;' class='material-icons'>&#xE5C5;</i>";
- window.location.href = modeList[indx].url;
- }
- }
-
- // PARTY:
- function loadPartyKey() {
- if (partyKey) {
- window.history.pushState("", "Doblons.io", "/?l=" + partyKey);
- lobbyKeyText.innerHTML = "send the url above to a friend";
- lobbyKey.className = "deadLink";
- }
- }*/
-
 // ENTER THE GAME:
 if (hasStorage && localStorage.getItem("lstnmdbl")) {
     userNameInput.value = localStorage.getItem("lstnmdbl");
@@ -708,7 +101,7 @@ function enterGame() {
             name: userNameInput.value,
             skin: skinIndex
         });
-        localStorage.setItem("lstnmdbl", userNameInput.value);
+        Utility.saveString("lstnmdbl", userNameInput.value);
         mainCanvas.focus();
     }
 }
@@ -928,7 +321,7 @@ function changeSkin(val) {
     skinIcon.src = renderedSkins[skinIndex];
     skinName.innerHTML = userSkins[skinIndex].name;
     if (hasStorage) {
-        localStorage.setItem("sknInx", skinIndex);
+        Utility.saveString("sknInx", skinIndex);
     }
 }
 changeSkin(0);
@@ -946,7 +339,7 @@ function unlockSkins(indx) {
         skinInfo.style.display = "inline-block";
         skinSelector.style.display = "inline-block";
         if (hasStorage) {
-            localStorage.setItem("isFollDob", 1);
+            Utility.saveString("isFollDob", 1);
         }
     }
 }
@@ -1956,17 +1349,6 @@ var treasureMap = "2B=TK:KAB,SSV:100K";
 window.addEventListener('resize', resize);
 var screenRatio, physicalH, physicalW;
 
-function resize() {
-    screenRatio = window.devicePixelRatio;
-    physicalW = Math.round(window.screen.width * screenRatio);
-    physicalH = Math.round(window.screen.height * screenRatio);
-
-    screenWidth = physicalW;
-    screenHeight = physicalH;
-    mainCanvas.width = screenWidth;
-    mainCanvas.height = screenHeight;
-
-}
 resize();
 
 // GAME UPDATE LOOP:
@@ -2004,7 +1386,7 @@ var app = {
     },
 
     onDeviceReady: function () {
-        console.log('device ready')
+        Utility.log('device ready')
         app.receivedEvent('deviceready');
 
         getStarted();
@@ -2025,133 +1407,29 @@ var flipOrientation = screen.orientation != "landscape-primary";
 
 window.addEventListener("orientationchange", function () {
     flipOrientation = screen.orientation != "landscape-primary";
-    // console.log("flipOrientation: " + flipOrientation);
+    // Utility.log("flipOrientation: " + flipOrientation);
 });
-
-/*
- function accelerometerSuccess(acceleration) {
- if (shootingMode != shootingModes.accel)
- return;
-
- if (calib == null)
- calib = acceleration;
-
- accel = acceleration;
- var x = /!*flipOrientation ? *!/calib.x - acceleration.x/!* : acceleration.x - calib.x*!/;
- var y = flipOrientation ? calib.y - acceleration.y : acceleration.y - calib.y;
- resetJoyStickVars();
-
- if (x > threshold && y > threshold) {
- keys.u = 1;
- keys.r = 1;
- } else if (x < threshold && y > threshold) {
- keys.d = 1;
- keys.r = 1;
- } else if (x > threshold && y < threshold) {
- keys.u = 1;
- keys.l = 1;
- } else if (x < threshold && y < threshold) {
- keys.d = 1;
- keys.l = 1;
- } else if (x > threshold) {
- keys.u = 1;
- } else if (x < threshold) {
- keys.d = 1;
- } else if (y > threshold) {
- keys.r = 1;
- } else if (y < threshold) {
- keys.l = 1;
- }
- }
- */
 
 app.initialize();
 
 var forceTarget = true;
 
 
-function playSound(soundID, x, y) {
-    /* if (!kicked && doSounds) {
-     try {
-     tmpDist = getDistance(player.x, player.y, x, y);
-     if (tmpDist <= maxHearDist) {
-     tmpSound = tmpList[soundID];
-     if (tmpSound != undefined) {
-     tmpSound = tmpSound.sound;
-     tmpSound.volume(mathRound((1 - (tmpDist / maxHearDist)) * 10) / 10);
-     tmpSound.play();
-     }
-     }
-     } catch (e) {
-     console.log(e);
-     }
-     }*/
-}
-
-function stopAllSounds() {
-    /* if (!doSounds)
-     return false;
-     for (var i = 0; i < soundList.length; ++i) {
-     tmpList[soundList[i].id].sound.stop();
-     }*/
-}
-function pauseSounds() {
-    /* if (!doSounds)
-     return false;
-     for (var i = 0; i < soundList.length; ++i) {
-     if (tmpList[soundList[i].id].sound.loop)
-     tmpList[soundList[i].id].sound.pause();
-     }*/
-}
-
-function resumeSounds() {
-    /* if (!doSounds)
-     return false;
-     for (var i = 0; i < soundList.length; ++i) {
-     if (tmpList[soundList[i].id].sound.loop)
-     tmpList[soundList[i].id].sound.play();
-     }*/
-}
-
 Math.toDegrees = function (radians) {
     return radians * 180 / Math.PI;
 };
 
 
-mainCanvas.addEventListener('touchmove', touchMove, false);
-mainCanvas.addEventListener('touchstart', touchMove, false);
-function touchMove(event) {
-    var touch;
-    for (var i = 0; i < event.touches.length; i++) {
-        touch = event.touches[i];
-        mouseX = (touch.screenX * screenRatio / physicalW) * screenWidth;
-        mouseY = (touch.screenY * screenRatio / physicalH) * screenHeight;
-        sendTarget(false || forceTarget);
-        forceTarget = false;
-    }
-    try {
-        event.preventDefault();
-        event.stopPropagation();
-    } catch (e) {
 
-    }
-}
 
 function initAds() {
-    //Todo fix all other platforms
-    // document.addEventListener('onAdLoaded', function () {console.log("ad loaded")});
-    // document.addEventListener('onAdLoadFailed', function (reason) {console.log("ad load failed: "+reason)});
-    // document.addEventListener('onAdClosed', function () {console.log("ad closed")});
-    // document.addEventListener('onAdOpened', function () {console.log("ad opened")});
     ShowAds.initInterstitialAd({adId: "ca-app-pub-6350309116730071/9878078741", isTest: true});
 }
-
-// var tmpGM = document.getElementById('gameModeText');
 
 var lastAdShown = Date.now();
 
 function showAd() {
-    console.log("showAds")
+    Utility.log("showAds")
     if (!paused && (1200 < (Date.now() - lastAdShown))) {
         lastAdShown = Date.now();
         ShowAds.showInterstitialAd();
@@ -2179,37 +1457,7 @@ function connectToServer(data) {
     } catch (e) {
     }
     if (!socket) {
-        // socket.handshake.query.apid = '19ytahhsb';
-        socket = io.connect('http://' + data.ip + ':' + data.port, {
-            forceNew: true,
-            'connect timeout': 2500,
-            reconnection: true,
-            query: ('cid=' + cid + '&rmid=' + lobbyRoomID + '&apid=19ytahhsb')
-        });
+
         setupSocket();
     }
 }
-
-function getStarted() {
-    //Todo init game stuff here
-    //Todo fix press and hold
-    // boostDisplay.addEventListener('touchstart', function (event) {
-    //
-    //     target[2] = 1;
-    //     sendTarget(true);
-    //     try {
-    //         event.preventDefault();
-    //         event.stopPropagation();
-    //     } catch (e) {
-    //     }
-    // });
-
-}
-//Todo remove this
-// connectToServer({ip: 'localhost', port: "5000"});
-// connectToServer({ip: '10.0.0.38', port: "5000"});
-// connectToServer({ip: '10.0.0.69', port: "5000"});
-// connectToServer({ip: '192.168.1.9', port: "5000"});
-// connectToServer({ip: '192.168.43.161', port: "5000"});
-// connectToServer({ip:'10.159.50.222'});
-

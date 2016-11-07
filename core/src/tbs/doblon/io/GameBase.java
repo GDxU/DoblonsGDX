@@ -8,20 +8,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import java.util.ArrayList;
-import java.util.Random;
-
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public abstract class GameBase extends ApplicationAdapter {
     private static final Color bg = new Color(0xa3da4bff);
-    public static int w, h;
+    public static int screenWidth, screenHeight;
     private static Level level;
     private static SpriteBatch spriteBatch;
     private static ShapeRenderer shapeRenderer;
@@ -87,11 +78,12 @@ public abstract class GameBase extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        w = width;
-        h = height;
+        screenWidth = width;
+        screenHeight = height;
         if (level == null) {
             level = new Level();
         }
+
         super.resize(width, height);
     }
 
@@ -170,7 +162,7 @@ public abstract class GameBase extends ApplicationAdapter {
         final String fps = "fps: " + Gdx.graphics.getFramesPerSecond();
         final float scale = Utility.getScale(50);
         final GlyphLayout layout = Utility.measureText(fps, scale);
-        float w = layout.width, h = layout.height, x = (GameBase.w * 0.95f) - (w * 0.5f), y = (GameBase.h * 0.95f) - (h * 0.5f);
+        float w = layout.width, h = layout.height, x = (GameBase.screenWidth * 0.95f) - (w * 0.5f), y = (GameBase.screenHeight * 0.95f) - (h * 0.5f);
 
         shapeRenderer(fill);
         enableAlpha();

@@ -151,4 +151,162 @@ public class GameController extends InputMultiplexer {
         }
     };
 
+
+
+
+
+
+
+    window.onkeyup = function (event) {
+        var keyNum = event.keyCode ? event.keyCode : event.which;
+        if (socket && player && !player.dead) {
+
+            // UPGRADES:
+            if (upgrInputsToIndex["k" + keyNum] != undefined) {
+                doUpgrade(upgrInputsToIndex["k" + keyNum], 0, 1);
+            }
+
+            // STOP SHOOTING:
+            if (keyNum == 32) {
+                shooting = false;
+                socket.emit('2');
+            }
+
+            // MOVEMENT:
+            if ((keyNum == 65 || keyNum == 37)) {
+                keys.l = 0;
+                sendMoveTarget();
+            }
+            if ((keyNum == 68 || keyNum == 39)) {
+                keys.r = 0;
+                sendMoveTarget();
+            }
+            if ((keyNum == 87 || keyNum == 38)) {
+                keys.u = 0;
+                sendMoveTarget();
+            }
+            if ((keyNum == 83 || keyNum == 40)) {
+                keys.d = 0;
+                sendMoveTarget();
+            }
+
+            // AUTO SHOOT:
+            if (keyNum == 69) {
+                socket.emit('as');
+            }
+
+            // GIVE COIN:
+            if (keyNum == 70) {
+                socket.emit('5');
+            }
+        }
+    };
+    window.onkeydown = function (event) {
+        var keyNum = event.keyCode ? event.keyCode : event.which;
+        if (socket && player && !player.dead) {
+
+            // START SHOOTING:
+            if (!shooting && keyNum == 32) {
+                shooting = true;
+                socket.emit('2', 1);
+            }
+
+            // MOVEMENT:
+            if ((keyNum == 65 || keyNum == 37) && !keys.l) {
+                keys.l = 1;
+                keys.r = 0;
+                turnDir = -1;
+                sendMoveTarget();
+            }
+            if ((keyNum == 68 || keyNum == 39) && !keys.r) {
+                keys.r = -1;
+                keys.l = 0;
+                turnDir = 1;
+                sendMoveTarget();
+            }
+            if ((keyNum == 87 || keyNum == 38) && !keys.u) {
+                keys.u = 1;
+                keys.d = 0;
+                speedInc = 1;
+                sendMoveTarget();
+            }
+            if ((keyNum == 83 || keyNum == 40) && !keys.d) {
+                keys.d = 1;
+                keys.u = 0;
+                speedInc = -1;
+                sendMoveTarget();
+            }
+        }
+    };
+
+    mainCanvas.addEventListener('touchmove', touchMove, false);
+    mainCanvas.addEventListener('touchstart', touchMove, false);
+    function touchMove(event) {
+        var touch;
+        for (var i = 0; i < event.touches.length; i++) {
+            touch = event.touches[i];
+            mouseX = (touch.screenX * screenRatio / physicalW) * screenWidth;
+            mouseY = (touch.screenY * screenRatio / physicalH) * screenHeight;
+            sendTarget(false || forceTarget);
+            forceTarget = false;
+        }
+        try {
+            event.preventDefault();
+            event.stopPropagation();
+        } catch (e) {
+
+        }
+    }
+
+    fireButton.addEventListener('touchstart', function () {
+        socket.emit('2', 1);
+    });
+
+    fireButton.addEventListener('touchend', function () {
+        socket.emit('2');
+    });
+
+    upgrades.addEventListener('touchstart', function () {
+        toggleUpgrades();
+    });
+
+    enterGameButton.onclick = function () {
+        enterGame();
+    }
+
+
+    userNameInput.addEventListener('keypress', function (e) {
+        var key = e.which || e.keyCode;
+        if (key === 13) {
+            if (true || validNick()) {
+                enterGame();
+            }
+        }
+    });
+
+//    <div id="skinSelector" onclick="changeSkin(1)"><i class="material-icons">&#xE8D5;</i> SKIN</div>
+    mainCanvas.addEventListener('mousemove', gameInput, false);
+    mainCanvas.addEventListener('mousedown', mouseDown, false);
+    mainCanvas.addEventListener('mouseup', mouseUp, false);
+
+    function gameInput(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        sendTarget(false || forceTarget);
+        forceTarget = false;
+    }
+    function mouseDown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        socket.emit('2', 1);
+    }
+    function mouseUp(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (socket && player && !player.dead) {
+            socket.emit('2');
+        }
+    }
 }
