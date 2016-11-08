@@ -18,7 +18,14 @@ public class SocketManager {
 //    obj.put("binary", new byte[42]);
 //    socket.emit("foo", obj);
     static Socket socket;
-    static boolean isConnected;
+
+    static boolean isConnected() {
+        if (socket == null)
+            return false;
+        else return socket.connected();
+    }
+
+    static int numReconnect = 0;
 
     public static void init() {
         IO.Options opts = new IO.Options();
@@ -52,7 +59,7 @@ public class SocketManager {
             @Override
             public void call(Object... args) {
 
-            isConnected = true;
+                isConnected = true;
                 socket.emit("foo", "hi");
                 socket.disconnect();
             }
@@ -67,6 +74,8 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
+                isConnected = true;
+                socket.
             }
 
         });

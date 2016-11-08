@@ -220,12 +220,18 @@ public class Utility {
         return p;
     }
 
-    public static float getDistance (float a, float b, float c, float d) {
+    public static float getDistance(float a, float b, float c, float d) {
         return (float) Math.sqrt((c -= a) * c + (d -= b) * d);
     }
-    public static float getDirection (float x1,float y1,float x2,float y2) {
+
+    public static float getDirection(float x1, float y1, float x2, float y2) {
         return (float) Math.atan2(y1 - y2, x1 - x2);
     }
+
+    public static float toDegrees(double rad) {
+        return (float) (rad * 180 / Math.PI);
+    }
+
 //    private static final String pattern = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
 
 //    public static  String getUniqueID () {
