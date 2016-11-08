@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.StringBuilder;
 
+import java.util.ArrayList;
+
 public class Game extends GameBase {
     @Override
     public void create() {
@@ -50,6 +52,7 @@ public class Game extends GameBase {
 
     String socket;
     int port;
+    int controlIndex = 0;
     int targetFPS = 60;
     public static float delta, delta2;
     public static long currentTime, oldTime;
@@ -63,7 +66,19 @@ public class Game extends GameBase {
             "use your mouse to aim and fire your cannons",
             "destroy enemy ships and collect doblons to upgrade your ship"
     };
-
+    String partyKey;
+    Player player = null;
+    ArrayList modeList = null;
+    String modeIndex = null;
+    String currentMode = null;
+    int dayTimeValue = 0;
+    ArrayList<Player> users = new ArrayList<Player>();
+    ArrayList<GameObject> gameObjects = new ArrayList<GameObject>();
+    float target = 0;
+    float targetD = 1;
+    float turnDir = 0;
+    float speedInc = 0;
+    int mTarget = 0;
     int instructionsIndex = Utility.randInt(0, instructionsList.length - 1);
     String[] randomLoadingTexts = {
             "discovering treasure...",

@@ -1,26 +1,3 @@
-
-String partyKey = null;
-var player = null;
-var modeList = null;
-var modeIndex = null;
-var currentMode = null;
-var dayTimeValue = 0;
-var users = [];
-var gameObjects = [];
-var target = 0;
-var targetD = 1;
-var turnDir = 0;
-var speedInc = 0;
-var mTarget = 0;
-
-// CONTROL SETTINGS:
-var controlIndex = 0;
-if (hasStorage) {
-    var contIndx = localStorage.getItem("contrlSt");
-    if (contIndx)
-        controlIndex = contIndx;
-}
-
 // SCALING:
 var viewMult = 1;
 var maxScreenWidth = 2208; // 1920;

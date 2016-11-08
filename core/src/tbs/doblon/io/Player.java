@@ -4,7 +4,7 @@ package tbs.doblon.io;
  * Created by linde on 11/7/2016.
  */
 
-public class Player {
+public class Player extends GameObject {
     float aimDir;
     int autoCannons, bigCannon, cannonLength, cannonWidth;
     int cannons, chaseCannons, classIndex;
@@ -23,9 +23,15 @@ public class Player {
     String team;
     int trippleCannons, twinCannons, viewMult;
     boolean visible;
-    float height, width, x, y;
 
-    public void update(float delta){
+
+    @Override
+    public void draw() {
+
+    }
+
+    @Override
+    public void update(float delta) {
 
     }
 }
