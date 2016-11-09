@@ -161,7 +161,7 @@ public class SocketManager {
                                             } else {
                                                 updateOrPushUser(gameObject);
                                             }
-                                            player = gameObject;
+                                            Game.player = gameObject;
                                             gameState = 1;
                                             toggleMenuUI(false);
                                             toggleGameUI(true);
