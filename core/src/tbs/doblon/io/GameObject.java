@@ -5,6 +5,9 @@ package tbs.doblon.io;
  */
 
 public abstract class GameObject {
+    public GameObject() {
+    }
+
     public GameObject(float x, float y, float w, float h) {
         this.x = x;
         this.y = y;
@@ -12,7 +15,7 @@ public abstract class GameObject {
         this.h = h;
     }
 
-    float x, y, w, h;
+    public float x, y, w, h;
 
     public abstract void draw();
 

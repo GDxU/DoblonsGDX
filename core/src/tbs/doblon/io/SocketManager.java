@@ -4,6 +4,8 @@ package tbs.doblon.io;
 import org.json.JSONObject;
 
 
+import java.io.BufferedWriter;
+
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -17,6 +19,7 @@ public class SocketManager {
 //    obj.put("hello", "server");
 //    obj.put("binary", new byte[42]);
 //    socket.emit("foo", obj);
+
     static Socket socket;
 
     static boolean isConnected() {
@@ -58,8 +61,7 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
-
-                isConnected = true;
+                numReconnect = 0;
                 socket.emit("foo", "hi");
                 socket.disconnect();
             }
@@ -74,24 +76,26 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
-                isConnected = true;
-                socket.
+                numReconnect++;
+                if (numReconnect < 15)
+                    socket.connect();
             }
 
-        });
+        }).on("connect_error", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        numReconnect++;
+                        if (numReconnect < 15)
+                            socket.connect();
 
-        socket.on("connect_error", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                if (lobbyURLIP) {
-                    kickPlayer("Connection failed. Please check your lobby ID");
-                } else {
-                    kickPlayer("Connection failed. Check your internet and firewall settings");
+                        if (Game.lobbyURLIP) {
+                            Game.kickPlayer("Connection failed. Please check your lobby ID");
+                        } else {
+                            Game.kickPlayer("Connection failed. Check your internet and firewall settings");
+                        }
+                    }
                 }
-            }
-
-            );
-            socket.on("disconnect",new Emitter.Listener()
+            ).on("disconnect",new Emitter.Listener()
 
             {
 
@@ -99,103 +103,86 @@ public class SocketManager {
                 public void call (Object...args){
                 kickPlayer("Disconnected.");
                 console.log("Send this to the dev: " + reason);
-            });
-                socket.on("error", new Emitter.Listener() {
+            }}).on("error", new Emitter.Listener() {
 
                     @Override
                     public void call(Object... args) {
                         kickPlayer("Disconnected. The server may have updated.");
                         console.log("Send this to the dev: " + err);
                     }
-
-                    );
-                    socket.on("kick",new Emitter.Listener()
+                }
+                    ).on("kick",new Emitter.Listener()
 
                     {
 
                         @Override
                         public void call (Object...args){
                         kickPlayer(reason);
-                    });
+                    }}).on("lk", new Emitter.Listener() {
 
-                        // LOBBY KEY:
-                        socket.on("lk", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                partyKey = lKey;
+            }
 
-                            @Override
-                            public void call(Object... args) {
-                                partyKey = lKey;
-                            }
-
-                            );
-
-                            // MODES LIST:
-                            socket.on("mds",new Emitter.Listener()
+        } ).on("mds",new Emitter.Listener()
 
                             {
 
                                 @Override
-                                public void call (Object...args){
-                                modeList = data;
-                                // Todo modeSelector.innerHTML = data[crnt].name + "  <i style="vertical-align: middle;" class="material-icons">&#xE5C5;</i>";
-                                modeIndex = crnt;
-                                currentMode = modeList[crnt];
-                            });
+                                public void call (Object...args) {
+                                    modeList = data;
+                                    // Todo modeSelector.innerHTML = data[crnt].name + "  <i style="vertical-align: middle;" class="material-icons">&#xE5C5;</i>";
+                                    modeIndex = crnt;
+                                    currentMode = modeList[crnt];
+                                } }).on("v", new Emitter.Listener() {
 
-                                // VIEW MULT:
-                                socket.on("v", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                //Todo sw, sh, mult
+                if (Game.viewMult != Game.mult) {
+                    Game.viewMult = Game.mult;
+                    Game.maxScreenWidth = Math.round(Game.sw * Game.mult);
+                    Game.maxScreenHeight = Math.round(Game.sh * Game.mult);
+                    Game.resize();
+                }
+            }
 
-                                    @Override
-                                    public void call(Object... args) {
-                                        //Todo sw, sh, mult
-                                        if (viewMult != mult) {
-                                            viewMult = mult;
-                                            maxScreenWidth = Math.round(sw * mult);
-                                            maxScreenHeight = Math.round(sh * mult);
-                                            resize();
-                                        }
-                                    }
-
-                                    );
-
-                                    // YOU SPAWN:
-                                    socket.on("spawn",new Emitter.Listener()
+        }).on("spawn",new Emitter.Listener()
 
                                     {
 
                                         @Override
-                                        public void call (Object...args){
-                                        //Todo gameObject, data
+                                        public void call (Object...args) {
+                                            //Todo gameObject, data
 
-                                        if (!objectExists(gameObject)) {
-                                            users.push(gameObject);
-                                        } else {
-                                            updateOrPushUser(gameObject);
-                                        }
-                                        player = gameObject;
-                                        gameState = 1;
-                                        toggleMenuUI(false);
-                                        toggleGameUI(true);
-                                        mainCanvas.focus();
-                                        if (data) {
-                                            gameData = data;
-                                            gameObjects.length = 0;
-                                            for (var i = 0; i < data.objCount; ++i) {
-                                                gameObjects.push({});
+                                            if (!Game.gameObjects.c(gameObject)) {
+                                                users.push(gameObject);
+                                            } else {
+                                                updateOrPushUser(gameObject);
                                             }
-                                            data = null;
-                                        }
-                                        targetD = 1;
-                                        resetKeys();
-                                        gameObject = null;
-                                    });
-
-                                        // USER LEFT:
-                                        socket.on("d", new Emitter.Listener() {
+                                            player = gameObject;
+                                            gameState = 1;
+                                            toggleMenuUI(false);
+                                            toggleGameUI(true);
+                                            mainCanvas.focus();
+                                            if (data) {
+                                                gameData = data;
+                                                gameObjects.length = 0;
+                                                for (var i = 0; i < data.objCount; ++i) {
+                                                    gameObjects.push({});
+                                                }
+                                                data = null;
+                                            }
+                                            targetD = 1;
+                                            resetKeys();
+                                            gameObject = null;
+                                        }}).on("d", new Emitter.Listener() {
 
                                             @Override
                                             public void call(Object... args) {
                                                 //todo id
-                                                var tmpIndx = getPlayerIndexById(id);
+                                                int tmpIndx = getPlayerIndexById(id);
                                             }
 
                                             if(tmpIndx!=null)
@@ -203,10 +190,7 @@ public class SocketManager {
                                             {
                                                 users.splice(tmpIndx, 1);
                                             }
-                                        });
-
-                                        // DAY/NIGHT TIME:
-                                        socket.on("dnt", new Emitter.Listener() {
+                                        }).on("dnt", new Emitter.Listener() {
 
                                             @Override
                                             public void call(Object... args) {
@@ -215,35 +199,33 @@ public class SocketManager {
                                                 // timeDisplay.innerHTML = timeStr;
                                                 dayTimeValue = dnt;
                                             }
-
-                                            );
-
-                                            // GET LEADERBOARD DATA:
-                                            socket.on("0",new Emitter.Listener()
-
-                                            {
-
-                                                @Override
-                                                public void call (Object...args){
-                                                //Todo list
-                                                var rank = 1;
-                                            }
-                                                var pos = -1;
-
-                                                for (var i = 0; i < list.length; ) {
-                                                    if (player && list[i] == player.sid)
-                                                        pos = rank;
-                                                    i += 4;
-                                                    rank++;
-                                                }
-
-                                                leaderboardText.innerHTML = "pos " + (pos < 0 ? "10+" : pos) + " of " + rank;
-
-                                                // CLEAR:
-                                                delete list;
                                             }
 
-                                            );
+                                            ).on("0",new Emitter.Listener()
+
+        {
+
+            @Override
+            public void call(Object... args) {
+                //Todo list
+                var rank = 1;
+
+                var pos = -1;
+
+                for (var i = 0; i < list.length; ) {
+                    if (player && list[i] == player.sid)
+                        pos = rank;
+                    i += 4;
+                    rank++;
+                }
+
+                leaderboardText.innerHTML = "pos " + (pos < 0 ? "10+" : pos) + " of " + rank;
+
+                // CLEAR:
+                delete list;
+            }
+
+        });
 
                                             // GET USER DATA:
                                             function updateUserData(singleObj, listObj) {
@@ -539,7 +521,7 @@ public class SocketManager {
                                                                                         showScoreNotif(val);
                                                                                     }
 
-                                                                                    );
+                                                                                    )
 
                                                                                     // MINIMAP:
                                                                                     var pingColors =
@@ -574,26 +556,31 @@ public class SocketManager {
                                                                                         controlIndex = 1;
                                                                                         socket.connect();
                                                                                     }
+                                                                                });
+                                                                            }
 
-                                                                                    public void send() {
-                                                                                        // Sending an object
-                                                                                        JSONObject obj = new JSONObject();
-                                                                                        obj.put("hello", "server");
-                                                                                        obj.put("binary", new byte[42]);
-                                                                                        socket.emit("foo", obj);
+                                                                            public void send() {
+                                                                                // Sending an object
+                                                                                JSONObject obj = new JSONObject();
+                                                                                obj.put("hello", "server");
+                                                                                obj.put("binary", new byte[42]);
+                                                                                socket.emit("foo", obj);
 
 
+                                                                            }
+
+                                                                            public void receive() {
+                                                                                // Receiving an object
+                                                                                socket.on("foo", new Emitter.Listener() {
+                                                                                    @Override
+                                                                                    public void call(Object... args) {
+                                                                                        JSONObject obj = (JSONObject) args[0];
+                                                                                        obj.))
                                                                                     }
-
-                                                                                    public void receive() {
-                                                                                        // Receiving an object
-                                                                                        socket.on("foo", new Emitter.Listener() {
-                                                                                            @Override
-                                                                                            public void call(Object... args) {
-                                                                                                JSONObject obj = (JSONObject) args[0];
-                                                                                            }
-                                                                                        });
-                                                                                    }
+                                                                                });
+                                                                            }
 
 
-                                                                                }
+
+
+

@@ -1,22 +1,37 @@
 package tbs.doblon.io;
 
+import com.badlogic.gdx.graphics.Color;
+
 /**
  * Created by linde on 11/8/2016.
  */
 
-public class AnimText {
-    this.x = 0;
-    this.y = 0;
-    this.alpha = 0;
-    this.scale = 0;
-    this.minScale = 0;
-    this.maxScale = 0;
-    this.scalePlus = 0;
-    this.fadeDelay = 0;
-    this.fadeSpeed = 0;
-    this.text = "";
-    this.active = false;
-    this.update = public static void (delta) {
+public class AnimText extends GameObject {
+    float x;
+    float y;
+    float alpha;
+    float scale;
+    float minScale;
+    float maxScale;
+    float scalePlus;
+    float fadeDelay;
+    float fadeSpeed;
+    String text;
+    boolean active = false;
+
+    @Override
+    public void draw() {
+        // DRAW:
+        if (this.active) {
+            final Color color = Utility.tmpColor;
+            color.set(Color.WHITE);
+            color.a = alpha;
+            Utility.drawCenteredText(Game.spriteBatch(), color, text, x, y, scale);
+        }
+    }
+
+    @Override
+    public void update(float delta) {
         if (this.active) {
             // UPDATE:
             this.scale += this.scalePlus * delta;
@@ -35,27 +50,20 @@ public class AnimText {
                     this.active = false;
                 }
             }
-
-            // DRAW:
-            if (this.active) {
-                mainContext.globalAlpha = this.alpha;
-                mainContext.font = (this.scale * viewMult / 3) + "vh regularF";
-                mainContext.strokeText(this.text, this.x, this.y);
-                mainContext.fillText(this.text, this.x, this.y);
-            }
         }
-    };
-    this.show = public static void (x, y, txt, scale, fadeDelay, sclPlus) {
+    }
+
+    public void show(float x, float y, String txt, float scale, float fadeDelay, float sclPlus) {
         this.x = x;
         this.y = y;
         this.scale = scale;
         this.minScale = scale;
-        this.maxScale = scale * 1.35;
+        this.maxScale = scale * 1.35f;
         this.scalePlus = sclPlus;
-        this.text = txt || "";
+        this.text = txt;
         this.alpha = 1;
-        this.fadeDelay = fadeDelay || 0;
-        this.fadeSpeed = 0.003;
+        this.fadeDelay = fadeDelay;
+        this.fadeSpeed = 0.003f;
         this.active = true;
-    };
+    }
 }

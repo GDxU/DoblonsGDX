@@ -19,6 +19,7 @@ public class Utility {
     public static final Random rand = new Random();
     private static final Color c = new Color();
     private static final Color c2 = new Color();
+    public static final Color tmpColor = new Color();
     private static final int[] ints = new int[2];
     private static final GlyphLayout glyphLayout = new GlyphLayout();
     private static final float[] textSize = new float[2];
