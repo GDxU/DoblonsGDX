@@ -51,64 +51,65 @@ public class Game extends GameBase {
         super.pause();
     }
 
-    String socket;
-    int port;
-    int controlIndex = 0;
-    int targetFPS = 60;
+    public static String socket;
+    public static int port;
+    public static int controlIndex = 0;
+    public static int targetFPS = 60;
     public static float delta, delta2;
     public static long currentTime, oldTime;
     private static final int sendFrequency = 10, tUpdateFrequency = 10;
     private static long lastUpdated = 0, lastSent = 0;
-    int gameState = 0;
-    Object gameData;
-    boolean upgradesHidden = false;
-    int instructionsSpeed = 5500;
-    int insturctionsCountdown = 0;
-    public static final  String[] instructionsList = {
+    public static int gameState = 0;
+    public static Object gameData;
+    public static boolean upgradesHidden = false;
+    public static int instructionsSpeed = 5500;
+    public static int insturctionsCountdown = 0;
+    public static final String[] instructionsList = {
             "use A & D or Arrow Keys control the direction of your ship",
             "use your mouse to aim and fire your cannons",
             "destroy enemy ships and collect doblons to upgrade your ship"
     };
-    String partyKey;
-    Player player = null;
+    public static String partyKey;
+    public static Player player = null;
     public static final ArrayList modeList = null;
-    String modeIndex = null;
-    String currentMode = null;
-    public static final  int dayTimeValue = 0;
+    public static String modeIndex = null;
+    public static String currentMode = null;
+    public static final int dayTimeValue = 0;
     public static final ArrayList<Player> users = new ArrayList<Player>();
     public static final ArrayList<GameObject> gameObjects = new ArrayList<GameObject>();
-    float target = 0;
-    float targetD = 1;
-    float turnDir = 0;
-    float speedInc = 0;
-    int mTarget = 0;
-    int instructionsIndex = Utility.randInt(0, instructionsList.length - 1);
-    String[] randomLoadingTexts = {
+    public static float target = 0;
+    public static float targetD = 1;
+    public static float turnDir = 0;
+    public static float speedInc = 0;
+    public static int mTarget = 0;
+    public static int instructionsIndex = Utility.randInt(0, instructionsList.length - 1);
+    public static String[] randomLoadingTexts = {
             "discovering treasure...",
             "setting sail..."
     };
 
-   static long lastAdShown = System.currentTimeMillis();
+    static long lastAdShown = System.currentTimeMillis();
     //Todo set this value in pause/resume
     static boolean paused;
     // SCALING:
-    static int viewMult = 1,maxScreenWidth = 2208,maxScreenHeight = 1242; // 1080;
-    static int originalScreenWidth = maxScreenWidth, originalScreenHeight = maxScreenHeight,screenWidth, screenHeight;
+    static int viewMult = 1, maxScreenWidth = 2208, maxScreenHeight = 1242; // 1080;
+    static int originalScreenWidth = maxScreenWidth, originalScreenHeight = maxScreenHeight, screenWidth, screenHeight;
+
     public static void showAd() {
         Utility.log("showAds");
         if (!paused && (1200 < (System.currentTimeMillis() - lastAdShown))) {
             lastAdShown = System.currentTimeMillis();
-          //Todo show an ad
+            //Todo show an ad
         }
     }
 
     public static Player getPlayerIndexById(String id) {
-                for (int i =0;i<Level.players.size();i++){
-                    final Player p = Level.players.get(i);
-                    if (p.id.equals(id)){
-                        return p;
-                    }
-                }
+        for (int i = 0; i < Level.players.size(); i++) {
+            final Player p = Level.players.get(i);
+            if (p.id.equals(id)) {
+                return p;
+            }
+        }
 
         return null;
     }
@@ -116,9 +117,9 @@ public class Game extends GameBase {
     // CHECK IF PLAYER IS IN ARRAY:
     public static boolean objectExists(Player obj) {
 
-        for (int i =0;i<Level.players.size();i++){
+        for (int i = 0; i < Level.players.size(); i++) {
             final Player p = Level.players.get(i);
-            if (p.sid == obj.sid){
+            if (p.sid == obj.sid) {
                 return true;
             }
         }
@@ -129,9 +130,9 @@ public class Game extends GameBase {
     // FIND PLAYER INDEX:
     public static int getPlayerIndex(int sid) {
 
-        for (int i =0;i<Level.players.size();i++){
+        for (int i = 0; i < Level.players.size(); i++) {
             final Player p = Level.players.get(i);
-            if (p.sid == sid){
+            if (p.sid == sid) {
                 return i;
             }
         }
@@ -140,16 +141,18 @@ public class Game extends GameBase {
     }
 
     // SCREEN SHAKE:
-    static float screenSkX ,screenShackeScale,screenSkY ,screenSkRed , screenSkDir = 0;
-    public static void screenShake(float scl,float dir) {
+    static float screenSkX, screenShackeScale, screenSkY, screenSkRed, screenSkDir = 0;
+
+    public static void screenShake(float scl, float dir) {
         if (screenShackeScale < scl) {
             screenShackeScale = scl;
             screenSkDir = dir;
         }
     }
+
     public static void updateScreenShake(long delta) {
         if (screenShackeScale > 0) {
-            screenSkX = (float)(screenShackeScale * Math.cos(screenSkDir));
+            screenSkX = (float) (screenShackeScale * Math.cos(screenSkDir));
             screenSkY = (float) (screenShackeScale * Math.sin(screenSkDir));
             screenShackeScale *= screenSkRed;
             if (screenShackeScale <= 0.1)
@@ -163,12 +166,14 @@ public class Game extends GameBase {
     static int iconsCount = 5;
     static float skullIconSize = 50;
     Texture[] iconsList = {};
+
     initIconList();
-    static void initIconList(){
+
+    static void initIconList() {
         for (int i = 1; i < iconsCount; ++i) {
             var tmpImg = new Image();
-            tmpImg.onload = (public static void (val) {
-            return public static void () {
+            tmpImg.onload = (public static void(val) {
+            return public static void() {
                 this.onLoad = null;
                 iconsList[val] = this;
             }
@@ -178,21 +183,26 @@ public class Game extends GameBase {
     }
 
     public static final IslandInfo[] islandInfo = {
-            new IslandInfo(17,0xe0cca7, new float[]{0.92f, 0.95f, 1, 1.05f, 1, 0.85f, 0.95f, 1, 1.1f, 1, 0.96f}),
-  new IslandInfo(17, 0xd4c19e,new float[]{1, 0.94f, 1, 1.13f, 0.98f, 1.05f, 1.1f, 1, 0.96f}),
-   new IslandInfo(17,0xc7b694, new float[]{1.05f, 0.92f, 1, 1.06f, 1, 0.98f, 1, 0.92f}),
-   new IslandInfo(5,0xa4a4a4, new float[]{1.05f, 0.92f, 1, 1.06f, 1, 0.98f, 1, 0.92f})
+            new IslandInfo(17, 0xe0cca7, new float[]{0.92f, 0.95f, 1, 1.05f, 1, 0.85f, 0.95f, 1, 1.1f, 1, 0.96f}),
+            new IslandInfo(17, 0xd4c19e, new float[]{1, 0.94f, 1, 1.13f, 0.98f, 1.05f, 1.1f, 1, 0.96f}),
+            new IslandInfo(17, 0xc7b694, new float[]{1.05f, 0.92f, 1, 1.06f, 1, 0.98f, 1, 0.92f}),
+            new IslandInfo(5, 0xa4a4a4, new float[]{1.05f, 0.92f, 1, 1.06f, 1, 0.98f, 1, 0.92f})
     };
 
     // ANIM TEXT:
     static final ArrayList<AnimText> animTexts = new ArrayList<AnimText>();
-   static int animTextIndex = 0;
+    static int animTextIndex = 0;
     int scoreCountdown = 0;
     int lastScore = 0;
     int scoreDisplayTime = 1500;
-    for (var i = 0; i < 20; ++i) {
+    for(
+    var i = 0;
+    i<20;++i)
+
+    {
         animTexts.push(new AnimText());
     }
+
     public static void updateAnimTexts(delta) {
         // UPDATE COOLDOWNS:
         if (scoreCountdown) {
@@ -204,17 +214,15 @@ public class Game extends GameBase {
         }
 
         // RENDER:
-        mainContext.textAlign = "center";
-        mainContext.strokeStyle = '#5f5f5f';
-        mainContext.fillStyle = '#ffffff';
-        mainContext.lineWidth = 7;
-        for (var i = 0; i < animTexts.length; ++i) {
-            animTexts[i].update(delta);
+        mainContext.strokeStyle = 0x5f5f5f;
+        mainContext.fillStyle = 0xffffff;
+        for (int i = 0; i < animTexts.size(); ++i) {
+            animTexts.get(i).update(delta);
         }
         mainContext.globalAlpha = 1;
     }
 
-    public static void drawIsland(float x, float y,float s,int indx) {
+    public static void drawIsland(float x, float y, float s, int indx) {
         var tmpIndx = (s + "-" + indx);
         var tmpSprt = islandSprites[tmpIndx];
         if (!tmpSprt) {
@@ -223,7 +231,7 @@ public class Game extends GameBase {
                 tmpIsl = islandInfo[0];
             }
             var tmpCanvas = document.createElement("canvas");
-            var shapeRenderer(fill) = tmpCanvas.getContext('2d');
+            var shapeRenderer (fill) = tmpCanvas.getContext('2d');
             tmpCanvas.width = (s * 2) + (indx < 3 ? 300 : 10);
             tmpCanvas.height = tmpCanvas.width;
             shapeRenderer(fill).fillStyle = tmpIsl.color;
@@ -265,29 +273,30 @@ public class Game extends GameBase {
                 tmpSprt.width, tmpSprt.height);
     }
 
-    public static void showAnimText(x, y, txt, scale, fadeDelay, type, sclPlus) {
-        var tmpText = animTexts[animTextIndex];
+    public static void showAnimText(float x, float y, String txt, float scale, long fadeDelay,String type,float sclPlus) {
+        AnimText tmpText = animTexts.get(animTextIndex);
         tmpText.show(x, y, txt, scale, fadeDelay, sclPlus);
         tmpText.type = type;
         animTextIndex++;
-        if (animTextIndex >= animTexts.length)
+        if (animTextIndex >= animTexts.size())
             animTextIndex = 0;
     }
 
-    var kickReason = null;
-    public static void kickPlayer(reason) {
+    String kickReason;
+
+    public static void kickPlayer(String reason) {
         leaveGame();
-        if (!kickReason)
-            kickReason = reason;
-        showMainMenuText(kickReason);
+        showMainMenuText(reason);
         SocketManager.socket.close();
     }
+
+    static final int[] pingColors = {0xffffff, 0xffffff ,0xff6363 ,0xff6363,0x67ff3e66,0xffffff88,0x63b0ff};
 
     // UPDATE OR PUSH PLAYER:
     public static void updateOrPushUser(Player user) {
         int tmpIndx = getPlayerIndex(user.sid);
-        if (tmpIndx >=0) {
-            users.set(tmpIndx,user);
+        if (tmpIndx >= 0) {
+            users.set(tmpIndx, user);
         } else {
             users.add(user);
         }
@@ -302,20 +311,24 @@ public class Game extends GameBase {
             }
         }
     }
+
     static int darkColor = 0x4d4d4d;
 
     // PAGE IS READY:
     public static void getURLParam(name, url) {
         if (!url) url = location.href;
-        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        name = name.replace( /[\[]/,"\\\[").replace( /[\]]/,"\\\]");
         var regexS = "[\\?&]" + name + "=([^&#]*)";
         var regex = new RegExp(regexS);
         var results = regex.exec(url);
         return results == null ? null : results[1];
     }
+
     var lobbyURLIP = getURLParam("l");
     var lobbyRoomID;
-    if (lobbyURLIP) {
+    if(lobbyURLIP)
+
+    {
         var tmpL = lobbyURLIP.split("-");
         lobbyURLIP = tmpL[0];
         lobbyRoomID = tmpL[1];
@@ -323,6 +336,7 @@ public class Game extends GameBase {
 
 
     boolean activePopup;
+
     public static void showWeaponPopup(int indx) {
         for (var i = 0; i < 4; i++) {
             var tmpDiv = document.getElementById('popupRow' + i);
@@ -338,6 +352,7 @@ public class Game extends GameBase {
 
     public static final ArrayList<TextureRegion> renderedSkins = new ArrayList<TextureRegion>();
     public static int skinIndex = Utility.getInt("sknInx");
+
     // NOTIFICATIONS:
     public static void hideNotifByType(type) {
         for (var i = 0; i < animTexts.length; ++i) {
@@ -345,6 +360,7 @@ public class Game extends GameBase {
                 animTexts[i].active = false;
         }
     }
+
     public static void showNotification(text) {
         for (var i = 0; i < animTexts.length; ++i) {
             if (animTexts[i].type == "notif")
@@ -352,18 +368,22 @@ public class Game extends GameBase {
         }
         showAnimText(maxScreenWidth / 2, maxScreenHeight / 1.27, text, 42, 1500, "notif", 0.19);
     }
+
     public static void showBigNotification(text) {
         hideNotifByType("bNotif");
         showAnimText(maxScreenWidth / 2, screenHeight / 3, text, 130, 1000, "bNotif", 0.26);
     }
-    public static void showScoreNotif(value) {
+static int lastScore;
+    static long scoreCountdown, scoreDisplayTime;
+    public static void showScoreNotif(int value) {
         hideNotifByType("sNotif");
         lastScore += value;
-        showAnimText(maxScreenWidth / 2, maxScreenHeight / 1.34, ("+" + lastScore), 35, scoreDisplayTime, "sNotif", 0.16);
+        showAnimText(maxScreenWidth / 2, maxScreenHeight / 1.34f, ("+" + lastScore), 35, scoreDisplayTime, "sNotif", 0.16f);
         scoreCountdown = scoreDisplayTime;
     }
 
     var skinDisplayIconSize = 200;
+
     public static void changeSkin(val) {
         skinIndex += val;
         if (skinIndex >= userSkins.length)
@@ -373,19 +393,19 @@ public class Game extends GameBase {
         if (!renderedSkins[skinIndex]) {
             var tmpCanvas = document.createElement('canvas');
             tmpCanvas.width = tmpCanvas.height = skinDisplayIconSize;
-            var shapeRenderer(fill) = tmpCanvas.getContext('2d');
+            var shapeRenderer (fill) = tmpCanvas.getContext('2d');
             shapeRenderer(fill).translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
             shapeRenderer(fill).lineJoin = "round";
             renderPlayer(shapeRenderer(fill), {
-                    dir: (Math.PI),
-                    width: 60,
-                    length: 125,
-                    rearLength: 25,
-                    noseLength: 35,
-                    cannonLength: 18,
-                    cannonWidth: 28,
-                    cannons: 1
-            }, 0, 0, userSkins[skinIndex]);
+                    dir:(Math.PI),
+                    width:60,
+                    length:125,
+                    rearLength:25,
+                    noseLength:35,
+                    cannonLength:18,
+                    cannonWidth:28,
+                    cannons:1
+            },0, 0, userSkins[skinIndex]);
             renderedSkins[skinIndex] = tmpCanvas.toDataURL();
         }
         skinIcon.src = renderedSkins[skinIndex];
@@ -396,11 +416,12 @@ public class Game extends GameBase {
     }
 
     // SHOW A TEXT IN THE MENU:
-    public static void showMainMenuText(text) {
+    public static void showMainMenuText(String text) {
         userInfoContainer.style.display = "none";
         loadingContainer.style.display = "block";
         loadingContainer.innerHTML = text;
     }
+
     public static void hideMainMenuText() {
         userInfoContainer.style.display = "block";
         loadingContainer.style.display = "none";
@@ -411,6 +432,7 @@ public class Game extends GameBase {
         var display = visible ? "block" : "none";
         gameUiContainer.style.display = display;
     }
+
     public static void toggleMenuUI(visible) {
 
         // SHOWING MAIN MENU:
@@ -430,7 +452,7 @@ public class Game extends GameBase {
     }
 
     public static void initAds() {
-        ShowAds.initInterstitialAd({adId: "ca-app-pub-6350309116730071/9878078741", isTest: true});
+        ShowAds.initInterstitialAd({adId:"ca-app-pub-6350309116730071/9878078741", isTest:true});
     }
 
     public static final String treasureMap = "2B=TK:KAB,SSV:100K";
@@ -461,10 +483,10 @@ public class Game extends GameBase {
     }
 
     public static void drawCircle(float x, float y, float s) {
-        shapeRenderer(fill).circle(x,y,s);
+        shapeRenderer(fill).circle(x, y, s);
     }
 
-    public static void renderPlayer(Player tmpObj, float tmpX, float tmpY,float tmpS, float delta) {
+    public static void renderPlayer(Player tmpObj, float tmpX, float tmpY, float tmpS, float delta) {
 
         // RENDER PLAYER SHIP:
         contxt.lineWidth = 8.5;
@@ -815,261 +837,260 @@ public class Game extends GameBase {
             "Default",
             "#eb6d6d",
             "#949494"
-    }, {
+    },{
         "Purple",
         "#b96bed",
         "#949494"
-        }, {
+        },{
         "Green",
         "#6FED6B",
         "#949494"
-        }, {
+        },{
         "Orange",
         "#EDB76B",
         "#949494"
-        }, {
+        },{
         "Black",
         "#696969",
         "#949494"
-        }, {
+        },{
         "Navy",
         "#adadad",
         "#949494"
-        }, {
+        },{
         "Ghostly",
         "#9BEB6D",
         "#949494",
-        opacity: 0.7,
-        overlay: "rgba(0,255,0,0.3)"
-        }, {
+        opacity:0.7,
+        overlay:"rgba(0,255,0,0.3)"
+        },{
         "Glass",
         "#6DEBDE",
         "#949494",
-        opacity: 0.6,
-        overlay: "rgba(0,0,255,0.3)"
-        }, {
+        opacity:0.6,
+        overlay:"rgba(0,0,255,0.3)"
+        },{
         "Pirate",
         "#5E5E5E",
         "#737373"
-        }, {
+        },{
         "Sketch",
         "#E8E8E8",
         "#E8E8E8"
-        }, {
+        },{
         "Gold",
         "#e9cd5f",
         "#949494"
-        }, {
+        },{
         "Hazard",
         "#737373",
         "#e9cd5f"
-        }, {
+        },{
         "Apples",
         "#91DB30",
         "#eb6d6d"
-        }, {
+        },{
         "Beach",
         "#eac086",
         "#FFD57D"
-        }, {
+        },{
         "Wood",
         "#8c5d20",
         "#949494"
-        }, {
+        },{
         "Diamond",
         "#6FE8E2",
         "#EDEDED"
-        }, {
+        },{
         "Midnight",
         "#5E5E5E",
         "#A763BA"
-        }, {
+        },{
         "Valentine",
         "#FE4998",
         "#F9A7FE"
-        }, {
+        },{
         "Cheddar",
         "#FCA403",
         "#FDFC08"
-        }, {
+        },{
         "PewDie",
         "#09BBDF",
         "#1D3245"
-        }, {
+        },{
         "Crimson",
         "#6B3333",
         "#AD3E3E"
-        }, {
+        },{
         "Banana",
         "#fbf079",
         "#f9f9f9"
-        }, {
+        },{
         "Cherry",
         "#F8E0F7",
         "#F5A9F2"
-        }, {
+        },{
         "Moon",
         "#1C1C1C",
         "#F2F5A9"
-        }, {
+        },{
         "Master",
         "#fce525",
         "#bb5e0e"
-        }, {
+        },{
         "Reddit",
         "#fe562d",
         "#f9f9f9"
-        }, {
+        },{
         "4Chan",
         "#ffd3b4",
         "#3c8d2e"
-        }, {
+        },{
         "Necron",
         "#808080",
         "#80ff80"
-        }, {
+        },{
         "Ambient",
         "#626262",
         "#80ffff"
-        }, {
+        },{
         "Uranium",
         "#5a9452",
         "#80ff80"
-        }, {
+        },{
         "XPlode",
         "#fe4c00",
         "#f8bf00"
-        }, {
+        },{
         "巧克力",
         "#804029",
         "#f9ebb4"
         };
 
-public static void sendTarget(float force) {
-        long tmpTime = currentTime;
-        if (player!=null  && !player.dead) {
-        target = Math.atan2(mouseY - (screenHeight / 2), mouseX - (screenWidth / 2));
-        if (force || tmpTime - lastUpdated > tUpdateFrequency) {
-        if (controlIndex == 1) {
-        targetD = Math.sqrt(MathPOW(mouseY - (screenHeight / 2), 2) + MathPOW(mouseX - screenWidth / 2, 2));
-        targetD *= Math.min(maxScreenWidth / screenWidth, maxScreenHeight / screenHeight);
-        targetD /= (maxScreenHeight / 3.5);
-        targetD = targetD.round(1);
-        if (targetD > 1)
-        targetD = 1;
-        else if (targetD < 0.5)
-        targetD = 0.5;
+public static void sendTarget(float force){
+        long tmpTime=currentTime;
+        if(player!=null&&!player.dead){
+        target=Math.atan2(mouseY-(screenHeight/2),mouseX-(screenWidth/2));
+        if(force||tmpTime-lastUpdated>tUpdateFrequency){
+        if(controlIndex==1){
+        targetD=Math.sqrt(MathPOW(mouseY-(screenHeight/2),2)+MathPOW(mouseX-screenWidth/2,2));
+        targetD*=Math.min(maxScreenWidth/screenWidth,maxScreenHeight/screenHeight);
+        targetD/=(maxScreenHeight/3.5);
+        targetD=targetD.round(1);
+        if(targetD>1)
+        targetD=1;
+        else if(targetD<0.5)
+        targetD=0.5;
         }
-        lastUpdated = tmpTime;
+        lastUpdated=tmpTime;
         }
-        if (force || tmpTime - lastSent > sendFrequency) {
-        lastSent = tmpTime;
-        if (controlIndex == 1) {
-        socket.emit('1', target.round(2), targetD.round(1));
-        } else {
-        socket.emit('1', target);
-        }
-        }
+        if(force||tmpTime-lastSent>sendFrequency){
+        lastSent=tmpTime;
+        if(controlIndex==1){
+        socket.emit('1',target.round(2),targetD.round(1));
+        }else{
+        socket.emit('1',target);
         }
         }
-public static void sendMoveTarget() {
+        }
+        }
+public static void sendMoveTarget(){
         //Todo might have to do keys[]
-        if (keys.r !=0&& keys.l!=0)
-        turnDir = 0;
-        if (!keys.u && !keys.d)
-        speedInc = 0;
-        SocketManager.socket.emit('4', turnDir, speedInc);
+        if(keys.r!=0&&keys.l!=0)
+        turnDir=0;
+        if(!keys.u&&!keys.d)
+        speedInc=0;
+        SocketManager.socket.emit('4',turnDir,speedInc);
         }
-public static void renderGameObject(tmpObj, ctxt) {
-        var tmpIndx = (tmpObj.c + "-" + tmpObj.shp + "-" + tmpObj.s);
-        var tmpSprt = gameObjSprites[tmpIndx];
-        if (!tmpSprt) {
-        var tmpCanvas = document.createElement("canvas");
-        var shapeRenderer(fill) = tmpCanvas.getContext('2d');
-        tmpCanvas.width = (tmpObj.s * 2) + 10;
-        tmpCanvas.height = tmpCanvas.width;
-        shapeRenderer(fill).strokeStyle = darkColor;
-        shapeRenderer(fill).lineWidth = 8.5;
-        shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
-        if (tmpObj.c == 0) {
-        shapeRenderer(fill).fillStyle = '#797979';
-        } else if (tmpObj.c == 1) {
-        shapeRenderer(fill).fillStyle = '#e89360';
-        } else if (tmpObj.c == 2) {
-        shapeRenderer(fill).fillStyle = '#c8c8c8';
-        } else if (tmpObj.c == 3) {
-        shapeRenderer(fill).fillStyle = '#e9cd5f';
-        } else if (tmpObj.c == 4) {
-        shapeRenderer(fill).fillStyle = '#EB6565';
-        } else if (tmpObj.c == 5) {
-        shapeRenderer(fill).fillStyle = '#6FE8E2';
-        } else if (tmpObj.c == 6) {
-        shapeRenderer(fill).fillStyle = '#7BE86F';
+public static void renderGameObject(tmpObj,ctxt){
+        var tmpIndx=(tmpObj.c+"-"+tmpObj.shp+"-"+tmpObj.s);
+        var tmpSprt=gameObjSprites[tmpIndx];
+        if(!tmpSprt){
+        var tmpCanvas=document.createElement("canvas");
+        var shapeRenderer(fill)=tmpCanvas.getContext('2d');
+        tmpCanvas.width=(tmpObj.s*2)+10;
+        tmpCanvas.height=tmpCanvas.width;
+        shapeRenderer(fill).strokeStyle=darkColor;
+        shapeRenderer(fill).lineWidth=8.5;
+        shapeRenderer(fill).translate(tmpCanvas.width/2,tmpCanvas.height/2);
+        if(tmpObj.c==0){
+        shapeRenderer(fill).fillStyle='#797979';
+        }else if(tmpObj.c==1){
+        shapeRenderer(fill).fillStyle='#e89360';
+        }else if(tmpObj.c==2){
+        shapeRenderer(fill).fillStyle='#c8c8c8';
+        }else if(tmpObj.c==3){
+        shapeRenderer(fill).fillStyle='#e9cd5f';
+        }else if(tmpObj.c==4){
+        shapeRenderer(fill).fillStyle='#EB6565';
+        }else if(tmpObj.c==5){
+        shapeRenderer(fill).fillStyle='#6FE8E2';
+        }else if(tmpObj.c==6){
+        shapeRenderer(fill).fillStyle='#7BE86F';
         }
-        if (tmpObj.shp == 1) {
-        var spikes = 6;
-        var rot = Math.PI / 2 * 3;
-        var rad = tmpObj.s / 2;
-        var step = Math.PI / spikes;
+        if(tmpObj.shp==1){
+        var spikes=6;
+        var rot=Math.PI/2*3;
+        var rad=tmpObj.s/2;
+        var step=Math.PI/spikes;
         shapeRenderer(fill).beginPath();
-        shapeRenderer(fill).moveTo(0, -rad);
-        for (var s = 0; s < spikes; s++) {
-        shapeRenderer(fill).lineTo(MathCOS(rot) * rad, MathSIN(rot) * rad);
-        rot += step;
-        shapeRenderer(fill).lineTo(MathCOS(rot) * (rad * 0.8), MathSIN(rot) * (rad * 0.8));
-        rot += step;
+        shapeRenderer(fill).moveTo(0,-rad);
+        for(var s=0;s<spikes;s++){
+        shapeRenderer(fill).lineTo(MathCOS(rot)*rad,MathSIN(rot)*rad);
+        rot+=step;
+        shapeRenderer(fill).lineTo(MathCOS(rot)*(rad*0.8),MathSIN(rot)*(rad*0.8));
+        rot+=step;
         }
-        shapeRenderer(fill).lineTo(0, -rad);
+        shapeRenderer(fill).lineTo(0,-rad);
         shapeRenderer(fill).closePath();
         shapeRenderer(fill).stroke();
         shapeRenderer(fill).fill();
-        } else if (tmpObj.shp == 2) {
-        var rad = tmpObj.s / 1.6;
+        }else if(tmpObj.shp==2){
+        var rad=tmpObj.s/1.6;
         shapeRenderer(fill).beginPath();
-        shapeRenderer(fill).moveTo(0, -rad);
-        shapeRenderer(fill).lineTo(rad, 0);
-        shapeRenderer(fill).lineTo(0, rad);
-        shapeRenderer(fill).lineTo(-rad, 0);
+        shapeRenderer(fill).moveTo(0,-rad);
+        shapeRenderer(fill).lineTo(rad,0);
+        shapeRenderer(fill).lineTo(0,rad);
+        shapeRenderer(fill).lineTo(-rad,0);
         shapeRenderer(fill).closePath();
         shapeRenderer(fill).stroke();
         shapeRenderer(fill).fill();
-        } else if (tmpObj.shp == 3) {
-        var rad = tmpObj.s / 1.6;
+        }else if(tmpObj.shp==3){
+        var rad=tmpObj.s/1.6;
         shapeRenderer(fill).beginPath();
-        shapeRenderer(fill).moveTo(0, -rad);
-        shapeRenderer(fill).lineTo(rad / 1.5, 0);
-        shapeRenderer(fill).lineTo(0, rad);
-        shapeRenderer(fill).lineTo(-rad / 1.5, 0);
+        shapeRenderer(fill).moveTo(0,-rad);
+        shapeRenderer(fill).lineTo(rad/1.5,0);
+        shapeRenderer(fill).lineTo(0,rad);
+        shapeRenderer(fill).lineTo(-rad/1.5,0);
         shapeRenderer(fill).closePath();
         shapeRenderer(fill).stroke();
         shapeRenderer(fill).fill();
-        } else {
+        }else{
         shapeRenderer(fill).beginPath();
-        shapeRenderer(fill).arc(0, 0, tmpObj.s / 2, 0, 2 * Math.PI);
+        shapeRenderer(fill).arc(0,0,tmpObj.s/2,0,2*Math.PI);
         shapeRenderer(fill).stroke();
         shapeRenderer(fill).fill();
         }
-        gameObjSprites[tmpIndx] = tmpCanvas;
-        tmpSprt = gameObjSprites[tmpIndx];
+        gameObjSprites[tmpIndx]=tmpCanvas;
+        tmpSprt=gameObjSprites[tmpIndx];
         }
-        spriteBatch().draw(tmpSprt, -tmpSprt.width / 2, -tmpSprt.height / 2,
-        tmpSprt.width, tmpSprt.height);
+        spriteBatch().draw(tmpSprt,-tmpSprt.width/2,-tmpSprt.height/2,
+        tmpSprt.width,tmpSprt.height);
         }
-
 
 
 // UPDATE MENU:
-public static void updateMenuLoop(delta) {
-        if (gameState != 1) {
+public static void updateMenuLoop(delta){
+        if(gameState!=1){
 
         // MENU INSTRUCTIONS TEXT:
-        insturctionsCountdown -= delta;
-        if (insturctionsCountdown <= 0) {
-        insturctionsCountdown = instructionsSpeed;
-        instructionsText.innerHTML = instructionsList[instructionsIndex];
+        insturctionsCountdown-=delta;
+        if(insturctionsCountdown<=0){
+        insturctionsCountdown=instructionsSpeed;
+        instructionsText.innerHTML=instructionsList[instructionsIndex];
         instructionsIndex++;
-        if (instructionsIndex >= instructionsList.length)
-        instructionsIndex = 0;
+        if(instructionsIndex>=instructionsList.length)
+        instructionsIndex=0;
         }
         }
         }

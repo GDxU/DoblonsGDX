@@ -1,6 +1,8 @@
 package tbs.doblon.io;
 
 
+import com.badlogic.gdx.utils.StringBuilder;
+
 import org.json.JSONObject;
 
 
@@ -101,14 +103,12 @@ public class SocketManager {
 
                 @Override
                 public void call (Object...args){
-                kickPlayer("Disconnected.");
-                console.log("Send this to the dev: " + reason);
+                Game.kickPlayer("Disconnected.> reason");
             }}).on("error", new Emitter.Listener() {
 
                     @Override
                     public void call(Object... args) {
-                        kickPlayer("Disconnected. The server may have updated.");
-                        console.log("Send this to the dev: " + err);
+                        kickPlayer("Disconnected. The server may have updated. ["+err+"]");
                     }
                 }
                     ).on("kick",new Emitter.Listener()
@@ -117,24 +117,22 @@ public class SocketManager {
 
                         @Override
                         public void call (Object...args){
-                        kickPlayer(reason);
+                        Game.kickPlayer(reason);
                     }}).on("lk", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
-                partyKey = lKey;
+                Game.partyKey = lKey;
             }
 
-        } ).on("mds",new Emitter.Listener()
-
-                            {
+        } ).on("mds",new Emitter.Listener(){
 
                                 @Override
                                 public void call (Object...args) {
-                                    modeList = data;
+                                    Game.modeList = data;
                                     // Todo modeSelector.innerHTML = data[crnt].name + "  <i style="vertical-align: middle;" class="material-icons">&#xE5C5;</i>";
-                                    modeIndex = crnt;
-                                    currentMode = modeList[crnt];
+                                    Game.modeIndex = crnt;
+                                    Game.currentMode = Game.modeList[crnt];
                                 } }).on("v", new Emitter.Listener() {
 
             @Override
@@ -142,41 +140,37 @@ public class SocketManager {
                 //Todo sw, sh, mult
                 if (Game.viewMult != Game.mult) {
                     Game.viewMult = Game.mult;
-                    Game.maxScreenWidth = Math.round(Game.sw * Game.mult);
-                    Game.maxScreenHeight = Math.round(Game.sh * Game.mult);
+                    Game.maxScreenWidth = Math.round(Game.screenWidth * Game.mult);
+                    Game.maxScreenHeight = Math.round(Game.screenHeight * Game.mult);
                     Game.resize();
                 }
             }
 
-        }).on("spawn",new Emitter.Listener()
-
-                                    {
-
+        }).on("spawn",new Emitter.Listener(){
                                         @Override
                                         public void call (Object...args) {
                                             //Todo gameObject, data
 
                                             if (!Game.gameObjects.c(gameObject)) {
-                                                users.push(gameObject);
+                                                Game.users.add(gameObject);
                                             } else {
-                                                updateOrPushUser(gameObject);
+                                                Game.updateOrPushUser(gameObject);
                                             }
                                             Game.player = gameObject;
-                                            gameState = 1;
-                                            toggleMenuUI(false);
-                                            toggleGameUI(true);
-                                            mainCanvas.focus();
+                                            Game.gameState = 1;
+                                            Game.toggleMenuUI(false);
+                                            Game.toggleGameUI(true);
                                             if (data) {
                                                 gameData = data;
-                                                gameObjects.length = 0;
+                                                Game.gameObjects.clear();
                                                 for (var i = 0; i < data.objCount; ++i) {
                                                     gameObjects.push({});
                                                 }
                                                 data = null;
                                             }
-                                            targetD = 1;
-                                            resetKeys();
-                                            gameObject = null;
+                                            Game.targetD = 1;
+                                            Game.resetKeys();
+                                            Game.gameObject = null;
                                         }}).on("d", new Emitter.Listener() {
 
                                             @Override
@@ -185,10 +179,8 @@ public class SocketManager {
                                                 int tmpIndx = getPlayerIndexById(id);
                                             }
 
-                                            if(tmpIndx!=null)
-
-                                            {
-                                                users.splice(tmpIndx, 1);
+                                            if(Game.tmpIndx!=null){
+                                                Game.users.remove(tmpIndx);
                                             }
                                         }).on("dnt", new Emitter.Listener() {
 
@@ -197,7 +189,7 @@ public class SocketManager {
                                                 //todo timeStr, dnt
 
                                                 // timeDisplay.innerHTML = timeStr;
-                                                dayTimeValue = dnt;
+                                                Game.dayTimeValue = dnt;
                                             }
                                             }
 
@@ -208,57 +200,20 @@ public class SocketManager {
             @Override
             public void call(Object... args) {
                 //Todo list
-                var rank = 1;
+                int rank = 1;
+                int pos = -1;
 
-                var pos = -1;
-
-                for (var i = 0; i < list.length; ) {
-                    if (player && list[i] == player.sid)
+                for (int i = 0; i < list.length; ) {
+                    if (Game.player && list[i] == Game.player.sid)
                         pos = rank;
                     i += 4;
                     rank++;
                 }
 
-                leaderboardText.innerHTML = "pos " + (pos < 0 ? "10+" : pos) + " of " + rank;
-
-                // CLEAR:
-                delete list;
+                Game.leaderboardText = "pos " + (pos < 0 ? "10+" : pos) + " of " + rank;
             }
 
-        });
-
-                                            // GET USER DATA:
-                                            function updateUserData(singleObj, listObj) {
-                                                if (singleObj) {
-                                                    singleObj.visible = true;
-                                                    updateOrPushUser(singleObj);
-                                                    delete singleObj;
-                                                } else if (listObj) {
-                                                    for (var i = 0; i < users.length; ++i) {
-                                                        if (!users[i].visible)
-                                                            users[i].forcePos = 1;
-                                                        users[i].visible = false;
-                                                    }
-                                                    var tmpIndx;
-                                                    for (var i = 0; i < listObj.length; ) {
-                                                        tmpIndx = getPlayerIndex(listObj[i]);
-                                                        if (tmpIndx != null) {
-                                                            users[tmpIndx].x = listObj[i + 1];
-                                                            users[tmpIndx].y = listObj[i + 2];
-                                                            users[tmpIndx].dir = listObj[i + 3];
-                                                            users[tmpIndx].targetDir = listObj[i + 4];
-                                                            users[tmpIndx].aimDir = listObj[i + 5];
-                                                            users[tmpIndx].visible = true;
-                                                        }
-                                                        i += 6;
-                                                    }
-                                                    delete listObj;
-                                                }
-                                            }
-
-                                            socket.on("1",new Emitter.Listener()
-
-                                            {
+        }).on("1",new Emitter.Listener() {
 
                                                 @Override
                                                 public void call (Object...args){
@@ -266,30 +221,23 @@ public class SocketManager {
                                             }
                                             }
 
-                                            );
-
-                                            // UPGRADES LIST & COINS:
-                                            socket.on("2",
-                                                    new Emitter.Listener()
-
-                                            {
+                                            ).on("2",
+                                                    new Emitter.Listener() {
 
                                                 @Override
                                                 public void call (Object...args){
                                                 //todo  upgrC, fleetC, data, points
                                                 if (data) {
-                                                    var tmpHTML = "";
-                                                    upgradesText.innerHTML = "~ Upgrades " + upgrC + " ~ Fleet " + fleetC;
-                                                    var num = 1;
-                                                    for (var i = 0; i < data.length; ) {
-                                                        var tmpW = ((data[i + 2] - 1) / (data[i + 3] - 1)) * (39 / 65 * weaponsProgress.clientWidth);
-                                                        if (num == 9)
-                                                            tmpHTML += "</br>"
-                                                        tmpHTML += "<div class=" upgradeItem
-                                                        " onclick="
-                                                        doUpgrade(" + (num - 1) + ", 0, 1)
-                                                        "><div class=" upgrProg " style=" width:
-                                                        " + tmpW + " px "></div>" +
+                                                    StringBuilder tmpHTML = new StringBuilder();
+                                                    Game.upgradesText = "~ Upgrades " + upgrC + " ~ Fleet " + fleetC;
+                                                    int num = 1;
+                                                    for (int i = 0; i < data.length; ) {
+                                                        float tmpW = ((data[i + 2] - 1) / (data[i + 3] - 1)) * (39 / 65 * Game.screenWidth);
+                                                        if (num == 9){
+                                                            //Todo add a line seperator
+                                                        }
+                                                        //Todo doUpgrade(" + (num - 1) + ", 0, 1)
+                                                       tmpHTML.app
                                                                 (data[i]) + " <span class="
                                                         greyMenuText
                                                         ">" + ((data[i + 2] != data[i + 3]) ? ("$" + data[i + 1]) : "max")
@@ -298,18 +246,13 @@ public class SocketManager {
                                                         num++;
                                                     }
                                                     upgradeList.innerHTML = tmpHTML;
-                                                    if (!upgradesHidden)
+                                                    if (!Game.upgradesHidden)
                                                         upgradeContainer.style.display = "inline-block";
                                                 }
-                                                if (points != undefined)
+                                                if (Game.points != undefined)
                                                     coinDisplay.innerHTML = "Coins <span class="
                                                 greyMenuText ">$" + (points || 0) + "</span>";
-                                            });
-
-                                                // WEAPONS LIST AND PROGRESS:
-                                                socket.on("8",
-                                                        new Emitter.Listener() {
-
+                                            }).on("8", new Emitter.Listener() {
                                                             @Override
                                                             public void call(Object... args) {
                                                                 //todo data, points, prog
@@ -379,10 +322,7 @@ public class SocketManager {
                                                                 prog = null;
                                                             }
 
-                                                            );
-
-                                                            // UPDATE VALUE:
-                                                            socket.on("3",new Emitter.Listener()
+                                                            ).on("3",new Emitter.Listener()
 
                                                             {
 
@@ -398,11 +338,7 @@ public class SocketManager {
                                                                         i += 2;
                                                                     }
                                                                 }
-                                                            });
-
-                                                                // UPDATE GAMEOBJECT:
-                                                                var tmpObj;
-                                                                socket.on("4", new Emitter.Listener() {
+                                                            }).on("4", new Emitter.Listener() {
 
                                                                     @Override
                                                                     public void call(Object... args) {
@@ -425,10 +361,7 @@ public class SocketManager {
                                                                         }
                                                                     }
 
-                                                                    );
-
-                                                                    // SOMEONE SHOT:
-                                                                    socket.on("5",
+                                                                    ).on("5",
                                                                             new Emitter.Listener()
 
                                                                     {
@@ -437,9 +370,9 @@ public class SocketManager {
                                                                         public void call (Object...
                                                                         args){
                                                                         //Todo sid, wpnIndex
-                                                                        var tmpIndx = getPlayerIndex(sid);
+                                                                        int tmpIndx = Game.getPlayerIndex(sid);
                                                                         if (tmpIndx != null) {
-                                                                            var tmpUser = users[tmpIndx];
+                                                                            final Player tmpUser = Game.users.get(tmpIndx);
                                                                             if (!tmpUser.animMults)
                                                                                 tmpUser.animMults =[
                                                                             {
@@ -457,10 +390,7 @@ public class SocketManager {
                                                                             }];
                                                                             tmpUser.animMults[wpnIndex].plus = -0.03;
                                                                         }
-                                                                    });
-
-                                                                        // CHANGE HEALTH:
-                                                                        socket.on("6", new Emitter.Listener() {
+                                                                    }).on("6", new Emitter.Listener() {
 
                                                                             @Override
                                                                             public void call(Object... args) {
@@ -482,11 +412,7 @@ public class SocketManager {
                                                                                     }
                                                                                 }
                                                                             }
-
-                                                                            );
-
-                                                                            // CHANGE SCORE:
-                                                                            socket.on("7",new Emitter.Listener()
+                                                                            ).on("7",new Emitter.Listener()
 
                                                                             {
 
@@ -498,22 +424,14 @@ public class SocketManager {
                                                                             }
                                                                             }
 
-                                                                            );
-
-                                                                            // NOTIFICATION:
-                                                                            socket.on("n",new Emitter.Listener()
-
-                                                                            {
+                                                                            ).on("n",new Emitter.Listener(){
 
                                                                                 @Override
                                                                                 public void call
                                                                                 (Object...args){
                                                                                 //todo txt
                                                                                 showNotification(txt);
-                                                                            });
-
-                                                                                // SCORE NOTIFICATION:
-                                                                                socket.on("s", new Emitter.Listener() {
+                                                                            }).on("s", new Emitter.Listener() {
 
                                                                                     @Override
                                                                                     public void call(Object... args) {
@@ -521,12 +439,7 @@ public class SocketManager {
                                                                                         showScoreNotif(val);
                                                                                     }
 
-                                                                                    )
-
-                                                                                    // MINIMAP:
-                                                                                    var pingColors =
-                                                                                    ["#fff","#fff","#ff6363","#ff6363","rgba(103,255,62,0.3)","rgba(255,255,255,0.4)","#63b0ff"];
-                                                                                    socket.on("m",new Emitter.Listener()
+                                                                                    ).on("m",new Emitter.Listener()
 
                                                                                     {
 
@@ -538,7 +451,7 @@ public class SocketManager {
                                                                                         minimap.width = minimap.width;
 
                                                                                         for (var i = 0; i < data.length; ) {
-                                                                                            minimapContext.fillStyle = pingColors[data[i]];
+                                                                                            minimapContext.fillStyle = Game.pingColors[data[i]];
                                                                                             minimapContext.font = "10px regularF";
                                                                                             minimapContext.beginPath();
                                                                                             minimapContext.arc(((data[i + 1] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width,
@@ -575,12 +488,35 @@ public class SocketManager {
                                                                                     @Override
                                                                                     public void call(Object... args) {
                                                                                         JSONObject obj = (JSONObject) args[0];
-                                                                                        obj.))
+                                                                                        String k = obj.getString("k");
                                                                                     }
                                                                                 });
                                                                             }
 
-
-
-
-
+                                                                        // GET USER DATA:
+                                                                        public void updateUserData(singleObj, listObj) {
+                                                                            if (singleObj) {
+                                                                                singleObj.visible = true;
+                                                                                updateOrPushUser(singleObj);
+                                                                                delete singleObj;
+                                                                            } else if (listObj) {
+                                                                                for (var i = 0; i < users.length; ++i) {
+                                                                                    if (!users[i].visible)
+                                                                                        users[i].forcePos = 1;
+                                                                                    users[i].visible = false;
+                                                                                }
+                                                                                var tmpIndx;
+                                                                                for (var i = 0; i < listObj.length; ) {
+                                                                                    tmpIndx = getPlayerIndex(listObj[i]);
+                                                                                    if (tmpIndx != null) {
+                                                                                        users[tmpIndx].x = listObj[i + 1];
+                                                                                        users[tmpIndx].y = listObj[i + 2];
+                                                                                        users[tmpIndx].dir = listObj[i + 3];
+                                                                                        users[tmpIndx].targetDir = listObj[i + 4];
+                                                                                        users[tmpIndx].aimDir = listObj[i + 5];
+                                                                                        users[tmpIndx].visible = true;
+                                                                                    }
+                                                                                    i += 6;
+                                                                                }
+                                                                            }
+                                                                        }

@@ -1,6 +1,17 @@
 package tbs.doblon.io;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
 import java.util.ArrayList;
+
+import static tbs.doblon.io.Game.darkColor;
+import static tbs.doblon.io.Game.gameData;
+import static tbs.doblon.io.Game.maxScreenHeight;
+import static tbs.doblon.io.Game.maxScreenWidth;
+import static tbs.doblon.io.Game.screenSkX;
+import static tbs.doblon.io.Game.screenSkY;
+import static tbs.doblon.io.Game.users;
+import static tbs.doblon.io.GameBase.fill;
 
 /**
  * Created by mike on 3/4/16.
@@ -8,25 +19,24 @@ import java.util.ArrayList;
 public class Level {
     public static ArrayList<Player> players = new ArrayList<Player>();
 
-    public static void update(){
+    public static void update(float delta){
         for (Player player : players) {
             player.update(Game.delta);
         }
 
         // IF PLAYER IS SET:
-        if (player) {
 
             // INTERPOLATION & VISIBILITY:
-            var tmpObj;
-            for (var i = 0; i < users.length; ++i) {
-                tmpObj = users[i];
+            Player tmpObj;
+            for (int i = 0; i < users.size(); ++i) {
+                tmpObj = users.get(i);
                 if (tmpObj.visible && !tmpObj.dead) {
-                    if (tmpObj.forcePos || tmpObj.localX == undefined || tmpObj.localY == undefined) {
+                    if (tmpObj.forcePos!=0) {
                         tmpObj.localX = tmpObj.x;
                         tmpObj.localY = tmpObj.y;
                         tmpObj.forcePos = 0;
                     } else {
-                        var difference = tmpObj.x - tmpObj.localX;
+                        float difference = tmpObj.x - tmpObj.localX;
                         tmpObj.localX += (difference * delta * 0.0175);
                         difference = tmpObj.y - tmpObj.localY;
                         tmpObj.localY += (difference * delta * 0.0175);
@@ -35,26 +45,27 @@ public class Level {
             }
 
             // SET OFFSET:
-            tmpObj = users[getPlayerIndex(player.sid)];
-            var tmpPlayer = tmpObj;
-            var xOffset, yOffset;
-            if (tmpObj) {
+            tmpObj = users.get(Game.getPlayerIndex(Game.player.sid));
+            Player tmpPlayer = tmpObj;
+            float xOffset =0, yOffset =0;
+            if (tmpObj!=null) {
                 xOffset = tmpObj.localX;
                 yOffset = tmpObj.localY;
             }
-            var camX = (xOffset || 0) - (maxScreenWidth / 2) - screenSkX;
-            var camY = (yOffset || 0) - (maxScreenHeight / 2) - screenSkY;
-            var tmpX, tmpY;
+            float camX = xOffset - (maxScreenWidth / 2) - screenSkX;
+            float camY = yOffset - (maxScreenHeight / 2) - screenSkY;
+            float tmpX, tmpY;
 
             // RENDER MAP:
-            if (gameData) {
-
+            if (gameData!=null) {
+                final ShapeRenderer renderer = Game.shapeRenderer(fill);
+                renderer.setColor(gameData.outerColor);
                 // OUTSIDE WALLS:
-                mainContext.lineWidth = 7;
-                mainContext.fillStyle = gameData.outerColor;
-                mainContext.fillRect(0, 0, maxScreenWidth, maxScreenHeight);
-                mainContext.fillStyle = gameData.waterColor;
-                mainContext.roundRect(MathMAX(-7, -gameData.mapScale - camX), MathMAX(-7, -gameData.mapScale - camY),
+                //Todo check mainContext.lineWidth = 7;
+              
+                renderer.rect(0, 0, maxScreenWidth, maxScreenHeight);
+                renderer.setColor(gameData.waterColor);
+                mainContext.roundRect(Math.max(-7, -gameData.mapScale - camX), Math.max(-7, -gameData.mapScale - camY),
                         Math.min(maxScreenWidth + 14, gameData.mapScale - camX + 7), Math.min(maxScreenHeight + 14, gameData.mapScale - camY + 7), 0).fill();
                 mainContext.stroke();
 
@@ -262,10 +273,7 @@ public class Level {
             }
 
             // UPDATE TEXTS:
-            updateAnimTexts(delta);
+            Game.updateAnimTexts(delta);
 
-            // CLEAR:
-            delete tmpObj;
-        }
     }
 }

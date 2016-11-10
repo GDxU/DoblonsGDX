@@ -7,16 +7,18 @@ import com.badlogic.gdx.graphics.Color;
  */
 
 public class AnimText extends GameObject {
-    float x;
-    float y;
-    float alpha;
-    float scale;
-    float minScale;
-    float maxScale;
-    float scalePlus;
-    float fadeDelay;
-    float fadeSpeed;
-    String text;
+    public float x;
+    public float y;
+    public float alpha;
+    public float scale;
+    public float minScale;
+    public float maxScale;
+    public float scalePlus;
+    public float fadeDelay;
+    public String type;
+    public float fadeSpeed;
+    public String text;
+
     boolean active = false;
 
     @Override
