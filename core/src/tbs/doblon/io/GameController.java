@@ -7,6 +7,10 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 
+import static tbs.doblon.io.Game.enterGame;
+import static tbs.doblon.io.Game.toggleUpgrades;
+import static tbs.doblon.io.SocketManager.socket;
+
 public class GameController extends InputMultiplexer {
     private static InputMultiplexer multiplexer = new InputMultiplexer();
     private static GestureDetector gestureDetector;
@@ -169,7 +173,7 @@ public class GameController extends InputMultiplexer {
             // STOP SHOOTING:
             if (keyNum == 32) {
                 shooting = false;
-                socket.emit('2');
+                socket.emit("2");
             }
 
             // MOVEMENT:
@@ -192,12 +196,12 @@ public class GameController extends InputMultiplexer {
 
             // AUTO SHOOT:
             if (keyNum == 69) {
-                socket.emit('as');
+                socket.emit("as");
             }
 
             // GIVE COIN:
             if (keyNum == 70) {
-                socket.emit('5');
+                socket.emit("5");
             }
         }
     };
@@ -208,7 +212,7 @@ public class GameController extends InputMultiplexer {
             // START SHOOTING:
             if (!shooting && keyNum == 32) {
                 shooting = true;
-                socket.emit('2', 1);
+                socket.emit("2", 1);
             }
 
             // MOVEMENT:
@@ -239,34 +243,25 @@ public class GameController extends InputMultiplexer {
         }
     };
 
-    mainCanvas.addEventListener('touchmove', touchMove, false);
-    mainCanvas.addEventListener('touchstart', touchMove, false);
     function touchMove(event) {
         var touch;
         for (var i = 0; i < event.touches.length; i++) {
-            touch = event.touches[i];
-            mouseX = (touch.screenX * screenRatio / physicalW) * screenWidth;
-            mouseY = (touch.screenY * screenRatio / physicalH) * screenHeight;
+            Game.mouseX = (touch.screenX * screenRatio / physicalW) * screenWidth;
+            Game.mouseY = (touch.screenY * screenRatio / physicalH) * screenHeight;
             sendTarget(false || forceTarget);
             forceTarget = false;
         }
-        try {
-            event.preventDefault();
-            event.stopPropagation();
-        } catch (e) {
-
-        }
     }
 
-    fireButton.addEventListener('touchstart', function () {
-        socket.emit('2', 1);
+    fireButton.addEventListener("touchstart", function () {
+        socket.emit("2", 1);
     });
 
-    fireButton.addEventListener('touchend', function () {
-        socket.emit('2');
+    fireButton.addEventListener("touchend", function () {
+        socket.emit("2");
     });
 
-    upgrades.addEventListener('touchstart', function () {
+    upgrades.addEventListener("touchstart", function () {
         toggleUpgrades();
     });
 
@@ -275,7 +270,7 @@ public class GameController extends InputMultiplexer {
     }
 
 
-    userNameInput.addEventListener('keypress', function (e) {
+    userNameInput.addEventListener("keypress", function (e) {
         var key = e.which || e.keyCode;
         if (key === 13) {
             if (true || validNick()) {
@@ -284,29 +279,18 @@ public class GameController extends InputMultiplexer {
         }
     });
 
-//    <div id="skinSelector" onclick="changeSkin(1)"><i class="material-icons">&#xE8D5;</i> SKIN</div>
-    mainCanvas.addEventListener('mousemove', gameInput, false);
-    mainCanvas.addEventListener('mousedown', mouseDown, false);
-    mainCanvas.addEventListener('mouseup', mouseUp, false);
-
     function gameInput(e) {
-        e.preventDefault();
-        e.stopPropagation();
         mouseX = e.clientX;
         mouseY = e.clientY;
         sendTarget(false || forceTarget);
         forceTarget = false;
     }
     function mouseDown(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        socket.emit('2', 1);
+        socket.emit("2", 1);
     }
     function mouseUp(e) {
-        e.preventDefault();
-        e.stopPropagation();
         if (socket && player && !player.dead) {
-            socket.emit('2');
+            socket.emit("2");
         }
     }
 }

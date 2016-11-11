@@ -65,7 +65,7 @@ public class Level {
               
                 renderer.rect(0, 0, maxScreenWidth, maxScreenHeight);
                 renderer.setColor(gameData.waterColor);
-                mainContext.roundRect(Math.max(-7, -gameData.mapScale - camX), Math.max(-7, -gameData.mapScale - camY),
+                Game.roundRect(Math.max(-7, -gameData.mapScale - camX), Math.max(-7, -gameData.mapScale - camY),
                         Math.min(maxScreenWidth + 14, gameData.mapScale - camX + 7), Math.min(maxScreenHeight + 14, gameData.mapScale - camY + 7), 0).fill();
                 mainContext.stroke();
 

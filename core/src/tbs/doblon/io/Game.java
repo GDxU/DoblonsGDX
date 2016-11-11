@@ -231,7 +231,7 @@ public class Game extends GameBase {
                 tmpIsl = islandInfo[0];
             }
             var tmpCanvas = document.createElement("canvas");
-            var shapeRenderer (fill) = tmpCanvas.getContext('2d');
+            var shapeRenderer (fill) = tmpCanvas.getContext("2d");
             tmpCanvas.width = (s * 2) + (indx < 3 ? 300 : 10);
             tmpCanvas.height = tmpCanvas.width;
             shapeRenderer(fill).fillStyle = tmpIsl.color;
@@ -339,12 +339,12 @@ public class Game extends GameBase {
 
     public static void showWeaponPopup(int indx) {
         for (var i = 0; i < 4; i++) {
-            var tmpDiv = document.getElementById('popupRow' + i);
+            var tmpDiv = document.getElementById("popupRow" + i);
             if (tmpDiv) {
-                if (i != indx || tmpDiv.style.visibility == 'visible') {
-                    tmpDiv.style.visibility = 'hidden';
+                if (i != indx || tmpDiv.style.visibility == "visible") {
+                    tmpDiv.style.visibility = "hidden";
                 } else {
-                    tmpDiv.style.visibility = 'visible';
+                    tmpDiv.style.visibility = "visible";
                 }
             }
         }
@@ -391,9 +391,9 @@ static int lastScore;
         else if (skinIndex < 0)
             skinIndex = userSkins.length - 1;
         if (!renderedSkins[skinIndex]) {
-            var tmpCanvas = document.createElement('canvas');
+            var tmpCanvas = document.createElement("canvas");
             tmpCanvas.width = tmpCanvas.height = skinDisplayIconSize;
-            var shapeRenderer (fill) = tmpCanvas.getContext('2d');
+            var shapeRenderer (fill) = tmpCanvas.getContext("2d");
             shapeRenderer(fill).translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
             shapeRenderer(fill).lineJoin = "round";
             renderPlayer(shapeRenderer(fill), {
@@ -794,7 +794,7 @@ static int lastScore;
     public static void enterGame() {
         if (SocketManager.isConnected()) {
             showMainMenuText(randomLoadingTexts[UTILS.randInt(0, randomLoadingTexts.length - 1)]);
-            socket.emit('respawn', {
+            socket.emit("respawn", {
                     name:userNameInput.value,
                     skin:skinIndex
             });
@@ -811,11 +811,11 @@ static int lastScore;
     }
 
     // DO UPGRADE:
-    public static void doUpgrade(index, pos, tp) {
-        socket.emit('3', index, pos, tp);
+    public static void doUpgrade(int index,int pos,int tp) {
+        SocketManager.socket.emit("3", index, pos, tp);
     }
 
-    public void roundRect(float x, float y, float w, float h, float r, float s) {
+    public static void roundRect(float x, float y, float w, float h, float r, float s) {
         s = s || 1;
 
         if (w < 2 * r) r = w / 2;
@@ -987,9 +987,9 @@ public static void sendTarget(float force){
         if(force||tmpTime-lastSent>sendFrequency){
         lastSent=tmpTime;
         if(controlIndex==1){
-        socket.emit('1',target.round(2),targetD.round(1));
+        socket.emit("1",target.round(2),targetD.round(1));
         }else{
-        socket.emit('1',target);
+        socket.emit("1",target);
         }
         }
         }
@@ -1000,33 +1000,33 @@ public static void sendMoveTarget(){
         turnDir=0;
         if(!keys.u&&!keys.d)
         speedInc=0;
-        SocketManager.socket.emit('4',turnDir,speedInc);
+        SocketManager.socket.emit("4",turnDir,speedInc);
         }
 public static void renderGameObject(tmpObj,ctxt){
         var tmpIndx=(tmpObj.c+"-"+tmpObj.shp+"-"+tmpObj.s);
         var tmpSprt=gameObjSprites[tmpIndx];
         if(!tmpSprt){
         var tmpCanvas=document.createElement("canvas");
-        var shapeRenderer(fill)=tmpCanvas.getContext('2d');
+        var shapeRenderer(fill)=tmpCanvas.getContext("2d");
         tmpCanvas.width=(tmpObj.s*2)+10;
         tmpCanvas.height=tmpCanvas.width;
         shapeRenderer(fill).strokeStyle=darkColor;
         shapeRenderer(fill).lineWidth=8.5;
         shapeRenderer(fill).translate(tmpCanvas.width/2,tmpCanvas.height/2);
         if(tmpObj.c==0){
-        shapeRenderer(fill).fillStyle='#797979';
+        shapeRenderer(fill).fillStyle="#797979";
         }else if(tmpObj.c==1){
-        shapeRenderer(fill).fillStyle='#e89360';
+        shapeRenderer(fill).fillStyle="#e89360";
         }else if(tmpObj.c==2){
-        shapeRenderer(fill).fillStyle='#c8c8c8';
+        shapeRenderer(fill).fillStyle="#c8c8c8";
         }else if(tmpObj.c==3){
-        shapeRenderer(fill).fillStyle='#e9cd5f';
+        shapeRenderer(fill).fillStyle="#e9cd5f";
         }else if(tmpObj.c==4){
-        shapeRenderer(fill).fillStyle='#EB6565';
+        shapeRenderer(fill).fillStyle="#EB6565";
         }else if(tmpObj.c==5){
-        shapeRenderer(fill).fillStyle='#6FE8E2';
+        shapeRenderer(fill).fillStyle="#6FE8E2";
         }else if(tmpObj.c==6){
-        shapeRenderer(fill).fillStyle='#7BE86F';
+        shapeRenderer(fill).fillStyle="#7BE86F";
         }
         if(tmpObj.shp==1){
         var spikes=6;
