@@ -1,16 +1,21 @@
 package tbs.doblon.io;
 
 
+import com.badlogic.gdx.utils.ObjectFloatMap;
 import com.badlogic.gdx.utils.StringBuilder;
 
 import org.json.JSONObject;
 
 
 import java.io.BufferedWriter;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+
+import static tbs.doblon.io.Game.gameObjects;
 
 
 /**
@@ -90,7 +95,7 @@ public class SocketManager {
                         if (numReconnect < 15)
                             socket.connect();
 
-                        if (Game.lobbyURLIP) {
+                        if (Game.lobbyURLIP != null) {
                             Game.kickPlayer("Connection failed. Please check your lobby ID");
                         } else {
                             Game.kickPlayer("Connection failed. Check your internet and firewall settings");
@@ -109,7 +114,7 @@ public class SocketManager {
 
                     @Override
                     public void call(Object... args) {
-                        kickPlayer("Disconnected. The server may have updated. [" + err + "]");
+                        Game.kickPlayer("Disconnected. The server may have updated. [" + String.valueOf(args[0]) + "]");
                     }
                 }
         ).on("kick", new Emitter.Listener()
@@ -118,75 +123,78 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
-                Game.kickPlayer(reason);
+
+                Game.kickPlayer(String.valueOf(args[0]));
             }
         }).on("lk", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
-                Game.partyKey = lKey;
+                Game.partyKey = String.valueOf(args[0]);
             }
 
         }).on("mds", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
-                Game.modeList = data;
+                Game.modeList = String.valueOf(args[0]);
                 // Todo modeSelector.innerHTML = data[crnt].name + "  <i style="vertical-align: middle;" class="material-icons">&#xE5C5;</i>";
-                Game.modeIndex = crnt;
-                Game.currentMode = Game.modeList[crnt];
+                Game.modeIndex = String.valueOf(args[1]);
+                Game.currentMode = Game.modeList.get(Integer.parseInt(String.valueOf(args[1])));
             }
         }).on("v", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
                 //Todo sw, sh, mult
-                if (Game.viewMult != Game.mult) {
-                    Game.viewMult = Game.mult;
-                    Game.maxScreenWidth = Math.round(Game.screenWidth * Game.mult);
-                    Game.maxScreenHeight = Math.round(Game.screenHeight * Game.mult);
-                    Game.resize();
-                }
+                Utility.log(".on(v)> " + Arrays.toString(args));
+//                if (Game.viewMult != Game.mult) {
+//                    Game.viewMult = Game.mult;
+//                    Game.maxScreenWidth = Math.round(Game.screenWidth * Game.mult);
+//                    Game.maxScreenHeight = Math.round(Game.screenHeight * Game.mult);
+//                    Game.resize();
+//                }
             }
 
         }).on("spawn", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 //Todo gameObject, data
-
-                if (!Game.gameObjects.c(gameObject)) {
-                    Game.users.add(gameObject);
+                final Player tmpPlayer = new Player(String.valueOf(args[0]));
+                if (!Game.objectExists(tmpPlayer)) {
+                    Game.users.add(tmpPlayer);
                 } else {
-                    Game.updateOrPushUser(gameObject);
+                    Game.updateOrPushUser(tmpPlayer);
                 }
-                Game.player = gameObject;
+                Game.player = tmpPlayer;
                 Game.gameState = 1;
                 Game.toggleMenuUI(false);
                 Game.toggleGameUI(true);
-                if (data) {
-                    gameData = data;
-                    Game.gameObjects.clear();
-                    for (int i = 0; i < data.objCount; ++i) {
-                        gameObjects.push({});
-                    }
-                    data = null;
+                String data = String.valueOf(args[0]);
+                if (data != null && data.length() > 0) {
+                    if (Game.gameData == null)
+                        Game.gameData = new GameData(data);
+                    else
+                        Game.gameData.parse(data);
+                    gameObjects.clear();
+//                    for (int i = 0; i < data.objCount; ++i) {
+//                        gameObjects.push({});
+//                    }
+//                    data = null;
                 }
                 Game.targetD = 1;
                 Game.resetKeys();
-                Game.gameObject = null;
             }
         }).on("d", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
                 //todo id
-                int tmpIndx = getPlayerIndexById(id);
-            }
+                final Player tmpIndx = Game.getPlayerIndexById(String.valueOf(args[0]));
 
-            if(Game.tmpIndx!=null)
-
-            {
-                Game.users.remove(tmpIndx);
+                if (tmpIndx != null) {
+                    Game.users.remove(tmpIndx);
+                }
             }
         }).on("dnt", new Emitter.Listener() {
 
@@ -195,22 +203,34 @@ public class SocketManager {
                         //todo timeStr, dnt
 
                         // timeDisplay.innerHTML = timeStr;
-                        Game.dayTimeValue = dnt;
+                        Game.dayTimeValue = Float.parseFloat(String.valueOf(args[0]));
                     }
                 }
 
-        ).on("0", new Emitter.Listener()
-
-        {
+        ).on("0", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
+
+                //Todo 0
+                // :
+                // 2
+                // 1
+                // :
+                // "ksasdfssa0"
+                // 2
+                // :
+                // 10
+                // 3
+                // :
+                // 0
+                // String[]
                 //Todo list
                 int rank = 1;
                 int pos = -1;
-
+                final Object[] list = (Object[]) args[0];
                 for (int i = 0; i < list.length; ) {
-                    if (Game.player && list[i] == Game.player.sid)
+                    if ((((Integer) list[i]) == Game.player.sid))
                         pos = rank;
                     i += 4;
                     rank++;
@@ -231,28 +251,34 @@ public class SocketManager {
             @Override
             public void call(Object... args) {
                 //todo  upgrC, fleetC, data, points
-                if (data) {
-                    StringBuilder tmpHTML = new StringBuilder();
-                    Game.upgradesText = "~ Upgrades " + upgrC + " ~ Fleet " + fleetC;
+                final Object[] data = (Object[]) (args[2]);
+                if (data!=null){
+                    if (Game.upgradeItems.size()<(data.length/4))
+                        for (int i=0;i< (data.length/4)-Game.upgradeItems.size();i++ )
+                            Game.upgradeItems.add(new UpgradeItem());
+
+
+                    Game.upgradesText = "~ Upgrades " + String.valueOf(args[0]) + " ~ Fleet " + String.valueOf(args[1]);
                     int num = 1;
                     for (int i = 0; i < data.length; ) {
-                        float tmpW = ((data[i + 2] - 1) / (data[i + 3] - 1)) * (39 / 65 * Game.screenWidth);
-                        if (num == 9) {
-                            //Todo add a line seperator
-                        }
+
+                        final UpgradeItem upgradeItem = Game.upgradeItems.get(num-1);
+
+                        upgradeItem.name = String.valueOf(data[i]);
+                        upgradeItem.price = (Integer) (data[i+1]);
+                        upgradeItem.progress = (Integer) (data[i+2]);
+                        upgradeItem.maxProgress = (Integer) (data[i+3]);
+
                         //Todo doUpgrade(" + (num - 1) + ", 0, 1)
-                        tmpHTML.app
-                                (data[i]) + " <span class="
-                        greyMenuText
-                        ">" + ((data[i + 2] != data[i + 3]) ? ("$" + data[i + 1]) : "max")
-                                + "</span></div></br>";
+
                         i += 4;
                         num++;
                     }
-                    upgradeList.innerHTML = tmpHTML;
                 }
-                Game.coinDisplayText = "Coins: $" + points;
-            }).on("8",new Emitter.Listener() {
+                Game.coinDisplayText = "Coins: $" + args[3];
+            }}
+
+            ).on("8",new Emitter.Listener() {
                 @Override
                 public void call (Object...args){
                     //todo data, points, prog
@@ -281,7 +307,7 @@ public class SocketManager {
                             for (int i = 0; i < data.length; ) {
                                 tmpHTML += "<div onclick="
                                 showWeaponPopup(" + num + ")
-                                " class=" weaponItem
+                                " cass=" weaponItem
                                 "><div class="
                                 upgradeTxt
                                 ">" + data[i] + "</div><div class="
@@ -317,26 +343,58 @@ public class SocketManager {
                             upgradesInfo.innerHTML = "Items (" + points + ")";
                         }
                     }
-                    data = null;
-                    points = null;
-                    prog = null;
-                }
+                }}
 
-                ).on("3", new Emitter.Listener()
-
-                {
+                ).on("3", new Emitter.Listener() {
 
                     @Override
                     public void call(Object... args) {
                         //todo sid, values
 
-                        var tmpIndx = getPlayerIndex(sid);
-                        if (tmpIndx != null) {
-                            var tmpUser = users[tmpIndx];
+                        final int tmpIndx = Game.getPlayerIndex((Integer)(args[0]));
+                        final Object[] values = (Object[]) args[1];
+                        if (tmpIndx >=0) {
+                            final Player tmpUser = Game.users.get(tmpIndx);
+                            if (tmpUser!=null)
                             for (int i = 0; i < values.length; ) {
-                                tmpUser[values[i]] = values[i + 1];
+
+                            final String key = String.valueOf(values[i]);
+                                if (key.equals("lvl")){
+                                tmpUser.lvl =  (Integer) (values[i + 1]);
+
+                                }else if (key.equals("maxHealth")){
+                                    tmpUser.maxHealth =  (Integer) (values[i + 1]);
+
+                                }else if (key.equals("health")){
+                                    tmpUser.health =  (Integer) (values[i + 1]);
+                                }else if (key.equals("speedDiv")){
+                                tmpUser.speedDiv =  (Float) (values[i + 1]);
+                                }else if (key.equals("width")){
+                                tmpUser.w =  (Float) (values[i + 1]);
+                                }else if (key.equals("healthRegen")){
+tmpUser.healthRegen =  (Float) (values[i + 1]);
+                                }else if (key.equals("cannonSpeed")){
+tmpUser.cannonSpeed =  (Float) (values[i + 1]);
+                                }else if (key.equals("cannonWidth")){
+    tmpUser.cannonWidth= (Float) (values[i + 1]);
+                                }else if (key.equals("cannonLength")){
+tmpUser.cannonLength =  (Float) (values[i + 1]);
+                                }else if (key.equals("cannonDmg")){
+tmpUser.cannonDmg =  (Float) (values[i + 1]);
+                                }else if (key.equals("length")){
+tmpUser.length =  (Float) (values[i + 1]);
+                                }else if (key.equals("reloadDiv")){
+tmpUser.reloadDiv =  (Float) (values[i + 1]);
+                                }else if (key.equals("speed")){
+tmpUser.speed =  (Float) (values[i + 1]);
+                                }else if (key.equals("turnSpeed")){
+tmpUser.turnSpeed =  (Float) (values[i + 1]);
+                                }else if (key.equals("crashDamage")){
+tmpUser.crashDamage = (Float) (values[i + 1]);
+                                }
                                 i += 2;
                             }
+                        }
                         }
                     }
 
@@ -348,8 +406,8 @@ public class SocketManager {
                         public void call (Object...args){
                             //todo indx, data
 
-                            tmpObj = gameObjects[indx];
-                            if (tmpObj) {
+                           GameObject tmpObj = gameObjects.get((Integer)args[0]);
+                            if (tmpObj!=null) {
                                 if (data) {
                                     tmpObj.x = data[0];
                                     tmpObj.xS = data[1];
@@ -364,11 +422,9 @@ public class SocketManager {
                                 }
                             }
                         }
+                        }
 
-                        ).on("5",
-                                new Emitter.Listener()
-
-                                {
+                        ).on("5", new Emitter.Listener() {
 
                                     @Override
                                     public void call(Object...
@@ -395,6 +451,7 @@ public class SocketManager {
                                             tmpUser.animMults[wpnIndex].plus = -0.03;
                                         }
                                     }
+                                    }
 
                                     ).
 
@@ -419,6 +476,7 @@ public class SocketManager {
                                                     }
                                                 }
                                             }
+                                            }
                                         }
                                         ).on("7", new Emitter.Listener()
 
@@ -431,6 +489,9 @@ public class SocketManager {
                                                         scoreText.innerHTML = value;
                                                     }
                                                 }
+                                                }
+                                                }
+
 
                                         ).on("n", new Emitter.Listener() {
 
@@ -439,6 +500,7 @@ public class SocketManager {
                                                     (Object... args) {
                                                 //todo txt
                                                 showNotification(txt);
+                                            }
                                             }
 
                                             ).
@@ -483,6 +545,7 @@ public class SocketManager {
                                                     controlIndex=1;
                                                     socket.connect();
                                                 }
+                                            }
                                             }
 
                                             );

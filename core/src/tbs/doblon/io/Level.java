@@ -74,13 +74,13 @@ public class Level {
                 mainContext.strokeStyle = darkColor;
                 mainContext.globalAlpha = 0.18;
                 mainContext.beginPath();
-                var grdX = -camX - gameData.mapScale - (1920 / 2);
-                for (var x = grdX; x < maxScreenWidth; x += 40) {
+                int grdX = -camX - gameData.mapScale - (1920 / 2);
+                for (int x = grdX; x < maxScreenWidth; x += 40) {
                     mainContext.moveTo(x, 0);
                     mainContext.lineTo(x, maxScreenHeight);
                 }
-                var grdY = -camY - gameData.mapScale - (1920 / 2);
-                for (var y = grdY; y < maxScreenHeight; y += 40) {
+                int grdY = -camY - gameData.mapScale - (1920 / 2);
+                for (int y = grdY; y < maxScreenHeight; y += 40) {
                     mainContext.moveTo(0, y);
                     mainContext.lineTo(maxScreenWidth, y);
                 }
@@ -90,7 +90,7 @@ public class Level {
                 // RENDER ISLANDS:
                 if (gameData.islands) {
                     var tmpIsl;
-                    for (var i = 0; i < gameData.islands.length; ++i) {
+                    for (int i = 0; i < gameData.islands.length; ++i) {
                         tmpIsl = gameData.islands[i];
                         tmpX = tmpIsl.x - camX;
                         tmpY = tmpIsl.y - camY;
@@ -105,7 +105,7 @@ public class Level {
 
             // RENDER GAMEOBJECTS:
             mainContext.lineWidth = 8.5;
-            for (var i = 0; i < gameObjects.length; ++i) {
+            for (int i = 0; i < gameObjects.length; ++i) {
                 tmpObj = gameObjects[i];
                 if (tmpObj.active) {
                     tmpObj.x += (tmpObj.xS * (delta / 1000));
@@ -123,7 +123,7 @@ public class Level {
 
             // RENDER PLAYERS:
             var tmpS;
-            for (var i = 0; i < users.length; ++i) {
+            for (int i = 0; i < users.length; ++i) {
                 tmpObj = users[i];
                 if (tmpObj.visible && !tmpObj.dead) {
                     tmpX = tmpObj.localX - camX;
@@ -134,7 +134,7 @@ public class Level {
 
                     // CANNON ANIMATIONS:
                     if (tmpObj.animMults) {
-                        for (var a = 0; a < tmpObj.animMults.length; ++a) {
+                        for (int a = 0; a < tmpObj.animMults.length; ++a) {
                             if (tmpObj.animMults[a].plus) {
                                 tmpObj.animMults[a].mult += tmpObj.animMults[a].plus;
                                 if (tmpObj.animMults[a].mult >= 1) {
@@ -194,7 +194,7 @@ public class Level {
             // PLAYER UI:
             var UIPadding, maxBarWidth, barPadding,
                     percentage, barWidth, barHeight, szMult, tmpSID;
-            for (var i = 0; i < users.length; ++i) {
+            for (int i = 0; i < users.length; ++i) {
                 tmpObj = users[i];
                 if (tmpObj.visible && !tmpObj.dead) {
                     tmpX = tmpObj.localX - camX;

@@ -6,14 +6,22 @@ package tbs.doblon.io;
 
 public class Player extends GameObject {
     float aimDir;
-    int autoCannons, bigCannon, cannonLength, cannonWidth;
+    int autoCannons, bigCannon;
+    float cannonLength, cannonWidth,cannonSpeed;
     int cannons, chaseCannons, classIndex;
     boolean dead;
     float dir;
+    float cannonDmg;
+    float speed;
+    float turnSpeed;
+    float crashDamage;
+    float speedDiv;
+    float reloadDiv;
+    float healthRegen;
     float flashAlpha, flashInc;
     int forcePos, gatlinCannons, health;
     String id;
-    int length;
+    float length;
     float localX, localY;
     int lvl, maxHealth, mineDropper;
     String name, nameSprite, nameSpriteID;
@@ -24,6 +32,18 @@ public class Player extends GameObject {
     int trippleCannons, twinCannons, viewMult;
     boolean visible;
 
+    public void parse(String player) {
+        //Todo
+    }
+
+    public Player() {
+        super();
+    }
+
+    public Player(String player) {
+        super();
+        parse(player);
+    }
 
     @Override
     public void draw() {

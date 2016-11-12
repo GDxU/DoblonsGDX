@@ -52,6 +52,10 @@ public class Game extends GameBase {
     }
 
     public static String socket;
+    public static String upgradesText;
+    public static String coinDisplayText;
+    public static int lobbyRoomID;
+    public static ArrayList<UpgradeItem> upgradeItems=new ArrayList<UpgradeItem>(12);
     public static int port;
     public static int controlIndex = 0;
     public static int targetFPS = 60;
@@ -60,7 +64,7 @@ public class Game extends GameBase {
     private static final int sendFrequency = 10, tUpdateFrequency = 10;
     private static long lastUpdated = 0, lastSent = 0;
     public static int gameState = 0;
-    public static Object gameData;
+    public static GameData gameData;
     public static boolean upgradesHidden = false;
     public static int instructionsSpeed = 5500;
     public static int insturctionsCountdown = 0;
@@ -71,10 +75,11 @@ public class Game extends GameBase {
     };
     public static String partyKey;
     public static Player player = null;
-    public static final ArrayList modeList = null;
+    public static  ArrayList<String> modeList;
     public static String modeIndex = null;
+    public static String leaderboardText = null;
     public static String currentMode = null;
-    public static final int dayTimeValue = 0;
+    public static float dayTimeValue = 0;
     public static final ArrayList<Player> users = new ArrayList<Player>();
     public static final ArrayList<GameObject> gameObjects = new ArrayList<GameObject>();
     public static float target = 0;
@@ -294,6 +299,7 @@ public class Game extends GameBase {
 
     // UPDATE OR PUSH PLAYER:
     public static void updateOrPushUser(Player user) {
+        //Todo check
         int tmpIndx = getPlayerIndex(user.sid);
         if (tmpIndx >= 0) {
             users.set(tmpIndx, user);
@@ -324,8 +330,7 @@ public class Game extends GameBase {
         return results == null ? null : results[1];
     }
 
-    var lobbyURLIP = getURLParam("l");
-    var lobbyRoomID;
+    public static String lobbyURLIP = getURLParam("l");
     if(lobbyURLIP)
 
     {
@@ -428,12 +433,12 @@ static int lastScore;
     }
 
     // TOGGLE UI:
-    public static void toggleGameUI(visible) {
+    public static void toggleGameUI(boolean visible) {
         var display = visible ? "block" : "none";
         gameUiContainer.style.display = display;
     }
 
-    public static void toggleMenuUI(visible) {
+    public static void toggleMenuUI(boolean visible) {
 
         // SHOWING MAIN MENU:
         if (visible) {
@@ -457,9 +462,9 @@ static int lastScore;
 
     public static final String treasureMap = "2B=TK:KAB,SSV:100K";
 
-    int[] keys = {0, 0, 0, 0};//l,r,u,d
+    public static int[] keys = {0, 0, 0, 0};//l,r,u,d
 
-    public void resetKeys() {
+    public static void resetKeys() {
         keys[0] = 0;
         keys[1] = 0;
     }
