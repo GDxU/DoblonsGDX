@@ -201,20 +201,19 @@ public class Game extends GameBase {
     // ANIM TEXT:
     static final ArrayList<AnimText> animTexts = new ArrayList<AnimText>();
     static int animTextIndex = 0;
-    int scoreCountdown = 0;
-    int lastScore = 0;
-    int scoreDisplayTime = 1500;
-    for(
-    var i = 0;
-    i<20;++i)
 
-    {
-        animTexts.push(new AnimText());
+    private static short a = initAnimTexts();
+    public static short initAnimTexts(){
+        for(int i = 0;i<20;++i) {
+            animTexts.add(new AnimText());
+        }
+
+        return 0;
     }
 
-    public static void updateAnimTexts(delta) {
+    public static void updateAnimTexts(float delta) {
         // UPDATE COOLDOWNS:
-        if (scoreCountdown) {
+        if (scoreCountdown>=0) {
             scoreCountdown -= delta;
             if (scoreCountdown <= 0) {
                 scoreCountdown = 0;
