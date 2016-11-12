@@ -8,7 +8,16 @@ import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 
 import static tbs.doblon.io.Game.enterGame;
+import static tbs.doblon.io.Game.forceTarget;
+import static tbs.doblon.io.Game.keys;
+import static tbs.doblon.io.Game.player;
+import static tbs.doblon.io.Game.screenHeight;
+import static tbs.doblon.io.Game.screenWidth;
+import static tbs.doblon.io.Game.sendMoveTarget;
+import static tbs.doblon.io.Game.shooting;
+import static tbs.doblon.io.Game.speedInc;
 import static tbs.doblon.io.Game.toggleUpgrades;
+import static tbs.doblon.io.Game.turnDir;
 import static tbs.doblon.io.SocketManager.socket;
 
 public class GameController extends InputMultiplexer {
@@ -35,23 +44,34 @@ public class GameController extends InputMultiplexer {
 
         @Override
         public boolean touchDown(int x, int y, int pointer, int button) {
-
+            socket.emit("2", 1);
             return false;
         }
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            if (socket!=null && player!=null && !player.dead) {
+                socket.emit("2");
+            }
             click(screenX, screenY);
             return false;
         }
 
         @Override
         public boolean touchDragged(int screenX, int screenY, int pointer) {
+            Game.mouseX = screenX;
+            Game.mouseY = screenY;
+            Game.sendTarget(false || forceTarget);
+            forceTarget = false;
             return false;
         }
 
         @Override
         public boolean mouseMoved(int screenX, int screenY) {
+            Game.mouseX = screenX;
+            Game.mouseY = screenY;
+            Game.sendTarget(false || forceTarget);
+            forceTarget = false;
             return false;
         }
 
@@ -83,16 +103,102 @@ public class GameController extends InputMultiplexer {
         return false;
     }
 
-    private static void keyPress(int keyCode) {
-        switch (keyCode) {
-            case Input.Keys.SPACE:
+    private static void keyPress(int keyNum) {
+        if (SocketManager.isConnected() && player!=null && !player.dead) {
 
-                break;
+            // START SHOOTING:
+            if (!shooting && keyNum == 32) {
+                shooting = true;
+                socket.emit("2", 1);
+            }
+
+            // MOVEMENT:
+            if ((keyNum == 65 || keyNum == 37) && keys.l==0) {
+                keys.l = 1;
+                keys.r = 0;
+                turnDir = -1;
+                sendMoveTarget();
+            }
+            if ((keyNum == 68 || keyNum == 39) && keys.r==0) {
+                keys.r = -1;
+                keys.l = 0;
+                turnDir = 1;
+                sendMoveTarget();
+            }
+            if ((keyNum == 87 || keyNum == 38) && keys.u==0) {
+                keys.u = 1;
+                keys.d = 0;
+                speedInc = 1;
+                sendMoveTarget();
+            }
+            if ((keyNum == 83 || keyNum == 40) && keys.d==0) {
+                keys.d = 1;
+                keys.u = 0;
+                speedInc = -1;
+                sendMoveTarget();
+            }
         }
+
     }
 
-    private static void keyRelease(int keyCode) {
+    private static void keyRelease(int keyNum) {
+        if (SocketManager.isConnected() && player !=null&& !player.dead) {
 
+            // UPGRADES:
+                int num =-1;
+                switch (keyNum){
+                    case 48: num =  9;  break;
+                            case 49: num =  0;  break;
+                            case 50: num =  1;  break;
+                            case 51: num =  2;  break;
+                            case 52: num =  3;  break;
+                            case 53: num =  4;  break;
+                            case 54: num =  5;  break;
+                            case 55: num =  6;  break;
+                            case 56: num =  7;  break;
+                            case 57: num =  8;  break;
+                            case 84: num =  10;  break;
+                            case 89: num =  11; break;
+
+                }
+
+                Game.doUpgrade(num, 0, 1);
+
+
+            // STOP SHOOTING:
+            if (keyNum == 32) {
+                shooting = false;
+                socket.emit("2");
+            }
+
+            // MOVEMENT:
+            if ((keyNum == 65 || keyNum == 37)) {
+                keys.l = 0;
+                sendMoveTarget();
+            }
+            if ((keyNum == 68 || keyNum == 39)) {
+                keys.r = 0;
+                sendMoveTarget();
+            }
+            if ((keyNum == 87 || keyNum == 38)) {
+                keys.u = 0;
+                sendMoveTarget();
+            }
+            if ((keyNum == 83 || keyNum == 40)) {
+                keys.d = 0;
+                sendMoveTarget();
+            }
+
+            // AUTO SHOOT:
+            if (keyNum == 69) {
+                socket.emit("as");
+            }
+
+            // GIVE COIN:
+            if (keyNum == 70) {
+                socket.emit("5");
+            }
+        }
     }
 
     public static void init() {
@@ -155,108 +261,9 @@ public class GameController extends InputMultiplexer {
         }
     };
 
-
-
-
-
-
-
-    window.onkeyup = function (event) {
-        var keyNum = event.keyCode ? event.keyCode : event.which;
-        if (socket && player && !player.dead) {
-
-            // UPGRADES:
-            if (upgrInputsToIndex["k" + keyNum] != undefined) {
-                doUpgrade(upgrInputsToIndex["k" + keyNum], 0, 1);
-            }
-
-            // STOP SHOOTING:
-            if (keyNum == 32) {
-                shooting = false;
-                socket.emit("2");
-            }
-
-            // MOVEMENT:
-            if ((keyNum == 65 || keyNum == 37)) {
-                keys.l = 0;
-                sendMoveTarget();
-            }
-            if ((keyNum == 68 || keyNum == 39)) {
-                keys.r = 0;
-                sendMoveTarget();
-            }
-            if ((keyNum == 87 || keyNum == 38)) {
-                keys.u = 0;
-                sendMoveTarget();
-            }
-            if ((keyNum == 83 || keyNum == 40)) {
-                keys.d = 0;
-                sendMoveTarget();
-            }
-
-            // AUTO SHOOT:
-            if (keyNum == 69) {
-                socket.emit("as");
-            }
-
-            // GIVE COIN:
-            if (keyNum == 70) {
-                socket.emit("5");
-            }
-        }
-    };
-    window.onkeydown = function (event) {
-        var keyNum = event.keyCode ? event.keyCode : event.which;
-        if (socket && player && !player.dead) {
-
-            // START SHOOTING:
-            if (!shooting && keyNum == 32) {
-                shooting = true;
-                socket.emit("2", 1);
-            }
-
-            // MOVEMENT:
-            if ((keyNum == 65 || keyNum == 37) && !keys.l) {
-                keys.l = 1;
-                keys.r = 0;
-                turnDir = -1;
-                sendMoveTarget();
-            }
-            if ((keyNum == 68 || keyNum == 39) && !keys.r) {
-                keys.r = -1;
-                keys.l = 0;
-                turnDir = 1;
-                sendMoveTarget();
-            }
-            if ((keyNum == 87 || keyNum == 38) && !keys.u) {
-                keys.u = 1;
-                keys.d = 0;
-                speedInc = 1;
-                sendMoveTarget();
-            }
-            if ((keyNum == 83 || keyNum == 40) && !keys.d) {
-                keys.d = 1;
-                keys.u = 0;
-                speedInc = -1;
-                sendMoveTarget();
-            }
-        }
-    };
-
-    function touchMove(event) {
-        var touch;
-        for (var i = 0; i < event.touches.length; i++) {
-            Game.mouseX = (touch.screenX * screenRatio / physicalW) * screenWidth;
-            Game.mouseY = (touch.screenY * screenRatio / physicalH) * screenHeight;
-            sendTarget(false || forceTarget);
-            forceTarget = false;
-        }
-    }
-
     fireButton.addEventListener("touchstart", function () {
         socket.emit("2", 1);
     });
-
     fireButton.addEventListener("touchend", function () {
         socket.emit("2");
     });
@@ -278,19 +285,4 @@ public class GameController extends InputMultiplexer {
             }
         }
     });
-
-    function gameInput(e) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        sendTarget(false || forceTarget);
-        forceTarget = false;
-    }
-    function mouseDown(e) {
-        socket.emit("2", 1);
-    }
-    function mouseUp(e) {
-        if (socket && player && !player.dead) {
-            socket.emit("2");
-        }
-    }
 }

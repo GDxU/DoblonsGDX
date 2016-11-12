@@ -59,6 +59,8 @@ public class Game extends GameBase {
     public static String upgradesText;
     public static String coinDisplayText;
     public static int lobbyRoomID;
+    public static GameController gameController = new GameController();
+
     public static ArrayList<UpgradeItem> upgradeItems=new ArrayList<UpgradeItem>(12);
     public static int port;
     public static int controlIndex = 0;
@@ -466,11 +468,11 @@ static int lastScore;
 
     public static final String treasureMap = "2B=TK:KAB,SSV:100K";
 
-    public static int[] keys = {0, 0, 0, 0};//l,r,u,d
+    public static Keys keys = new Keys();//l,r,u,d
 
     public static void resetKeys() {
-        keys[0] = 0;
-        keys[1] = 0;
+        keys.l = 0;
+        keys.r = 0;
     }
 
     public static String cid;
@@ -483,8 +485,8 @@ static int lastScore;
         }
     }
 
-    int mouseX, mouseY;
-    boolean forceTarget = true, shooting;
+    public static int mouseX, mouseY;
+    public  static boolean forceTarget = true, shooting;
     String userNameInput = Utility.getString("lstnmdbl");
 
     public static void toggleUpgrades() {
@@ -995,7 +997,7 @@ public static int initSkins(){
     public static final MiniMap minimap = new MiniMap();
     public static ArrayList<Skin> userSkins = new ArrayList<Skin>();
 
-public static void sendTarget(float force){
+public static void sendTarget(boolean force){
         long tmpTime=currentTime;
         if(player!=null&&!player.dead){
         target=Math.atan2(mouseY-(screenHeight/2),mouseX-(screenWidth/2));
