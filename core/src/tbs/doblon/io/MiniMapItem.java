@@ -13,6 +13,6 @@ import static tbs.doblon.io.Game.minimap;
 public class MiniMapItem {
     float x,y,w,h;
     int color;
-
+    boolean active;
 
 }

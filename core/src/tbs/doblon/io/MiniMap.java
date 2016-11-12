@@ -12,14 +12,16 @@ import static tbs.doblon.io.Game.minimap;
  */
 
 public class MiniMap {
-    ArrayList<MiniMapItem> miniMapItems = new ArrayList<MiniMapItem>();
-    float x,y,width, height,r,s;
+    public static ArrayList<MiniMapItem> miniMapItems = new ArrayList<MiniMapItem>();
+    float x, y, width, height, r, s;
 
-    public void draw(ShapeRenderer renderer){
-        Game.roundRect(x,y,width,height, r,s);
+    public void draw(ShapeRenderer renderer) {
+        Game.roundRect(x, y, width, height, r, s);
         for (MiniMapItem item : miniMapItems) {
+            if (!item.active)
+                continue;
             renderer.setColor(Utility.tmpColor.set(item.color));
-            renderer.circle(item.x, item.y, item.w/2);
+            renderer.circle(item.x, item.y, item.w / 2);
         }
     }
 }

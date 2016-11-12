@@ -15,14 +15,18 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
+import static tbs.doblon.io.Game.controlIndex;
 import static tbs.doblon.io.Game.gameData;
 import static tbs.doblon.io.Game.gameObjects;
+import static tbs.doblon.io.Game.gameState;
 import static tbs.doblon.io.Game.hideMainMenuText;
 import static tbs.doblon.io.Game.leaveGame;
 import static tbs.doblon.io.Game.minimap;
 import static tbs.doblon.io.Game.player;
 import static tbs.doblon.io.Game.showAd;
 import static tbs.doblon.io.Game.users;
+import static tbs.doblon.io.GameBase.fill;
+import static tbs.doblon.io.MiniMap.miniMapItems;
 
 
 /**
@@ -514,15 +518,28 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                                                                      args) {
                                                         //Todo data
                                                         final Object[] data = (Object[]) args[0];
+                                                        final int numItems = data.length/4;
+                                                        if (miniMapItems.size()<numItems)
+                                                            for (int i=0;i<miniMapItems.size() - numItems;i++)
+                                                                miniMapItems.add(new MiniMapItem());
+                                                        int item=0;
                                                         for (int i = 0; i < data.length; ) {
-                                                            minimapContext.fillStyle = Game.pingColors((Integer)data[i]);
-                                                            minimapContext.font = "10px regularF";
-                                                            minimapContext.beginPath();
-                                                            minimapContext.arc(((data[i + 1] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width,
-                                                                    ((data[i + 2] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height, ((Float)data[i + 3]) * 2, 0, M * 2, true);
-                                                            minimapContext.closePath();
-                                                            minimapContext.fill();
+                                                            final MiniMapItem miniMapItem = miniMapItems.get(i);
+                                                            if (item>=numItems) {
+miniMapItem.active = false;
+                                                            }else {
+                                                                miniMapItem.active = true;
+                                                                miniMapItem.color = Game.pingColors[(Integer)data[i]];
+                                                                miniMapItem.w  = Game.pingColors[(Integer)data[i]];
+                                                                miniMapItem.x = (((Float)data[i + 1] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width;
+                                                                miniMapItem.y = (((Float) data[i + 2] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height;
+                                                                miniMapItem.w = ((Float)data[i + 3]) * 2;
+                                                                miniMapItem.h = miniMapItem.w;
+                                                            }
+
                                                             i += 4;
+                                                            item++;
+                                                        }
                                                         }
                                                     }
 
@@ -534,11 +551,7 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                                                     socket.emit("6","cont",1);
                                                     controlIndex=1;
                                                     socket.connect();
-                                                }
-                                            }
-                                            }
 
-                                            );
                                         }
 
                                     public void send() {
@@ -563,27 +576,28 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                                     }
 
                                     // GET USER DATA:
-                                    public void updateUserData(singleObj, listObj) {
-                                        if (singleObj) {
-                                            singleObj.visible = true;
-                                            updateOrPushUser(singleObj);
-                                            delete singleObj;
-                                        } else if (listObj) {
-                                            for (int i = 0; i < users.length; ++i) {
-                                                if (!users[i].visible)
-                                                    users[i].forcePos = 1;
-                                                users[i].visible = false;
+                                    public void updateUserData(Object singleObject, Object[] listObj) {
+                                        final JSONObject obj = (JSONObject) singleObject;
+
+                                        if (singleObject!=null) {
+                                            obj.put("visible", true);
+                                            Game.updateOrPushUser(obj);
+                                        } else if (listObj!=null) {
+                                            for (int i = 0; i < users.size(); ++i) {
+                                                if (!users.get(i).visible)
+                                                    users.get(i).forcePos = 1;
+                                                users.get(i).visible = false;
                                             }
-                                            var tmpIndx;
                                             for (int i = 0; i < listObj.length; ) {
-                                                tmpIndx = getPlayerIndex(listObj[i]);
-                                                if (tmpIndx != null) {
-                                                    users[tmpIndx].x = listObj[i + 1];
-                                                    users[tmpIndx].y = listObj[i + 2];
-                                                    users[tmpIndx].dir = listObj[i + 3];
-                                                    users[tmpIndx].targetDir = listObj[i + 4];
-                                                    users[tmpIndx].aimDir = listObj[i + 5];
-                                                    users[tmpIndx].visible = true;
+                                                final int tmpIndx = Game.getPlayerIndex((Integer) listObj[i]);
+                                                final Player p = users.get(tmpIndx);
+                                                if (tmpIndx >=0) {
+                                                    p.x = (Float) listObj[i + 1];
+                                                    p.y = (Float)listObj[i + 2];
+                                                    p.dir = (Float)listObj[i + 3];
+                                                    p.targetDir =(Float) listObj[i + 4];
+                                                    p.aimDir = (Float)listObj[i + 5];
+                                                    p.visible = true;
                                                 }
                                                 i += 6;
                                             }

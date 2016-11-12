@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.sun.corba.se.impl.orbutil.ObjectWriter;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class Game extends GameBase {
@@ -300,13 +302,14 @@ public class Game extends GameBase {
     static final int[] pingColors = {0xffffff, 0xffffff ,0xff6363 ,0xff6363,0x67ff3e66,0xffffff88,0x63b0ff};
 
     // UPDATE OR PUSH PLAYER:
-    public static void updateOrPushUser(Player user) {
+    public static void updateOrPushUser(JSONObject obj) {
         //Todo check
-        int tmpIndx = getPlayerIndex(user.sid);
+        int tmpIndx = getPlayerIndex(obj.getInt("sid"));
         if (tmpIndx >= 0) {
-            users.set(tmpIndx, user);
+            final Player player = users.get(tmpIndx);
+            player.updateData(obj);
         } else {
-            users.add(user);
+            users.add(new Player(obj));
         }
     }
 
