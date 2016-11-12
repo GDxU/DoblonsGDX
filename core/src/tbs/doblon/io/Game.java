@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.StringBuilder;
+import com.sun.corba.se.impl.orbutil.ObjectWriter;
 
 import java.util.ArrayList;
 
@@ -52,6 +53,7 @@ public class Game extends GameBase {
     }
 
     public static String socket;
+    public static String scoreText;
     public static String upgradesText;
     public static String coinDisplayText;
     public static int lobbyRoomID;
@@ -81,7 +83,7 @@ public class Game extends GameBase {
     public static String currentMode = null;
     public static float dayTimeValue = 0;
     public static final ArrayList<Player> users = new ArrayList<Player>();
-    public static final ArrayList<GameObject> gameObjects = new ArrayList<GameObject>();
+    public static final ArrayList<Obstacle> gameObjects = new ArrayList<Obstacle>();
     public static float target = 0;
     public static float targetD = 1;
     public static float turnDir = 0;
@@ -359,24 +361,24 @@ public class Game extends GameBase {
     public static int skinIndex = Utility.getInt("sknInx");
 
     // NOTIFICATIONS:
-    public static void hideNotifByType(type) {
-        for (var i = 0; i < animTexts.length; ++i) {
-            if (animTexts[i].type == type)
-                animTexts[i].active = false;
+    public static void hideNotifByType(String type) {
+        for (int i = 0; i < animTexts.size(); ++i) {
+            if (animTexts.get(i).type.equals(type))
+                animTexts.get(i).active = false;
         }
     }
 
-    public static void showNotification(text) {
-        for (var i = 0; i < animTexts.length; ++i) {
-            if (animTexts[i].type == "notif")
-                animTexts[i].active = false;
+    public static void showNotification(String text) {
+        for (int i = 0; i < animTexts.size(); ++i) {
+            if (animTexts.get(i).type.equals("notif"))
+                animTexts.get(i).active = false;
         }
-        showAnimText(maxScreenWidth / 2, maxScreenHeight / 1.27, text, 42, 1500, "notif", 0.19);
+        showAnimText(maxScreenWidth / 2, maxScreenHeight / 1.27f, text, 42, 1500, "notif", 0.19f);
     }
 
-    public static void showBigNotification(text) {
+    public static void showBigNotification(String text) {
         hideNotifByType("bNotif");
-        showAnimText(maxScreenWidth / 2, screenHeight / 3, text, 130, 1000, "bNotif", 0.26);
+        showAnimText(maxScreenWidth / 2, screenHeight / 3, text, 130, 1000, "bNotif", 0.26f);
     }
 static int lastScore;
     static long scoreCountdown, scoreDisplayTime;
@@ -387,9 +389,9 @@ static int lastScore;
         scoreCountdown = scoreDisplayTime;
     }
 
-    var skinDisplayIconSize = 200;
+    int skinDisplayIconSize = 200;
 
-    public static void changeSkin(val) {
+    public static void changeSkin(int val) {
         skinIndex += val;
         if (skinIndex >= userSkins.length)
             skinIndex = 0;
@@ -836,141 +838,160 @@ static int lastScore;
     }
 }
 
-
-    //[0] = name, [1] = color1, [2] = color2;
-    String[][] userSkins = {
-            "Default",
-            "#eb6d6d",
-            "#949494"
+public static int initSkins(){
+    final Object[][]objects = {{
+        "Default",
+                0xeb6d6d,
+                0x949494
     },{
         "Purple",
-        "#b96bed",
-        "#949494"
-        },{
+                0xb96bed,
+                0x949494
+    },{
         "Green",
-        "#6FED6B",
-        "#949494"
-        },{
+                0x6FED6B,
+                0x949494
+    },{
         "Orange",
-        "#EDB76B",
-        "#949494"
-        },{
+                0xEDB76B,
+                0x949494
+    },{
         "Black",
-        "#696969",
-        "#949494"
-        },{
+                0x696969,
+                0x949494
+    },{
         "Navy",
-        "#adadad",
-        "#949494"
-        },{
+                0xadadad,
+                0x949494
+    },{
         "Ghostly",
-        "#9BEB6D",
-        "#949494",
-        opacity:0.7,
-        overlay:"rgba(0,255,0,0.3)"
-        },{
+                0x9BEB6D,
+                0x949494,
+                0.7f,
+                0x00ff0049
+    },{
         "Glass",
-        "#6DEBDE",
-        "#949494",
-        opacity:0.6,
-        overlay:"rgba(0,0,255,0.3)"
-        },{
+                0x6DEBDE,
+                0x949494,
+                0.6f,
+                0x0000ff49
+    },{
         "Pirate",
-        "#5E5E5E",
-        "#737373"
-        },{
+                0x5E5E5E,
+                0x737373
+    },{
         "Sketch",
-        "#E8E8E8",
-        "#E8E8E8"
-        },{
+                0xE8E8E8,
+                0xE8E8E8
+    },{
         "Gold",
-        "#e9cd5f",
-        "#949494"
-        },{
+                0xe9cd5f,
+                0x949494
+    },{
         "Hazard",
-        "#737373",
-        "#e9cd5f"
-        },{
+                0x737373,
+                0xe9cd5f
+    },{
         "Apples",
-        "#91DB30",
-        "#eb6d6d"
-        },{
+                0x91DB30,
+                0xeb6d6d
+    },{
         "Beach",
-        "#eac086",
-        "#FFD57D"
-        },{
+                0xeac086,
+                0xFFD57D
+    },{
         "Wood",
-        "#8c5d20",
-        "#949494"
-        },{
+                0x8c5d20,
+                0x949494
+    },{
         "Diamond",
-        "#6FE8E2",
-        "#EDEDED"
-        },{
+                0x6FE8E2,
+                0xEDEDED
+    },{
         "Midnight",
-        "#5E5E5E",
-        "#A763BA"
-        },{
+                0x5E5E5E,
+                0xA763BA
+    },{
         "Valentine",
-        "#FE4998",
-        "#F9A7FE"
-        },{
+                0xFE4998,
+                0xF9A7FE
+    },{
         "Cheddar",
-        "#FCA403",
-        "#FDFC08"
-        },{
+                0xFCA403,
+                0xFDFC08
+    },{
         "PewDie",
-        "#09BBDF",
-        "#1D3245"
-        },{
+                0x09BBDF,
+                0x1D3245"
+    },{
         "Crimson",
-        "#6B3333",
-        "#AD3E3E"
-        },{
+                0x6B3333,
+                0xAD3E3E
+    },{
         "Banana",
-        "#fbf079",
-        "#f9f9f9"
-        },{
+                0xfbf079,
+                0xf9f9f9
+    },{
         "Cherry",
-        "#F8E0F7",
-        "#F5A9F2"
-        },{
+                0xF8E0F7,
+                0xF5A9F2
+    },{
         "Moon",
-        "#1C1C1C",
-        "#F2F5A9"
-        },{
+                0x1C1C1C,
+                0xF2F5A9
+    },{
         "Master",
-        "#fce525",
-        "#bb5e0e"
-        },{
+                0xfce525,
+                0xbb5e0e
+    },{
         "Reddit",
-        "#fe562d",
-        "#f9f9f9"
-        },{
+                0xfe562d,
+                0xf9f9f9
+    },{
         "4Chan",
-        "#ffd3b4",
-        "#3c8d2e"
-        },{
+                0xffd3b4,
+                0x3c8d2e
+    },{
         "Necron",
-        "#808080",
-        "#80ff80"
-        },{
+                0x808080,
+                0x80ff80
+    },{
         "Ambient",
-        "#626262",
-        "#80ffff"
-        },{
+                0x626262,
+                0x80ffff
+    },{
         "Uranium",
-        "#5a9452",
-        "#80ff80"
-        },{
+                0x5a9452,
+                0x80ff80
+    },{
         "XPlode",
-        "#fe4c00",
-        "#f8bf00"
-        },{
+                0xfe4c00,
+                0xf8bf00
+    },{
         "巧克力",
-        "#804029",
-        "#f9ebb4"
-        };
+                0x804029,
+                0xf9ebb4
+    }};
+
+
+
+    for (Object[] object : objects) {
+        final Skin s = new Skin();
+        s.name = String.valueOf(object[0]);
+        s.color1 = (Integer) (object[1]);
+        s.color2 = (Integer) (object[2]);
+        if (object.length>3)
+        s.opacity = (Float) (object[3]);
+        if (object.length>4)
+        s.overlay = (Integer) (object[4]);
+
+    }
+    return 0;
+    //[0] = name, [1] = color1, [2] = color2;
+}
+   int o= initSkins();
+    public static final MiniMap minimap = new MiniMap();
+    public static ArrayList<Skin> userSkins = new ArrayList<Skin>();
 
 public static void sendTarget(float force){
         long tmpTime=currentTime;
@@ -1019,19 +1040,19 @@ public static void renderGameObject(tmpObj,ctxt){
         shapeRenderer(fill).lineWidth=8.5;
         shapeRenderer(fill).translate(tmpCanvas.width/2,tmpCanvas.height/2);
         if(tmpObj.c==0){
-        shapeRenderer(fill).fillStyle="#797979";
+        shapeRenderer(fill).fillStyle=0x797979";
         }else if(tmpObj.c==1){
-        shapeRenderer(fill).fillStyle="#e89360";
+        shapeRenderer(fill).fillStyle=0xe89360";
         }else if(tmpObj.c==2){
-        shapeRenderer(fill).fillStyle="#c8c8c8";
+        shapeRenderer(fill).fillStyle=0xc8c8c8";
         }else if(tmpObj.c==3){
-        shapeRenderer(fill).fillStyle="#e9cd5f";
+        shapeRenderer(fill).fillStyle=0xe9cd5f";
         }else if(tmpObj.c==4){
-        shapeRenderer(fill).fillStyle="#EB6565";
+        shapeRenderer(fill).fillStyle=0xEB6565";
         }else if(tmpObj.c==5){
-        shapeRenderer(fill).fillStyle="#6FE8E2";
+        shapeRenderer(fill).fillStyle=0x6FE8E2";
         }else if(tmpObj.c==6){
-        shapeRenderer(fill).fillStyle="#7BE86F";
+        shapeRenderer(fill).fillStyle=0x7BE86F";
         }
         if(tmpObj.shp==1){
         var spikes=6;

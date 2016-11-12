@@ -15,7 +15,14 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
+import static tbs.doblon.io.Game.gameData;
 import static tbs.doblon.io.Game.gameObjects;
+import static tbs.doblon.io.Game.hideMainMenuText;
+import static tbs.doblon.io.Game.leaveGame;
+import static tbs.doblon.io.Game.minimap;
+import static tbs.doblon.io.Game.player;
+import static tbs.doblon.io.Game.showAd;
+import static tbs.doblon.io.Game.users;
 
 
 /**
@@ -162,20 +169,20 @@ public class SocketManager {
                 //Todo gameObject, data
                 final Player tmpPlayer = new Player(String.valueOf(args[0]));
                 if (!Game.objectExists(tmpPlayer)) {
-                    Game.users.add(tmpPlayer);
+                    users.add(tmpPlayer);
                 } else {
                     Game.updateOrPushUser(tmpPlayer);
                 }
-                Game.player = tmpPlayer;
+                player = tmpPlayer;
                 Game.gameState = 1;
                 Game.toggleMenuUI(false);
                 Game.toggleGameUI(true);
                 String data = String.valueOf(args[0]);
                 if (data != null && data.length() > 0) {
-                    if (Game.gameData == null)
-                        Game.gameData = new GameData(data);
+                    if (gameData == null)
+                        gameData = new GameData(data);
                     else
-                        Game.gameData.parse(data);
+                        gameData.parse(data);
                     gameObjects.clear();
 //                    for (int i = 0; i < data.objCount; ++i) {
 //                        gameObjects.push({});
@@ -193,7 +200,7 @@ public class SocketManager {
                 final Player tmpIndx = Game.getPlayerIndexById(String.valueOf(args[0]));
 
                 if (tmpIndx != null) {
-                    Game.users.remove(tmpIndx);
+                    users.remove(tmpIndx);
                 }
             }
         }).on("dnt", new Emitter.Listener() {
@@ -230,7 +237,7 @@ public class SocketManager {
                 int pos = -1;
                 final Object[] list = (Object[]) args[0];
                 for (int i = 0; i < list.length; ) {
-                    if ((((Integer) list[i]) == Game.player.sid))
+                    if ((((Integer) list[i]) == player.sid))
                         pos = rank;
                     i += 4;
                     rank++;
@@ -354,7 +361,7 @@ public class SocketManager {
                         final int tmpIndx = Game.getPlayerIndex((Integer)(args[0]));
                         final Object[] values = (Object[]) args[1];
                         if (tmpIndx >=0) {
-                            final Player tmpUser = Game.users.get(tmpIndx);
+                            final Player tmpUser = users.get(tmpIndx);
                             if (tmpUser!=null)
                             for (int i = 0; i < values.length; ) {
 
@@ -397,25 +404,24 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                         }
                         }
                     }
-
                     ).
 
                     on("4",new Emitter.Listener() {
-
                         @Override
                         public void call (Object...args){
                             //todo indx, data
 
-                           GameObject tmpObj = gameObjects.get((Integer)args[0]);
+                          final Obstacle tmpObj =  gameObjects.get((Integer)args[0]);
+                            final Object[] data = (Object[])args[1];
                             if (tmpObj!=null) {
-                                if (data) {
-                                    tmpObj.x = data[0];
-                                    tmpObj.xS = data[1];
-                                    tmpObj.y = data[2];
-                                    tmpObj.yS = data[3];
-                                    tmpObj.s = data[4];
-                                    tmpObj.c = data[5];
-                                    tmpObj.shp = data[6];
+                                if (data!=null) {
+                                    tmpObj.x = (Integer) data[0];
+                                    tmpObj.xS = (Integer) data[1];
+                                    tmpObj.y = (Integer) data[2];
+                                    tmpObj.yS = (Integer) data[3];
+                                    tmpObj.s = (Integer) data[4];
+                                    tmpObj.c = (Integer) data[5];
+                                    tmpObj.shp = (Integer) data[6];
                                     tmpObj.active = true;
                                 } else {
                                     tmpObj.active = false;
@@ -423,32 +429,20 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                             }
                         }
                         }
-
                         ).on("5", new Emitter.Listener() {
 
                                     @Override
                                     public void call(Object...
                                                              args) {
                                         //Todo sid, wpnIndex
-                                        int tmpIndx = Game.getPlayerIndex(sid);
-                                        if (tmpIndx != null) {
-                                            final Player tmpUser = Game.users.get(tmpIndx);
-                                            if (!tmpUser.animMults)
-                                                tmpUser.animMults =[
-                                            {
-                                                mult:
-                                                1
-                                            },{
-                                                mult:
-                                                1
-                                            },{
-                                                mult:
-                                                1
-                                            },{
-                                                mult:
-                                                1
-                                            }];
-                                            tmpUser.animMults[wpnIndex].plus = -0.03;
+                                        int tmpIndx = Game.getPlayerIndex((Integer) args[0]);
+                                        int wpnIndex = Game.getPlayerIndex((Integer) args[1]);
+                                        if (tmpIndx >=0) {
+                                            final Player tmpUser = users.get(tmpIndx);
+                                            for (int i =0;i<4;i++)
+                                                tmpUser.animMults.get(i).mult = 1;
+
+                                            tmpUser.animMults.get(wpnIndex).plus = -0.03f;
                                         }
                                     }
                                     }
@@ -460,13 +454,15 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                                         @Override
                                         public void call (Object...args){
                                             //Todo  sid, value
-                                            var tmpIndx = getPlayerIndex(sid);
-                                            if (tmpIndx != null) {
-                                                var tmpUser = users[tmpIndx];
+                                            final int sid = (Integer) args[0];
+                                            int tmpIndx = Game.getPlayerIndex(sid);
+                                            int value = (Integer) args[1];
+                                            if (tmpIndx >=0) {
+                                                final Player tmpUser = users.get(tmpIndx);
                                                 tmpUser.health = value;
                                                 if (tmpUser.health <= 0) {
                                                     tmpUser.dead = true;
-                                                    if (player && sid == player.sid) {
+                                                    if (player!=null && (sid) == player.sid) {
                                                         player.dead = (value <= 0);
                                                         if (player.dead) {
                                                             hideMainMenuText();
@@ -478,20 +474,15 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                                             }
                                             }
                                         }
-                                        ).on("7", new Emitter.Listener()
-
-                                                {
+                                        ).on("7", new Emitter.Listener() {
 
                                                     @Override
                                                     public void call
                                                             (Object... args) {
                                                         //Todo value
-                                                        scoreText.innerHTML = value;
+                                                        Game.scoreText = String.valueOf(args[0]);
                                                     }
                                                 }
-                                                }
-                                                }
-
 
                                         ).on("n", new Emitter.Listener() {
 
@@ -499,7 +490,7 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                                             public void call
                                                     (Object... args) {
                                                 //todo txt
-                                                showNotification(txt);
+                                                Game.showNotification(String.valueOf(args[0]));
                                             }
                                             }
 
@@ -510,8 +501,8 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                                                 @Override
                                                 public void call (Object...args){
                                                     //todo val
-                                                    showScoreNotif(val);
-                                                }
+                                                    Game.showScoreNotif((Integer)(args[0]));
+                                                }}
 
                                                 ).on("m", new Emitter.Listener()
 
@@ -522,14 +513,13 @@ tmpUser.crashDamage = (Float) (values[i + 1]);
                                                             (Object...
                                                                      args) {
                                                         //Todo data
-                                                        minimap.width = minimap.width;
-
+                                                        final Object[] data = (Object[]) args[0];
                                                         for (int i = 0; i < data.length; ) {
-                                                            minimapContext.fillStyle = Game.pingColors[data[i]];
+                                                            minimapContext.fillStyle = Game.pingColors((Integer)data[i]);
                                                             minimapContext.font = "10px regularF";
                                                             minimapContext.beginPath();
                                                             minimapContext.arc(((data[i + 1] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width,
-                                                                    ((data[i + 2] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height, data[i + 3] * 2, 0, MathPI * 2, true);
+                                                                    ((data[i + 2] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height, ((Float)data[i + 3]) * 2, 0, M * 2, true);
                                                             minimapContext.closePath();
                                                             minimapContext.fill();
                                                             i += 4;

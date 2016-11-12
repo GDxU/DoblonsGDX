@@ -1,5 +1,8 @@
 package tbs.doblon.io;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 /**
  * Created by linde on 11/7/2016.
  */
@@ -31,6 +34,7 @@ public class Player extends GameObject {
     String team;
     int trippleCannons, twinCannons, viewMult;
     boolean visible;
+    final ArrayList<AnimMult> animMults =new ArrayList<AnimMult>();
 
     public void parse(String player) {
         //Todo
