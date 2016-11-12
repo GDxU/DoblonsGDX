@@ -148,7 +148,10 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
-                Game.modeList = String.valueOf(args[0]);
+                Game.modeList.clear();
+                final Object[] modes = (Object[]) args[0];
+                for (int i = 0; i < modes.length; i++)
+                    Game.modeList.add(String.valueOf(modes[i]));
                 // Todo modeSelector.innerHTML = data[crnt].name + "  <i style="vertical-align: middle;" class="material-icons">&#xE5C5;</i>";
                 Game.modeIndex = String.valueOf(args[1]);
                 Game.currentMode = Game.modeList.get(Integer.parseInt(String.valueOf(args[1])));
@@ -171,13 +174,16 @@ public class SocketManager {
             @Override
             public void call(Object... args) {
                 //Todo gameObject, data
-                final Player tmpPlayer = new Player(String.valueOf(args[0]));
-                if (!Game.objectExists(tmpPlayer)) {
-                    users.add(tmpPlayer);
+                final JSONObject tmpPlayer = new JSONObject(String.valueOf(args[0]));
+                Player foundPlayer = Game.getPlayerIndexById(tmpPlayer.getString("id"));
+                if (foundPlayer == null) {
+                    foundPlayer = new Player(tmpPlayer);
+
+                    users.add(foundPlayer);
                 } else {
                     Game.updateOrPushUser(tmpPlayer);
                 }
-                player = tmpPlayer;
+                player = foundPlayer;
                 Game.gameState = 1;
                 Game.toggleMenuUI(false);
                 Game.toggleGameUI(true);
@@ -212,7 +218,6 @@ public class SocketManager {
                     @Override
                     public void call(Object... args) {
                         //todo timeStr, dnt
-
                         // timeDisplay.innerHTML = timeStr;
                         Game.dayTimeValue = Float.parseFloat(String.valueOf(args[0]));
                     }
@@ -259,347 +264,342 @@ public class SocketManager {
                 }
         ).on("2", new Emitter.Listener() {
 
-            @Override
-            public void call(Object... args) {
-                //todo  upgrC, fleetC, data, points
-                final Object[] data = (Object[]) (args[2]);
-                if (data!=null){
-                    if (Game.upgradeItems.size()<(data.length/4))
-                        for (int i=0;i< (data.length/4)-Game.upgradeItems.size();i++ )
-                            Game.upgradeItems.add(new UpgradeItem());
+                    @Override
+                    public void call(Object... args) {
+                        //todo  upgrC, fleetC, data, points
+                        final Object[] data = (Object[]) (args[2]);
+                        if (data != null) {
+                            if (Game.upgradeItems.size() < (data.length / 4))
+                                for (int i = 0; i < (data.length / 4) - Game.upgradeItems.size(); i++)
+                                    Game.upgradeItems.add(new UpgradeItem());
 
 
-                    Game.upgradesText = "~ Upgrades " + String.valueOf(args[0]) + " ~ Fleet " + String.valueOf(args[1]);
-                    int num = 1;
-                    for (int i = 0; i < data.length; ) {
-
-                        final UpgradeItem upgradeItem = Game.upgradeItems.get(num-1);
-
-                        upgradeItem.name = String.valueOf(data[i]);
-                        upgradeItem.price = (Integer) (data[i+1]);
-                        upgradeItem.progress = (Integer) (data[i+2]);
-                        upgradeItem.maxProgress = (Integer) (data[i+3]);
-
-                        //Todo doUpgrade(" + (num - 1) + ", 0, 1)
-
-                        i += 4;
-                        num++;
-                    }
-                }
-                Game.coinDisplayText = "Coins: $" + args[3];
-            }}
-
-            ).on("8",new Emitter.Listener() {
-                @Override
-                public void call (Object...args){
-                    //todo data, points, prog
-
-                    if (!data && points == undefined && prog == undefined) {
-                        weaponsProgress.style.display = "none";
-                        weaponsList.style.display = "none";
-                        weaponsPopups.style.display = "none";
-                        upgradesInfo.style.display = "none";
-                    } else {
-                        if (!points) {
-                            weaponsProgress.style.display = "inline-block";
-                            weaponsList.style.display = "none";
-                            weaponsPopups.style.display = "none";
-                            upgradesInfo.style.display = "none";
-                        } else if (data) {
-                            weaponsProgress.style.display = "none";
-                            weaponsList.style.display = "block";
-                            weaponsPopups.style.display = "block";
-
-                            // WEAPONS LIST:
-                            String tmpHTML = "";
-                            int tmpHTML2 = "";
-                            int num = 0;
-                            int bot = 32;
+                            Game.upgradesText = "~ Upgrades " + String.valueOf(args[0]) + " ~ Fleet " + String.valueOf(args[1]);
+                            int num = 1;
                             for (int i = 0; i < data.length; ) {
-                                tmpHTML += "<div onclick="
-                                showWeaponPopup(" + num + ")
-                                " cass=" weaponItem
-                                "><div class="
-                                upgradeTxt
-                                ">" + data[i] + "</div><div class="
-                                upgradeNum ">Tier " +
-                                        data[i + 1] + "</div></div>";
-                                tmpHTML2 += "<div id="
-                                popupRow " + num + "
-                                " class=" weaponPopupRow
-                                ">";
-                                for (int x = 0; x < data[i + 2].length; ++x) {
-                                    tmpHTML2 += "<div onclick="
-                                    doUpgrade(" + x + ", " + num + ")
-                                    " class="
-                                    weaponPopupItem
-                                    " style=" bottom:
-                                    " + (bot * x / 3) + "
-                                    vh
-                                    ">" + data[i + 2][x] + "</div>";
-                                }
-                                tmpHTML2 += "</div>";
-                                i += 3;
+
+                                final UpgradeItem upgradeItem = Game.upgradeItems.get(num - 1);
+
+                                upgradeItem.name = String.valueOf(data[i]);
+                                upgradeItem.price = (Integer) (data[i + 1]);
+                                upgradeItem.progress = (Integer) (data[i + 2]);
+                                upgradeItem.maxProgress = (Integer) (data[i + 3]);
+
+                                //Todo doUpgrade(" + (num - 1) + ", 0, 1)
+
+                                i += 4;
                                 num++;
                             }
-                            weaponsList.innerHTML = tmpHTML;
-                            weaponsPopups.innerHTML = tmpHTML2;
                         }
-                        if (prog != undefined) {
-                            wpnsProgressBar.style.width = weaponsProgress.clientWidth * prog + "px";
-                            wpnsProgressTxt.innerHTML = Math.round(prog * 100) + "%";
-                        }
-                        if (points) {
-                            upgradesInfo.style.display = "inline-block";
-                            upgradesInfo.innerHTML = "Items (" + points + ")";
-                        }
+                        Game.coinDisplayText = "Coins: $" + args[3];
                     }
-                }}
+                }
 
-                ).on("3", new Emitter.Listener() {
+        ).on("8", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        //todo data, points, prog
+//                        if (!data && points == undefined && prog == undefined) {
+//                            weaponsProgress.style.display = "none";
+//                            weaponsList.style.display = "none";
+//                            weaponsPopups.style.display = "none";
+//                            upgradesInfo.style.display = "none";
+//                        } else {
+//                            if (!points) {
+//                                weaponsProgress.style.display = "inline-block";
+//                                weaponsList.style.display = "none";
+//                                weaponsPopups.style.display = "none";
+//                                upgradesInfo.style.display = "none";
+//                            } else if (data) {
+//                                weaponsProgress.style.display = "none";
+//                                weaponsList.style.display = "block";
+//                                weaponsPopups.style.display = "block";
+//
+//                                // WEAPONS LIST:
+//                                String tmpHTML = "";
+//                                int tmpHTML2 = "";
+//                                int num = 0;
+//                                int bot = 32;
+//                                for (int i = 0; i < data.length; ) {
+//                                    tmpHTML += "<div onclick="
+//                                    showWeaponPopup(" + num + ")
+//                                    " cass=" weaponItem
+//                                    "><div class="
+//                                    upgradeTxt
+//                                    ">" + data[i] + "</div><div class="
+//                                    upgradeNum ">Tier " +
+//                                            data[i + 1] + "</div></div>";
+//                                    tmpHTML2 += "<div id="
+//                                    popupRow " + num + "
+//                                    " class=" weaponPopupRow
+//                                    ">";
+//                                    for (int x = 0; x < data[i + 2].length; ++x) {
+//                                        tmpHTML2 += "<div onclick="
+//                                        doUpgrade(" + x + ", " + num + ")
+//                                        " class="
+//                                        weaponPopupItem
+//                                        " style=" bottom:
+//                                        " + (bot * x / 3) + "
+//                                        vh
+//                                        ">" + data[i + 2][x] + "</div>";
+//                                    }
+//                                    tmpHTML2 += "</div>";
+//                                    i += 3;
+//                                    num++;
+//                                }
+//                                weaponsList.innerHTML = tmpHTML;
+//                                weaponsPopups.innerHTML = tmpHTML2;
+//                            }
+//                            if (prog != undefined) {
+//                                wpnsProgressBar.style.width = weaponsProgress.clientWidth * prog + "px";
+//                                wpnsProgressTxt.innerHTML = Math.round(prog * 100) + "%";
+//                            }
+//                            if (points) {
+//                                upgradesInfo.style.display = "inline-block";
+//                                upgradesInfo.innerHTML = "Items (" + points + ")";
+//                            }
+//                        }
+                    }
+                }
+
+        ).on("3", new Emitter.Listener() {
 
                     @Override
                     public void call(Object... args) {
                         //todo sid, values
 
-                        final int tmpIndx = Game.getPlayerIndex((Integer)(args[0]));
+                        final int tmpIndx = Game.getPlayerIndex((Integer) (args[0]));
                         final Object[] values = (Object[]) args[1];
-                        if (tmpIndx >=0) {
+                        if (tmpIndx >= 0) {
                             final Player tmpUser = users.get(tmpIndx);
-                            if (tmpUser!=null)
-                            for (int i = 0; i < values.length; ) {
+                            if (tmpUser != null)
+                                for (int i = 0; i < values.length; ) {
 
-                            final String key = String.valueOf(values[i]);
-                                if (key.equals("lvl")){
-                                tmpUser.lvl =  (Integer) (values[i + 1]);
+                                    final String key = String.valueOf(values[i]);
+                                    if (key.equals("lvl")) {
+                                        tmpUser.lvl = (Integer) (values[i + 1]);
 
-                                }else if (key.equals("maxHealth")){
-                                    tmpUser.maxHealth =  (Integer) (values[i + 1]);
+                                    } else if (key.equals("maxHealth")) {
+                                        tmpUser.maxHealth = (Integer) (values[i + 1]);
 
-                                }else if (key.equals("health")){
-                                    tmpUser.health =  (Integer) (values[i + 1]);
-                                }else if (key.equals("speedDiv")){
-                                tmpUser.speedDiv =  (Float) (values[i + 1]);
-                                }else if (key.equals("width")){
-                                tmpUser.w =  (Float) (values[i + 1]);
-                                }else if (key.equals("healthRegen")){
-tmpUser.healthRegen =  (Float) (values[i + 1]);
-                                }else if (key.equals("cannonSpeed")){
-tmpUser.cannonSpeed =  (Float) (values[i + 1]);
-                                }else if (key.equals("cannonWidth")){
-    tmpUser.cannonWidth= (Float) (values[i + 1]);
-                                }else if (key.equals("cannonLength")){
-tmpUser.cannonLength =  (Float) (values[i + 1]);
-                                }else if (key.equals("cannonDmg")){
-tmpUser.cannonDmg =  (Float) (values[i + 1]);
-                                }else if (key.equals("length")){
-tmpUser.length =  (Float) (values[i + 1]);
-                                }else if (key.equals("reloadDiv")){
-tmpUser.reloadDiv =  (Float) (values[i + 1]);
-                                }else if (key.equals("speed")){
-tmpUser.speed =  (Float) (values[i + 1]);
-                                }else if (key.equals("turnSpeed")){
-tmpUser.turnSpeed =  (Float) (values[i + 1]);
-                                }else if (key.equals("crashDamage")){
-tmpUser.crashDamage = (Float) (values[i + 1]);
+                                    } else if (key.equals("health")) {
+                                        tmpUser.health = (Integer) (values[i + 1]);
+                                    } else if (key.equals("speedDiv")) {
+                                        tmpUser.speedDiv = (Float) (values[i + 1]);
+                                    } else if (key.equals("width")) {
+                                        tmpUser.w = (Float) (values[i + 1]);
+                                    } else if (key.equals("healthRegen")) {
+                                        tmpUser.healthRegen = (Float) (values[i + 1]);
+                                    } else if (key.equals("cannonSpeed")) {
+                                        tmpUser.cannonSpeed = (Float) (values[i + 1]);
+                                    } else if (key.equals("cannonWidth")) {
+                                        tmpUser.cannonWidth = (Float) (values[i + 1]);
+                                    } else if (key.equals("cannonLength")) {
+                                        tmpUser.cannonLength = (Float) (values[i + 1]);
+                                    } else if (key.equals("cannonDmg")) {
+                                        tmpUser.cannonDmg = (Float) (values[i + 1]);
+                                    } else if (key.equals("length")) {
+                                        tmpUser.length = (Float) (values[i + 1]);
+                                    } else if (key.equals("reloadDiv")) {
+                                        tmpUser.reloadDiv = (Float) (values[i + 1]);
+                                    } else if (key.equals("speed")) {
+                                        tmpUser.speed = (Float) (values[i + 1]);
+                                    } else if (key.equals("turnSpeed")) {
+                                        tmpUser.turnSpeed = (Float) (values[i + 1]);
+                                    } else if (key.equals("crashDamage")) {
+                                        tmpUser.crashDamage = (Float) (values[i + 1]);
+                                    }
+                                    i += 2;
                                 }
-                                i += 2;
-                            }
-                        }
                         }
                     }
-                    ).
+                }
+        ).on("4", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        //todo indx, data
 
-                    on("4",new Emitter.Listener() {
-                        @Override
-                        public void call (Object...args){
-                            //todo indx, data
+                        final Obstacle tmpObj = gameObjects.get((Integer) args[0]);
+                        final Object[] data = (Object[]) args[1];
+                        if (tmpObj != null) {
+                            if (data != null) {
+                                tmpObj.x = (Integer) data[0];
+                                tmpObj.xS = (Integer) data[1];
+                                tmpObj.y = (Integer) data[2];
+                                tmpObj.yS = (Integer) data[3];
+                                tmpObj.s = (Integer) data[4];
+                                tmpObj.c = (Integer) data[5];
+                                tmpObj.shp = (Integer) data[6];
+                                tmpObj.active = true;
+                            } else {
+                                tmpObj.active = false;
+                            }
+                        }
+                    }
+                }
+        ).on("5", new Emitter.Listener() {
 
-                          final Obstacle tmpObj =  gameObjects.get((Integer)args[0]);
-                            final Object[] data = (Object[])args[1];
-                            if (tmpObj!=null) {
-                                if (data!=null) {
-                                    tmpObj.x = (Integer) data[0];
-                                    tmpObj.xS = (Integer) data[1];
-                                    tmpObj.y = (Integer) data[2];
-                                    tmpObj.yS = (Integer) data[3];
-                                    tmpObj.s = (Integer) data[4];
-                                    tmpObj.c = (Integer) data[5];
-                                    tmpObj.shp = (Integer) data[6];
-                                    tmpObj.active = true;
-                                } else {
-                                    tmpObj.active = false;
+                    @Override
+                    public void call(Object...
+                                             args) {
+                        //Todo sid, wpnIndex
+                        int tmpIndx = Game.getPlayerIndex((Integer) args[0]);
+                        int wpnIndex = Game.getPlayerIndex((Integer) args[1]);
+                        if (tmpIndx >= 0) {
+                            final Player tmpUser = users.get(tmpIndx);
+                            for (int i = 0; i < 4; i++)
+                                tmpUser.animMults.get(i).mult = 1;
+
+                            tmpUser.animMults.get(wpnIndex).plus = -0.03f;
+                        }
+                    }
+                }
+
+        ).on("6", new Emitter.Listener() {
+
+                    @Override
+                    public void call(Object... args) {
+                        //Todo  sid, value
+                        final int sid = (Integer) args[0];
+                        int tmpIndx = Game.getPlayerIndex(sid);
+                        int value = (Integer) args[1];
+                        if (tmpIndx >= 0) {
+                            final Player tmpUser = users.get(tmpIndx);
+                            tmpUser.health = value;
+                            if (tmpUser.health <= 0) {
+                                tmpUser.dead = true;
+                                if (player != null && (sid) == player.sid) {
+                                    player.dead = (value <= 0);
+                                    if (player.dead) {
+                                        hideMainMenuText();
+                                        leaveGame();
+                                        showAd();
+                                    }
                                 }
                             }
                         }
+                    }
+                }
+        ).on("7", new Emitter.Listener() {
+
+                    @Override
+                    public void call
+                            (Object... args) {
+                        //Todo value
+                        Game.scoreText = String.valueOf(args[0]);
+                    }
+                }
+
+        ).on("n", new Emitter.Listener() {
+
+                    @Override
+                    public void call
+                            (Object... args) {
+                        //todo txt
+                        Game.showNotification(String.valueOf(args[0]));
+                    }
+                }
+
+        ).on("s", new Emitter.Listener() {
+
+                    @Override
+                    public void call(Object... args) {
+                        //todo val
+                        Game.showScoreNotif((Integer) (args[0]));
+                    }
+                }
+
+        ).on("m", new Emitter.Listener() {
+
+                    @Override
+                    public void call
+                            (Object...
+                                     args) {
+                        //Todo data
+                        final Object[] data = (Object[]) args[0];
+                        final int numItems = data.length / 4;
+                        if (miniMapItems.size() < numItems)
+                            for (int i = 0; i < miniMapItems.size() - numItems; i++)
+                                miniMapItems.add(new MiniMapItem());
+                        int item = 0;
+                        for (int i = 0; i < data.length; ) {
+                            final MiniMapItem miniMapItem = miniMapItems.get(i);
+                            if (item >= numItems) {
+                                miniMapItem.active = false;
+                            } else {
+                                miniMapItem.active = true;
+                                miniMapItem.color = Game.pingColors[(Integer) data[i]];
+                                miniMapItem.w = Game.pingColors[(Integer) data[i]];
+                                miniMapItem.x = (((Float) data[i + 1] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width;
+                                miniMapItem.y = (((Float) data[i + 2] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height;
+                                miniMapItem.w = ((Float) data[i + 3]) * 2;
+                                miniMapItem.h = miniMapItem.w;
+                            }
+
+                            i += 4;
+                            item++;
                         }
-                        ).on("5", new Emitter.Listener() {
+                    }
+                }
 
-                                    @Override
-                                    public void call(Object...
-                                                             args) {
-                                        //Todo sid, wpnIndex
-                                        int tmpIndx = Game.getPlayerIndex((Integer) args[0]);
-                                        int wpnIndex = Game.getPlayerIndex((Integer) args[1]);
-                                        if (tmpIndx >=0) {
-                                            final Player tmpUser = users.get(tmpIndx);
-                                            for (int i =0;i<4;i++)
-                                                tmpUser.animMults.get(i).mult = 1;
+        );
 
-                                            tmpUser.animMults.get(wpnIndex).plus = -0.03f;
-                                        }
-                                    }
-                                    }
+        // LOAD DATA:
+        // setControlSheme(controlIndex);
+        Utility.saveInt("contrlSt", 1);
+        socket.emit("6", "cont", 1);
+        controlIndex = 1;
+        socket.connect();
 
-                                    ).
+    }
 
-                                    on("6",new Emitter.Listener() {
-
-                                        @Override
-                                        public void call (Object...args){
-                                            //Todo  sid, value
-                                            final int sid = (Integer) args[0];
-                                            int tmpIndx = Game.getPlayerIndex(sid);
-                                            int value = (Integer) args[1];
-                                            if (tmpIndx >=0) {
-                                                final Player tmpUser = users.get(tmpIndx);
-                                                tmpUser.health = value;
-                                                if (tmpUser.health <= 0) {
-                                                    tmpUser.dead = true;
-                                                    if (player!=null && (sid) == player.sid) {
-                                                        player.dead = (value <= 0);
-                                                        if (player.dead) {
-                                                            hideMainMenuText();
-                                                            leaveGame();
-                                                            showAd();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            }
-                                        }
-                                        ).on("7", new Emitter.Listener() {
-
-                                                    @Override
-                                                    public void call
-                                                            (Object... args) {
-                                                        //Todo value
-                                                        Game.scoreText = String.valueOf(args[0]);
-                                                    }
-                                                }
-
-                                        ).on("n", new Emitter.Listener() {
-
-                                            @Override
-                                            public void call
-                                                    (Object... args) {
-                                                //todo txt
-                                                Game.showNotification(String.valueOf(args[0]));
-                                            }
-                                            }
-
-                                            ).
-
-                                            on("s",new Emitter.Listener() {
-
-                                                @Override
-                                                public void call (Object...args){
-                                                    //todo val
-                                                    Game.showScoreNotif((Integer)(args[0]));
-                                                }}
-
-                                                ).on("m", new Emitter.Listener()
-
-                                                {
-
-                                                    @Override
-                                                    public void call
-                                                            (Object...
-                                                                     args) {
-                                                        //Todo data
-                                                        final Object[] data = (Object[]) args[0];
-                                                        final int numItems = data.length/4;
-                                                        if (miniMapItems.size()<numItems)
-                                                            for (int i=0;i<miniMapItems.size() - numItems;i++)
-                                                                miniMapItems.add(new MiniMapItem());
-                                                        int item=0;
-                                                        for (int i = 0; i < data.length; ) {
-                                                            final MiniMapItem miniMapItem = miniMapItems.get(i);
-                                                            if (item>=numItems) {
-miniMapItem.active = false;
-                                                            }else {
-                                                                miniMapItem.active = true;
-                                                                miniMapItem.color = Game.pingColors[(Integer)data[i]];
-                                                                miniMapItem.w  = Game.pingColors[(Integer)data[i]];
-                                                                miniMapItem.x = (((Float)data[i + 1] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width;
-                                                                miniMapItem.y = (((Float) data[i + 2] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height;
-                                                                miniMapItem.w = ((Float)data[i + 3]) * 2;
-                                                                miniMapItem.h = miniMapItem.w;
-                                                            }
-
-                                                            i += 4;
-                                                            item++;
-                                                        }
-                                                        }
-                                                    }
-
-                                                    );
-
-                                                    // LOAD DATA:
-                                                    // setControlSheme(controlIndex);
-                                                    Utility.saveInt("contrlSt",1);
-                                                    socket.emit("6","cont",1);
-                                                    controlIndex=1;
-                                                    socket.connect();
-
-                                        }
-
-                                    public void send() {
-                                        // Sending an object
-                                        JSONObject obj = new JSONObject();
-                                        obj.put("hello", "server");
-                                        obj.put("binary", new byte[42]);
-                                        socket.emit("foo", obj);
+    public void send() {
+        // Sending an object
+        JSONObject obj = new JSONObject();
+        obj.put("hello", "server");
+        obj.put("binary", new byte[42]);
+        socket.emit("foo", obj);
 
 
-                                    }
+    }
 
-                                    public void receive() {
-                                        // Receiving an object
-                                        socket.on("foo", new Emitter.Listener() {
-                                            @Override
-                                            public void call(Object... args) {
-                                                JSONObject obj = (JSONObject) args[0];
-                                                String k = obj.getString("k");
-                                            }
-                                        });
-                                    }
+    public void receive() {
+        // Receiving an object
+        socket.on("foo", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject obj = (JSONObject) args[0];
+                String k = obj.getString("k");
+            }
+        });
+    }
 
-                                    // GET USER DATA:
-                                    public void updateUserData(Object singleObject, Object[] listObj) {
-                                        final JSONObject obj = (JSONObject) singleObject;
+    // GET USER DATA:
+    public void updateUserData(Object singleObject, Object[] listObj) {
+        final JSONObject obj = (JSONObject) singleObject;
 
-                                        if (singleObject!=null) {
-                                            obj.put("visible", true);
-                                            Game.updateOrPushUser(obj);
-                                        } else if (listObj!=null) {
-                                            for (int i = 0; i < users.size(); ++i) {
-                                                if (!users.get(i).visible)
-                                                    users.get(i).forcePos = 1;
-                                                users.get(i).visible = false;
-                                            }
-                                            for (int i = 0; i < listObj.length; ) {
-                                                final int tmpIndx = Game.getPlayerIndex((Integer) listObj[i]);
-                                                final Player p = users.get(tmpIndx);
-                                                if (tmpIndx >=0) {
-                                                    p.x = (Float) listObj[i + 1];
-                                                    p.y = (Float)listObj[i + 2];
-                                                    p.dir = (Float)listObj[i + 3];
-                                                    p.targetDir =(Float) listObj[i + 4];
-                                                    p.aimDir = (Float)listObj[i + 5];
-                                                    p.visible = true;
-                                                }
-                                                i += 6;
-                                            }
-                                        }
-                                    }
+        if (singleObject != null) {
+            obj.put("visible", true);
+            Game.updateOrPushUser(obj);
+        } else if (listObj != null) {
+            for (int i = 0; i < users.size(); ++i) {
+                if (!users.get(i).visible)
+                    users.get(i).forcePos = 1;
+                users.get(i).visible = false;
+            }
+            for (int i = 0; i < listObj.length; ) {
+                final int tmpIndx = Game.getPlayerIndex((Integer) listObj[i]);
+                final Player p = users.get(tmpIndx);
+                if (tmpIndx >= 0) {
+                    p.x = (Float) listObj[i + 1];
+                    p.y = (Float) listObj[i + 2];
+                    p.dir = (Float) listObj[i + 3];
+                    p.targetDir = (Float) listObj[i + 4];
+                    p.aimDir = (Float) listObj[i + 5];
+                    p.visible = true;
+                }
+                i += 6;
+            }
+        }
+    }
+}
