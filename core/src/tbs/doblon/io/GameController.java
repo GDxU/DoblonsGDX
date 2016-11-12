@@ -44,14 +44,16 @@ public class GameController extends InputMultiplexer {
 
         @Override
         public boolean touchDown(int x, int y, int pointer, int button) {
-            socket.emit("2", 1);
+            if (UIManager.touchDown(x,y)){
+                return false;
+            }
             return false;
         }
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            if (socket!=null && player!=null && !player.dead) {
-                socket.emit("2");
+            if (UIManager.touchUp(screenX,screenY)){
+                return false;
             }
             click(screenX, screenY);
             return false;
@@ -261,28 +263,5 @@ public class GameController extends InputMultiplexer {
         }
     };
 
-    fireButton.addEventListener("touchstart", function () {
-        socket.emit("2", 1);
-    });
-    fireButton.addEventListener("touchend", function () {
-        socket.emit("2");
-    });
 
-    upgrades.addEventListener("touchstart", function () {
-        toggleUpgrades();
-    });
-
-    enterGameButton.onclick = function () {
-        enterGame();
-    }
-
-
-    userNameInput.addEventListener("keypress", function (e) {
-        var key = e.which || e.keyCode;
-        if (key === 13) {
-            if (true || validNick()) {
-                enterGame();
-            }
-        }
-    });
 }
