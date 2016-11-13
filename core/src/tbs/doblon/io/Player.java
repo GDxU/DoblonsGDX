@@ -29,7 +29,8 @@ public class Player extends GameObject {
     float length;
     float localX, localY;
     int lvl, maxHealth, mineDropper;
-    String name, nameSprite, nameSpriteID;
+    String name, nameSpriteID;
+    NameSprite nameSprite;
     int noseLength, ownerID, quadCannons, ramLength, rearCannon, rearLength;
     int rows, scatterCannons, sid, skin, sniperCannon, spawnProt, swivelCannons;
     float targetDir;
@@ -119,9 +120,12 @@ public class Player extends GameObject {
             mineDropper = p.getInt("");
         if (p.has("name"))
             name = p.getString("name");
-        if (p.has("nameSprite"))
-            nameSprite = p.getString("nameSprite");
-        if (p.has("nameSpriteID"))
+        if (p.has("nameSprite")) {
+            if (nameSprite!=null)
+            nameSprite = new NameSprite(p.getString("nameSprite"));
+            else
+                nameSprite.parse(p.getString("nameSprite"));
+        }if (p.has("nameSpriteID"))
             nameSpriteID = p.getString("nameSpriteID");
         if (p.has("noseLength"))
             noseLength = p.getInt("");

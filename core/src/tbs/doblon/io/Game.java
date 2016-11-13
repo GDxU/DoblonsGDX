@@ -176,22 +176,22 @@ public class Game extends GameBase {
     // SKULL ICONS:
     static int iconsCount = 5;
     static float skullIconSize = 50;
-    Texture[] iconsList = {};
+    public static Texture[] iconsList = {};
 
-    initIconList();
+//    initIconList();
 
-    static void initIconList() {
-        for (int i = 1; i < iconsCount; ++i) {
-            var tmpImg = new Image();
-            tmpImg.onload = (public static void(val) {
-            return public static void() {
-                this.onLoad = null;
-                iconsList[val] = this;
-            }
-            })(i);
-            tmpImg.src = ".././img/icons/skull_" + i + ".png";
-        }
-    }
+//    static void initIconList() {
+//        for (int i = 1; i < iconsCount; ++i) {
+//            var tmpImg = new Image();
+//            tmpImg.onload = (public static void(val) {
+//            return public static void() {
+//                this.onLoad = null;
+//                iconsList[val] = this;
+//            }
+//            })(i);
+//            tmpImg.src = ".././img/icons/skull_" + i + ".png";
+//        }
+//    }
 
     public static final IslandInfo[] islandInfo = {
             new IslandInfo(17, 0xe0cca7, new float[]{0.92f, 0.95f, 1, 1.05f, 1, 0.85f, 0.95f, 1, 1.1f, 1, 0.96f}),
@@ -224,12 +224,14 @@ public class Game extends GameBase {
         }
 
         // RENDER:
-        mainContext.strokeStyle = 0x5f5f5f;
-        mainContext.fillStyle = 0xffffff;
+
+
         for (int i = 0; i < animTexts.size(); ++i) {
-            animTexts.get(i).update(delta);
+            final AnimText animText = animTexts.get(i);
+            animText.update(delta);
+            //todo might have to draw text with a bigger size mainContext.strokeStyle = 0x5f5f5f;
+            Utility.drawCenteredText(spriteBatch(), 0xfffff,animText.text, animText.x, animText.y,animText.scale);
         }
-        mainContext.globalAlpha = 1;
     }
 
     public static void drawIsland(float x, float y, float s, int indx) {
@@ -349,7 +351,7 @@ public class Game extends GameBase {
     boolean activePopup;
 
     public static void showWeaponPopup(int indx) {
-        for (var i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             var tmpDiv = document.getElementById("popupRow" + i);
             if (tmpDiv) {
                 if (i != indx || tmpDiv.style.visibility == "visible") {
@@ -397,12 +399,11 @@ static int lastScore;
 
     public static void changeSkin(int val) {
         skinIndex += val;
-        if (skinIndex >= userSkins.length)
+        if (skinIndex >= userSkins.size())
             skinIndex = 0;
         else if (skinIndex < 0)
             skinIndex = userSkins.length - 1;
-        if (!renderedSkins[skinIndex]) {
-            var tmpCanvas = document.createElement("canvas");
+        if (renderedSkins.get(skinIndex)!=null) {
             tmpCanvas.width = tmpCanvas.height = skinDisplayIconSize;
             var shapeRenderer (fill) = tmpCanvas.getContext("2d");
             shapeRenderer(fill).translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
@@ -1032,7 +1033,7 @@ public static void sendMoveTarget(){
         speedInc=0;
         SocketManager.socket.emit("4",turnDir,speedInc);
         }
-public static void renderGameObject(tmpObj,ctxt){
+public static void renderGameObject(Obstacle tmpObj){
         var tmpIndx=(tmpObj.c+"-"+tmpObj.shp+"-"+tmpObj.s);
         var tmpSprt=gameObjSprites[tmpIndx];
         if(!tmpSprt){

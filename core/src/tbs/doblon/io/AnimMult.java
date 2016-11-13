@@ -5,6 +5,5 @@ package tbs.doblon.io;
  */
 
 public class AnimMult {
-    public float plus;
-    public int mult;
+    public float plus, mult;
 }

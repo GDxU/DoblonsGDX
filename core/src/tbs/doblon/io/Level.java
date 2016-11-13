@@ -6,16 +6,20 @@ import java.util.ArrayList;
 
 import static tbs.doblon.io.Game.darkColor;
 import static tbs.doblon.io.Game.dayTimeValue;
+import static tbs.doblon.io.Game.drawIsland;
 import static tbs.doblon.io.Game.gameData;
+import static tbs.doblon.io.Game.gameObjects;
 import static tbs.doblon.io.Game.maxScreenHeight;
 import static tbs.doblon.io.Game.maxScreenWidth;
 import static tbs.doblon.io.Game.player;
 import static tbs.doblon.io.Game.screenSkX;
 import static tbs.doblon.io.Game.screenSkY;
 import static tbs.doblon.io.Game.skullIconSize;
+import static tbs.doblon.io.Game.userSkins;
 import static tbs.doblon.io.Game.users;
 import static tbs.doblon.io.GameBase.fill;
 import static tbs.doblon.io.GameBase.shapeRenderer;
+import static tbs.doblon.io.GameBase.spriteBatch;
 
 /**
  * Created by mike on 3/4/16.
@@ -31,9 +35,8 @@ public class Level {
         // IF PLAYER IS SET:
 
             // INTERPOLATION & VISIBILITY:
-            Player tmpObj;
             for (int i = 0; i < users.size(); ++i) {
-                tmpObj = users.get(i);
+                Player tmpObj = users.get(i);
                 if (tmpObj.visible && !tmpObj.dead) {
                     if (tmpObj.forcePos!=0) {
                         tmpObj.localX = tmpObj.x;
@@ -48,13 +51,13 @@ public class Level {
                 }
             }
 
+        ShapeRenderer renderer;
             // SET OFFSET:
-            tmpObj = users.get(Game.getPlayerIndex(player.sid));
-            Player tmpPlayer = tmpObj;
+            Player tmpPlayer = users.get(Game.getPlayerIndex(player.sid));
             float xOffset =0, yOffset =0;
-            if (tmpObj!=null) {
-                xOffset = tmpObj.localX;
-                yOffset = tmpObj.localY;
+            if (tmpPlayer!=null) {
+                xOffset = tmpPlayer.localX;
+                yOffset = tmpPlayer.localY;
             }
             float camX = xOffset - (maxScreenWidth / 2) - screenSkX;
             float camY = yOffset - (maxScreenHeight / 2) - screenSkY;
@@ -62,45 +65,42 @@ public class Level {
 
             // RENDER MAP:
             if (gameData!=null) {
-                final ShapeRenderer renderer = shapeRenderer(fill);
-                renderer.setColor(gameData.outerColor);
+                renderer = shapeRenderer(fill);
+                renderer.setColor(Utility.tmpColor.set(gameData.outerColor));
                 // OUTSIDE WALLS:
                 //Todo check mainContext.lineWidth = 7;
               
                 renderer.rect(0, 0, maxScreenWidth, maxScreenHeight);
-                renderer.setColor(gameData.waterColor);
+                renderer= shapeRenderer(ShapeRenderer.ShapeType.Line);
+                renderer.setColor(Utility.tmpColor.set(gameData.waterColor));
                 Game.roundRect(Math.max(-7, -gameData.mapScale - camX), Math.max(-7, -gameData.mapScale - camY),
-                        Math.min(maxScreenWidth + 14, gameData.mapScale - camX + 7), Math.min(maxScreenHeight + 14, gameData.mapScale - camY + 7), 0).fill();
-                mainContext.stroke();
+                        Math.min(maxScreenWidth + 14, gameData.mapScale - camX + 7), Math.min(maxScreenHeight + 14, gameData.mapScale - camY + 7), 0,0);
+//                mainContext.stroke();
 
                 // GRID:
-                mainContext.lineWidth = 5;
-                mainContext.strokeStyle = darkColor;
-                mainContext.globalAlpha = 0.18;
-                mainContext.beginPath();
-                int grdX = -camX - gameData.mapScale - (1920 / 2);
+//             Todo   mainContext.lineWidth = 5;
+                renderer.setColor(Utility.tmpColor.set(darkColor));
+                Utility.tmpColor.a = 0.18f;
+                int grdX = (int)(-camX - gameData.mapScale - (1920 / 2));
                 for (int x = grdX; x < maxScreenWidth; x += 40) {
-                    mainContext.moveTo(x, 0);
-                    mainContext.lineTo(x, maxScreenHeight);
+                    renderer.line(x, 0,x, maxScreenHeight);
                 }
-                int grdY = -camY - gameData.mapScale - (1920 / 2);
+                int grdY = (int) (-camY - gameData.mapScale - (1920 / 2));
                 for (int y = grdY; y < maxScreenHeight; y += 40) {
-                    mainContext.moveTo(0, y);
-                    mainContext.lineTo(maxScreenWidth, y);
+                    renderer.line(0, y,maxScreenWidth, y);
                 }
-                mainContext.stroke();
-                mainContext.globalAlpha = 1;
+                Utility.tmpColor.a = 1;
 
                 // RENDER ISLANDS:
-                if (gameData.islands) {
-                    var tmpIsl;
-                    for (int i = 0; i < gameData.islands.length; ++i) {
-                        tmpIsl = gameData.islands[i];
+                if (gameData.islands.size()>0) {
+                    Island tmpIsl;
+                    for (int i = 0; i < gameData.islands.size(); ++i) {
+                        tmpIsl = gameData.islands.get(i);
                         tmpX = tmpIsl.x - camX;
                         tmpY = tmpIsl.y - camY;
                         if (tmpX + tmpIsl.s + 125 >= 0 && tmpY + tmpIsl.s + 125 >= 0
                                 && tmpX - tmpIsl.s - 125 <= maxScreenWidth && tmpY - tmpIsl.s - 125 <= maxScreenHeight) {
-                            drawIsland(tmpX, tmpY, tmpIsl.s, tmpIsl.i, mainContext);
+                            drawIsland(tmpX, tmpY, tmpIsl.s, tmpIsl.i);
                         }
                     }
                     tmpIsl = null;
@@ -108,9 +108,9 @@ public class Level {
             }
 
             // RENDER GAMEOBJECTS:
-            mainContext.lineWidth = 8.5;
-            for (int i = 0; i < gameObjects.length; ++i) {
-                tmpObj = gameObjects[i];
+//         todo   mainContext.lineWidth = 8.5;
+            for (int i = 0; i < gameObjects.size(); ++i) {
+               Obstacle tmpObj = gameObjects.get(i);
                 if (tmpObj.active) {
                     tmpObj.x += (tmpObj.xS * (delta / 1000));
                     tmpObj.y += (tmpObj.yS * (delta / 1000));
@@ -118,36 +118,35 @@ public class Level {
                     tmpY = tmpObj.y - camY;
                     if (tmpX + tmpObj.s >= 0 && tmpY + tmpObj.s >= 0
                             && tmpX - tmpObj.s <= maxScreenWidth && tmpY - tmpObj.s <= maxScreenHeight) {
-                        mainContext.translate(tmpX, tmpY);
-                        renderGameObject(tmpObj, mainContext);
-                        mainContext.translate(-tmpX, -tmpY);
+//                     todo   mainContext.translate(tmpX, tmpY);
+                        Game.renderGameObject(tmpObj);
                     }
                 }
             }
 
             // RENDER PLAYERS:
-            var tmpS;
-            for (int i = 0; i < users.length; ++i) {
-                tmpObj = users[i];
+            Skin tmpS;
+            for (int i = 0; i < users.size(); ++i) {
+                final Player tmpObj = users.get(i);
                 if (tmpObj.visible && !tmpObj.dead) {
                     tmpX = tmpObj.localX - camX;
                     tmpY = tmpObj.localY - camY;
-                    tmpS = userSkins[tmpObj.skin || 0];
-                    if (!tmpS)
-                        tmpS = userSkins[0];
+                    tmpS = userSkins.get(tmpObj.skin);
+                    if (tmpS!=null)
+                        tmpS = userSkins.get(0);
 
                     // CANNON ANIMATIONS:
-                    if (tmpObj.animMults) {
-                        for (int a = 0; a < tmpObj.animMults.length; ++a) {
-                            if (tmpObj.animMults[a].plus) {
-                                tmpObj.animMults[a].mult += tmpObj.animMults[a].plus;
-                                if (tmpObj.animMults[a].mult >= 1) {
-                                    tmpObj.animMults[a].mult = 1;
-                                    tmpObj.animMults[a].plus = 0;
+                    if (tmpObj.animMults!=null) {
+                        for (int a = 0; a < tmpObj.animMults.size(); ++a) {
+                            if (tmpObj.animMults.get(a).plus!=0) {
+                                tmpObj.animMults.get(a).mult += tmpObj.animMults.get(a).plus;
+                                if (tmpObj.animMults.get(a).mult >= 1) {
+                                    tmpObj.animMults.get(a).mult = 1;
+                                    tmpObj.animMults.get(a).plus = 0;
                                 }
-                                if (tmpObj.animMults[a].mult < 0.8) {
-                                    tmpObj.animMults[a].mult = 0.8;
-                                    tmpObj.animMults[a].plus *= -1;
+                                if (tmpObj.animMults.get(a).mult < 0.8f) {
+                                    tmpObj.animMults.get(a).mult = 0.8f;
+                                    tmpObj.animMults.get(a).plus *= -1;
                                 }
                             }
                         }
@@ -185,20 +184,16 @@ public class Level {
                         mainContext.globalAlpha = tmpS.opacity;
 
                     // ACTUAL RENDER:
-                    mainContext.save();
                     mainContext.translate(tmpX, tmpY);
                     mainContext.rotate(tmpObj.dir - (Math.PI / 2));
                     mainContext.drawImage(playerCanvas, -(playerCanvas.width / 2), -(playerCanvas.height / 2));
-                    mainContext.restore();
-                    mainContext.globalAlpha = 1;
-                    mainContext.globalCompositeOperation = "source-over";
                 }
             }
 
             // PLAYER UI:
             float UIPadding, maxBarWidth, barPadding,
                     percentage, barWidth, barHeight, szMult, tmpSID;
-        final  ShapeRenderer renderer = shapeRenderer(fill);
+renderer = shapeRenderer(fill);
             for (int i = 0; i < users.size(); ++i) {
                 tmpObj = users.get(i);
                 if (tmpObj.visible && !tmpObj.dead) {
@@ -231,7 +226,7 @@ public class Level {
                                 renderer.fillText(tmpObj.name, 0, 0);
                                 if (tmpObj.lvl) {
                                     renderer.font = (nameTextSize * 1.3) + "px regularF";
-                                    var tmpLvlX = -(nameMeasure.width / 2) - (10 + (lvlMeasure.width / 2));
+                                    int tmpLvlX = -(nameMeasure.width / 2) - (10 + (lvlMeasure.width / 2));
                                     renderer.strokeStyle = darkColor;
                                     renderer.strokeText(tmpObj.lvl, tmpLvlX, 0);
                                     renderer.fillText(tmpObj.lvl, tmpLvlX, 0);
@@ -240,8 +235,8 @@ public class Level {
                             tmpObj.nameSpriteID = tmpSID;
                             tmpObj.nameSprite = tmpCanvas;
                         }
-                        if (tmpObj.nameSprite) {
-                            mainContext.drawImage(tmpObj.nameSprite, tmpX - (tmpObj.nameSprite.width / 2),
+                        if (tmpObj.nameSprite!=null) {
+                            spriteBatch().draw(tmpObj.nameSprite, tmpX - (tmpObj.nameSprite.width / 2),
                                     tmpY - (UIPadding * 2) - (tmpObj.nameSprite.height / 2), tmpObj.nameSprite.width, tmpObj.nameSprite.height);
                         }
                     }
@@ -261,8 +256,8 @@ public class Level {
                 }
             }
 
-            if (iconsList[1]) {
-                mainContext.drawImage(iconsList[1], 500, 500, skullIconSize, skullIconSize);
+            if (Game.iconsList[1]!=null) {
+                spriteBatch().draw(Game.iconsList[1], 500, 500, skullIconSize, skullIconSize);
             }
 
             // DAY/NIGHT TIME:
