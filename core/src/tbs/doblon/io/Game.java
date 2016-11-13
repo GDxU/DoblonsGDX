@@ -171,7 +171,7 @@ public class Game extends GameBase {
         }
     }
 
-    float playerCanvasScale = 430, maxFlashAlpha = 0.25f;
+   public static float playerCanvasScale = 430, maxFlashAlpha = 0.25f;
 
     // SKULL ICONS:
     static int iconsCount = 5;
@@ -498,7 +498,7 @@ static int lastScore;
         shapeRenderer(fill).circle(x, y, s);
     }
 
-    public static void renderPlayer(Player tmpObj, float tmpX, float tmpY, float tmpS, float delta) {
+    public static void renderPlayer(Player tmpObj, float tmpX, float tmpY, Skin tmpS, float delta) {
 
         // RENDER PLAYER SHIP:
         contxt.lineWidth = 8.5;

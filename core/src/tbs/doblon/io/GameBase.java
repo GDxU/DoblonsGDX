@@ -112,7 +112,7 @@ public abstract class GameBase extends ApplicationAdapter {
 
     public static void update() {
         try {
-            level.update();
+            level.update(delta);
         } catch (Exception e) {
             e.printStackTrace();
         }
