@@ -76,7 +76,7 @@ public class Level {
             renderer = shapeRenderer(ShapeRenderer.ShapeType.Line);
             renderer.setColor(Utility.tmpColor.set(gameData.waterColor));
             Game.roundRect(Math.max(-7, -gameData.mapScale - camX), Math.max(-7, -gameData.mapScale - camY),
-                    Math.min(maxScreenWidth + 14, gameData.mapScale - camX + 7), Math.min(maxScreenHeight + 14, gameData.mapScale - camY + 7), 0, 0);
+                    Math.min(maxScreenWidth + 14, gameData.mapScale - camX + 7), Math.min(maxScreenHeight + 14, gameData.mapScale - camY + 7), 0);
 //                mainContext.stroke();
 
             // GRID:
@@ -224,9 +224,9 @@ public class Level {
                 barHeight = (75 / 9);
                 renderer.setColor(Utility.tmpColor.set(darkColor));
                 Game.roundRect(tmpX - (maxBarWidth / 2) - barPadding, tmpY + UIPadding + UIPadding - barPadding,
-                        maxBarWidth + (barPadding * 2), barHeight + (barPadding * 2), 6, 0);
+                        maxBarWidth + (barPadding * 2), barHeight + (barPadding * 2), 6);
                 renderer.setColor(Utility.tmpColor.set((tmpObj.team == player.team) ? 0x78d545 : 0xED6B6B));
-                Game.roundRect(tmpX - (maxBarWidth / 2), tmpY + UIPadding + UIPadding, barWidth, barHeight, 6, 0);
+                Game.roundRect(tmpX - (maxBarWidth / 2), tmpY + UIPadding + UIPadding, barWidth, barHeight, 6);
             }
         }
 

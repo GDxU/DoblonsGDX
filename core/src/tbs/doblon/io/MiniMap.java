@@ -13,10 +13,10 @@ import static tbs.doblon.io.Game.minimap;
 
 public class MiniMap {
     public static ArrayList<MiniMapItem> miniMapItems = new ArrayList<MiniMapItem>();
-    float x, y, width, height, r, s;
+    float x, y, width, height, r;
 
     public void draw(ShapeRenderer renderer) {
-        Game.roundRect(x, y, width, height, r, s);
+        Game.roundRect(x, y, width, height, r);
         for (MiniMapItem item : miniMapItems) {
             if (!item.active)
                 continue;

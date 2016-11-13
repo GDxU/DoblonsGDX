@@ -2,10 +2,12 @@ package tbs.doblon.io;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.sun.corba.se.impl.orbutil.ObjectWriter;
 
@@ -61,7 +63,7 @@ public class Game extends GameBase {
     public static int lobbyRoomID;
     public static GameController gameController = new GameController();
 
-    public static ArrayList<UpgradeItem> upgradeItems=new ArrayList<UpgradeItem>(12);
+    public static ArrayList<UpgradeItem> upgradeItems = new ArrayList<UpgradeItem>(12);
     public static int port;
     public static int controlIndex = 0;
     public static int targetFPS = 60;
@@ -81,7 +83,7 @@ public class Game extends GameBase {
     };
     public static String partyKey;
     public static Player player = null;
-    public static  ArrayList<String> modeList;
+    public static ArrayList<String> modeList;
     public static String modeIndex = null;
     public static String leaderboardText = null;
     public static String currentMode = null;
@@ -171,7 +173,7 @@ public class Game extends GameBase {
         }
     }
 
-   public static float playerCanvasScale = 430, maxFlashAlpha = 0.25f;
+    public static float playerCanvasScale = 430, maxFlashAlpha = 0.25f;
 
     // SKULL ICONS:
     static int iconsCount = 5;
@@ -205,8 +207,9 @@ public class Game extends GameBase {
     static int animTextIndex = 0;
 
     private static short a = initAnimTexts();
-    public static short initAnimTexts(){
-        for(int i = 0;i<20;++i) {
+
+    public static short initAnimTexts() {
+        for (int i = 0; i < 20; ++i) {
             animTexts.add(new AnimText());
         }
 
@@ -215,7 +218,7 @@ public class Game extends GameBase {
 
     public static void updateAnimTexts(float delta) {
         // UPDATE COOLDOWNS:
-        if (scoreCountdown>=0) {
+        if (scoreCountdown >= 0) {
             scoreCountdown -= delta;
             if (scoreCountdown <= 0) {
                 scoreCountdown = 0;
@@ -230,7 +233,7 @@ public class Game extends GameBase {
             final AnimText animText = animTexts.get(i);
             animText.update(delta);
             //todo might have to draw text with a bigger size mainContext.strokeStyle = 0x5f5f5f;
-            Utility.drawCenteredText(spriteBatch(), 0xfffff,animText.text, animText.x, animText.y,animText.scale);
+            Utility.drawCenteredText(spriteBatch(), 0xfffff, animText.text, animText.x, animText.y, animText.scale);
         }
     }
 
@@ -250,8 +253,8 @@ public class Game extends GameBase {
             shapeRenderer(fill).strokeStyle = darkColor;
             shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
             var tmpOff = (s * tmpIsl.offsets[0]);
-            shapeRenderer(fill).beginPath();
-            shapeRenderer(fill).moveTo((tmpOff * MathCOS(0)), (tmpOff * MathSIN(0)));
+            
+            shapeRenderer(fill).moveTo((tmpOff * Math.cos(0)), (tmpOff * Math.sin(0)));
 
             // ISLAND BASE:
             var offIndx = 0;
@@ -260,7 +263,7 @@ public class Game extends GameBase {
                 if (offIndx >= tmpIsl.offsets.length - 1)
                     offIndx = 0;
                 var tmpOff = (s * tmpIsl.offsets[offIndx]);
-                shapeRenderer(fill).lineTo((tmpOff * MathCOS(i * 2 * Math.PI / tmpIsl.sides)), (tmpOff * MathSIN(i * 2 * Math.PI / tmpIsl.sides)));
+                shapeRenderer(fill).lineTo((tmpOff * Math.cos(i * 2 * Math.PI / tmpIsl.sides)), (tmpOff * Math.sin(i * 2 * Math.PI / tmpIsl.sides)));
             }
             shapeRenderer(fill).closePath();
             if (indx < 3) {
@@ -285,7 +288,7 @@ public class Game extends GameBase {
                 tmpSprt.width, tmpSprt.height);
     }
 
-    public static void showAnimText(float x, float y, String txt, float scale, long fadeDelay,String type,float sclPlus) {
+    public static void showAnimText(float x, float y, String txt, float scale, long fadeDelay, String type, float sclPlus) {
         AnimText tmpText = animTexts.get(animTextIndex);
         tmpText.show(x, y, txt, scale, fadeDelay, sclPlus);
         tmpText.type = type;
@@ -302,7 +305,7 @@ public class Game extends GameBase {
         SocketManager.socket.close();
     }
 
-    static final int[] pingColors = {0xffffff, 0xffffff ,0xff6363 ,0xff6363,0x67ff3e66,0xffffff88,0x63b0ff};
+    static final int[] pingColors = {0xffffff, 0xffffff, 0xff6363, 0xff6363, 0x67ff3e66, 0xffffff88, 0x63b0ff};
 
     // UPDATE OR PUSH PLAYER:
     public static void updateOrPushUser(JSONObject obj) {
@@ -386,8 +389,10 @@ public class Game extends GameBase {
         hideNotifByType("bNotif");
         showAnimText(maxScreenWidth / 2, screenHeight / 3, text, 130, 1000, "bNotif", 0.26f);
     }
-static int lastScore;
+
+    static int lastScore;
     static long scoreCountdown, scoreDisplayTime;
+
     public static void showScoreNotif(int value) {
         hideNotifByType("sNotif");
         lastScore += value;
@@ -403,7 +408,7 @@ static int lastScore;
             skinIndex = 0;
         else if (skinIndex < 0)
             skinIndex = userSkins.length - 1;
-        if (renderedSkins.get(skinIndex)!=null) {
+        if (renderedSkins.get(skinIndex) != null) {
             tmpCanvas.width = tmpCanvas.height = skinDisplayIconSize;
             var shapeRenderer (fill) = tmpCanvas.getContext("2d");
             shapeRenderer(fill).translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
@@ -487,7 +492,7 @@ static int lastScore;
     }
 
     public static int mouseX, mouseY;
-    public  static boolean forceTarget = true, shooting;
+    public static boolean forceTarget = true, shooting;
     String userNameInput = Utility.getString("lstnmdbl");
 
     public static void toggleUpgrades() {
@@ -823,305 +828,295 @@ static int lastScore;
     }
 
     // DO UPGRADE:
-    public static void doUpgrade(int index,int pos,int tp) {
+    public static void doUpgrade(int index, int pos, int tp) {
         SocketManager.socket.emit("3", index, pos, tp);
     }
 
-    public static void roundRect(float x, float y, float w, float h, float r, float s) {
-        s = s || 1;
+    public static void roundRect(float x, float y, float w, float h, float r) {
+        final ShapeRenderer renderer = shapeRenderer(fill);
 
-        if (w < 2 * r) r = w / 2;
-        if (h < 2 * r) r = h / 2;
-        this.beginPath();
-        this.moveTo(x + r, y);
-        this.arcTo(x + w * s, y, x + w * s, y + h, r);
-        this.arcTo(x + w, y + h, x, y + h, r);
-        this.arcTo(x, y + h, x, y, r);
-        this.arcTo(x * (s == 1 ? s : (s * 1.2)), y, x + w * s, y, r);
-        this.closePath();
-        return this;
+        //Todo renderer.setColor(Utility.tmpColor.set(color));
+        renderer.rect(x + r, y, w - r - r, h);
+        renderer.rect(x, y + r, r, h - r - r);
+        renderer.rect(x + w - r, y + r, r, h - r - r);
+
+        renderer.arc(x, y + h, r, 180, 90);
+        renderer.arc(x + r, y + r, r, 90, 90);
+        renderer.arc(x + w - r, y + h - r, r, 270, 90);
+        renderer.arc(x + w - r, y + r, r, 0, 90);
+
     }
-}
 
-public static int initSkins(){
-    final Object[][]objects = {{
-        "Default",
+    public static int initSkins() {
+        final Object[][] objects = {{
+                "Default",
                 0xeb6d6d,
                 0x949494
-    },{
-        "Purple",
+        }, {
+                "Purple",
                 0xb96bed,
                 0x949494
-    },{
-        "Green",
+        }, {
+                "Green",
                 0x6FED6B,
                 0x949494
-    },{
-        "Orange",
+        }, {
+                "Orange",
                 0xEDB76B,
                 0x949494
-    },{
-        "Black",
+        }, {
+                "Black",
                 0x696969,
                 0x949494
-    },{
-        "Navy",
+        }, {
+                "Navy",
                 0xadadad,
                 0x949494
-    },{
-        "Ghostly",
+        }, {
+                "Ghostly",
                 0x9BEB6D,
                 0x949494,
                 0.7f,
                 0x00ff0049
-    },{
-        "Glass",
+        }, {
+                "Glass",
                 0x6DEBDE,
                 0x949494,
                 0.6f,
                 0x0000ff49
-    },{
-        "Pirate",
+        }, {
+                "Pirate",
                 0x5E5E5E,
                 0x737373
-    },{
-        "Sketch",
+        }, {
+                "Sketch",
                 0xE8E8E8,
                 0xE8E8E8
-    },{
-        "Gold",
+        }, {
+                "Gold",
                 0xe9cd5f,
                 0x949494
-    },{
-        "Hazard",
+        }, {
+                "Hazard",
                 0x737373,
                 0xe9cd5f
-    },{
-        "Apples",
+        }, {
+                "Apples",
                 0x91DB30,
                 0xeb6d6d
-    },{
-        "Beach",
+        }, {
+                "Beach",
                 0xeac086,
                 0xFFD57D
-    },{
-        "Wood",
+        }, {
+                "Wood",
                 0x8c5d20,
                 0x949494
-    },{
-        "Diamond",
+        }, {
+                "Diamond",
                 0x6FE8E2,
                 0xEDEDED
-    },{
-        "Midnight",
+        }, {
+                "Midnight",
                 0x5E5E5E,
                 0xA763BA
-    },{
-        "Valentine",
+        }, {
+                "Valentine",
                 0xFE4998,
                 0xF9A7FE
-    },{
-        "Cheddar",
+        }, {
+                "Cheddar",
                 0xFCA403,
                 0xFDFC08
-    },{
-        "PewDie",
+        }, {
+                "PewDie",
                 0x09BBDF,
-                0x1D3245"
-    },{
-        "Crimson",
+                0x1D3245
+        }, {
+                "Crimson",
                 0x6B3333,
                 0xAD3E3E
-    },{
-        "Banana",
+        }, {
+                "Banana",
                 0xfbf079,
                 0xf9f9f9
-    },{
-        "Cherry",
+        }, {
+                "Cherry",
                 0xF8E0F7,
                 0xF5A9F2
-    },{
-        "Moon",
+        }, {
+                "Moon",
                 0x1C1C1C,
                 0xF2F5A9
-    },{
-        "Master",
+        }, {
+                "Master",
                 0xfce525,
                 0xbb5e0e
-    },{
-        "Reddit",
+        }, {
+                "Reddit",
                 0xfe562d,
                 0xf9f9f9
-    },{
-        "4Chan",
+        }, {
+                "4Chan",
                 0xffd3b4,
                 0x3c8d2e
-    },{
-        "Necron",
+        }, {
+                "Necron",
                 0x808080,
                 0x80ff80
-    },{
-        "Ambient",
+        }, {
+                "Ambient",
                 0x626262,
                 0x80ffff
-    },{
-        "Uranium",
+        }, {
+                "Uranium",
                 0x5a9452,
                 0x80ff80
-    },{
-        "XPlode",
+        }, {
+                "XPlode",
                 0xfe4c00,
                 0xf8bf00
-    },{
-        "巧克力",
+        }, {
+                "巧克力",
                 0x804029,
                 0xf9ebb4
-    }};
+        }};
 
 
+        for (Object[] object : objects) {
+            final Skin s = new Skin();
+            s.name = String.valueOf(object[0]);
+            s.color1 = (Integer) (object[1]);
+            s.color2 = (Integer) (object[2]);
+            if (object.length > 3)
+                s.opacity = (Float) (object[3]);
+            if (object.length > 4)
+                s.overlay = (Integer) (object[4]);
 
-    for (Object[] object : objects) {
-        final Skin s = new Skin();
-        s.name = String.valueOf(object[0]);
-        s.color1 = (Integer) (object[1]);
-        s.color2 = (Integer) (object[2]);
-        if (object.length>3)
-        s.opacity = (Float) (object[3]);
-        if (object.length>4)
-        s.overlay = (Integer) (object[4]);
-
+        }
+        return 0;
+        //[0] = name, [1] = color1, [2] = color2;
     }
-    return 0;
-    //[0] = name, [1] = color1, [2] = color2;
-}
-   int o= initSkins();
+
+    int o = initSkins();
     public static final MiniMap minimap = new MiniMap();
     public static ArrayList<Skin> userSkins = new ArrayList<Skin>();
 
-public static void sendTarget(boolean force){
-        long tmpTime=currentTime;
-        if(player!=null&&!player.dead){
-        target=Math.atan2(mouseY-(screenHeight/2),mouseX-(screenWidth/2));
-        if(force||tmpTime-lastUpdated>tUpdateFrequency){
-        if(controlIndex==1){
-        targetD=Math.sqrt(MathPOW(mouseY-(screenHeight/2),2)+MathPOW(mouseX-screenWidth/2,2));
-        targetD*=Math.min(maxScreenWidth/screenWidth,maxScreenHeight/screenHeight);
-        targetD/=(maxScreenHeight/3.5);
-        targetD=targetD.round(1);
-        if(targetD>1)
-        targetD=1;
-        else if(targetD<0.5)
-        targetD=0.5;
+    public static void sendTarget(boolean force) {
+        long tmpTime = currentTime;
+        if (player != null && !player.dead) {
+            target = (float) Math.atan2(mouseY - (screenHeight / 2), mouseX - (screenWidth / 2));
+            if (force || tmpTime - lastUpdated > tUpdateFrequency) {
+                if (controlIndex == 1) {
+                    targetD = (float) Math.sqrt(Math.pow(mouseY - (screenHeight / 2), 2) + Math.pow(mouseX - screenWidth / 2, 2));
+                    targetD *= Math.min(maxScreenWidth / screenWidth, maxScreenHeight / screenHeight);
+                    targetD /= (maxScreenHeight / 3.5);
+                    if (targetD > 1)
+                        targetD = 1;
+                    else if (targetD < 0.5)
+                        targetD = 0.5f;
+                }
+                lastUpdated = tmpTime;
+            }
+            if (force || tmpTime - lastSent > sendFrequency) {
+                lastSent = tmpTime;
+                if (controlIndex == 1) {
+                    SocketManager.socket.emit("1", target, targetD);
+                } else {
+                    SocketManager.socket.emit("1", target);
+                }
+            }
         }
-        lastUpdated=tmpTime;
-        }
-        if(force||tmpTime-lastSent>sendFrequency){
-        lastSent=tmpTime;
-        if(controlIndex==1){
-        socket.emit("1",target.round(2),targetD.round(1));
-        }else{
-        socket.emit("1",target);
-        }
-        }
-        }
-        }
-public static void sendMoveTarget(){
+    }
+
+    public static void sendMoveTarget() {
         //Todo might have to do keys[]
-        if(keys.r!=0&&keys.l!=0)
-        turnDir=0;
-        if(!keys.u&&!keys.d)
-        speedInc=0;
-        SocketManager.socket.emit("4",turnDir,speedInc);
-        }
-public static void renderGameObject(Obstacle tmpObj){
-        var tmpIndx=(tmpObj.c+"-"+tmpObj.shp+"-"+tmpObj.s);
-        var tmpSprt=gameObjSprites[tmpIndx];
-        if(!tmpSprt){
-        var tmpCanvas=document.createElement("canvas");
-        var shapeRenderer(fill)=tmpCanvas.getContext("2d");
-        tmpCanvas.width=(tmpObj.s*2)+10;
-        tmpCanvas.height=tmpCanvas.width;
-        shapeRenderer(fill).strokeStyle=darkColor;
-        shapeRenderer(fill).lineWidth=8.5;
-        shapeRenderer(fill).translate(tmpCanvas.width/2,tmpCanvas.height/2);
-        if(tmpObj.c==0){
-        shapeRenderer(fill).fillStyle=0x797979";
-        }else if(tmpObj.c==1){
-        shapeRenderer(fill).fillStyle=0xe89360";
-        }else if(tmpObj.c==2){
-        shapeRenderer(fill).fillStyle=0xc8c8c8";
-        }else if(tmpObj.c==3){
-        shapeRenderer(fill).fillStyle=0xe9cd5f";
-        }else if(tmpObj.c==4){
-        shapeRenderer(fill).fillStyle=0xEB6565";
-        }else if(tmpObj.c==5){
-        shapeRenderer(fill).fillStyle=0x6FE8E2";
-        }else if(tmpObj.c==6){
-        shapeRenderer(fill).fillStyle=0x7BE86F";
-        }
-        if(tmpObj.shp==1){
-        var spikes=6;
-        var rot=Math.PI/2*3;
-        var rad=tmpObj.s/2;
-        var step=Math.PI/spikes;
-        shapeRenderer(fill).beginPath();
-        shapeRenderer(fill).moveTo(0,-rad);
-        for(var s=0;s<spikes;s++){
-        shapeRenderer(fill).lineTo(MathCOS(rot)*rad,MathSIN(rot)*rad);
-        rot+=step;
-        shapeRenderer(fill).lineTo(MathCOS(rot)*(rad*0.8),MathSIN(rot)*(rad*0.8));
-        rot+=step;
-        }
-        shapeRenderer(fill).lineTo(0,-rad);
-        shapeRenderer(fill).closePath();
-        shapeRenderer(fill).stroke();
-        shapeRenderer(fill).fill();
-        }else if(tmpObj.shp==2){
-        var rad=tmpObj.s/1.6;
-        shapeRenderer(fill).beginPath();
-        shapeRenderer(fill).moveTo(0,-rad);
-        shapeRenderer(fill).lineTo(rad,0);
-        shapeRenderer(fill).lineTo(0,rad);
-        shapeRenderer(fill).lineTo(-rad,0);
-        shapeRenderer(fill).closePath();
-        shapeRenderer(fill).stroke();
-        shapeRenderer(fill).fill();
-        }else if(tmpObj.shp==3){
-        var rad=tmpObj.s/1.6;
-        shapeRenderer(fill).beginPath();
-        shapeRenderer(fill).moveTo(0,-rad);
-        shapeRenderer(fill).lineTo(rad/1.5,0);
-        shapeRenderer(fill).lineTo(0,rad);
-        shapeRenderer(fill).lineTo(-rad/1.5,0);
-        shapeRenderer(fill).closePath();
-        shapeRenderer(fill).stroke();
-        shapeRenderer(fill).fill();
-        }else{
-        shapeRenderer(fill).beginPath();
-        shapeRenderer(fill).arc(0,0,tmpObj.s/2,0,2*Math.PI);
-        shapeRenderer(fill).stroke();
-        shapeRenderer(fill).fill();
-        }
-        gameObjSprites[tmpIndx]=tmpCanvas;
-        tmpSprt=gameObjSprites[tmpIndx];
-        }
-        spriteBatch().draw(tmpSprt,-tmpSprt.width/2,-tmpSprt.height/2,
-        tmpSprt.width,tmpSprt.height);
-        }
+        if (keys.r == 0 && keys.l == 0)
+            turnDir = 0;
+        if (keys.u==0 && keys.d ==0)
+            speedInc = 0;
+        SocketManager.socket.emit("4", turnDir, speedInc);
+    }
 
+    public static void renderGameObject(Obstacle tmpObj) {
 
-// UPDATE MENU:
-public static void updateMenuLoop(delta){
-        if(gameState!=1){
+           //Todo tmpCanvas.width = (tmpObj.s * 2) + 10;
+            shapeRenderer(fill).strokeStyle = darkColor;
+            shapeRenderer(fill).lineWidth = 8.5;
+            shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
+            final Color color = Utility.tmpColor;
+            if (tmpObj.c == 0) {
+                color.set(0x797979) ;
+            } else if (tmpObj.c == 1) {
+                color.set(0xe89360 );
+            } else if (tmpObj.c == 2) {
+                color.set(0xc8c8c8 );
+            } else if (tmpObj.c == 3) {
+                color.set(0xe9cd5f );
+            } else if (tmpObj.c == 4) {
+                color.set(0xEB6565 );
+            } else if (tmpObj.c == 5) {
+                color.set(0x6FE8E2 );
+            } else if (tmpObj.c == 6) {
+                color.set(0x7BE86F );
+            }
+            if (tmpObj.shp == 1) {
+                int spikes = 6;
+                float rot = (float) Math.PI / 2 * 3;
+                float rad = tmpObj.s / 2;
+                float step = (float) Math.PI / spikes;
+                
+                shapeRenderer(fill).moveTo(0, -rad);
+                for (int s = 0; s < spikes; s++) {
+                    shapeRenderer(fill).lineTo(Math.cos(rot) * rad, Math.sin(rot) * rad);
+                    rot += step;
+                    shapeRenderer(fill).lineTo(Math.cos(rot) * (rad * 0.8), Math.sin(rot) * (rad * 0.8));
+                    rot += step;
+                }
+                shapeRenderer(fill).lineTo(0, -rad);
+                shapeRenderer(fill).closePath();
+                shapeRenderer(fill).stroke();
+                shapeRenderer(fill).fill();
+            } else if (tmpObj.shp == 2) {
+                float rad = tmpObj.s / 1.6f;
+                
+                shapeRenderer(fill).moveTo(0, -rad);
+                shapeRenderer(fill).lineTo(rad, 0);
+                shapeRenderer(fill).lineTo(0, rad);
+                shapeRenderer(fill).lineTo(-rad, 0);
+                shapeRenderer(fill).closePath();
+                shapeRenderer(fill).stroke();
+                shapeRenderer(fill).fill();
+            } else if (tmpObj.shp == 3) {
+                float rad = tmpObj.s / 1.6f;
+                
+                shapeRenderer(fill).moveTo(0, -rad);
+                shapeRenderer(fill).lineTo(rad / 1.5, 0);
+                shapeRenderer(fill).lineTo(0, rad);
+                shapeRenderer(fill).lineTo(-rad / 1.5, 0);
+                shapeRenderer(fill).closePath();
+                shapeRenderer(fill).stroke();
+                shapeRenderer(fill).fill();
+            } else {
+                
+                shapeRenderer(fill).circle(tmpObj.x, tmpObj.y,  tmpObj.s / 2);
+            }
+    }
 
-        // MENU INSTRUCTIONS TEXT:
-        insturctionsCountdown-=delta;
-        if(insturctionsCountdown<=0){
-        insturctionsCountdown=instructionsSpeed;
-        instructionsText.innerHTML=instructionsList[instructionsIndex];
-        instructionsIndex++;
-        if(instructionsIndex>=instructionsList.length)
-        instructionsIndex=0;
+    public static String instructionsText = "";
+
+    // UPDATE MENU:
+    public static void updateMenuLoop(float delta) {
+        if (gameState != 1) {
+
+            // MENU INSTRUCTIONS TEXT:
+            insturctionsCountdown -= delta;
+            if (insturctionsCountdown <= 0) {
+                insturctionsCountdown = instructionsSpeed;
+                instructionsText = instructionsList[instructionsIndex];
+                instructionsIndex++;
+                if (instructionsIndex >= instructionsList.length)
+                    instructionsIndex = 0;
+            }
         }
-        }
-        }
+    }}

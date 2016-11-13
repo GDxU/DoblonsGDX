@@ -377,7 +377,7 @@ public class SocketManager {
 
                                     final String key = String.valueOf(values[i]);
                                     if (key.equals("lvl")) {
-                                        tmpUser.lvl = (Integer) (values[i + 1]);
+                                        tmpUser.lvl = String.valueOf(values[i + 1]);
 
                                     } else if (key.equals("maxHealth")) {
                                         tmpUser.maxHealth = (Integer) (values[i + 1]);
