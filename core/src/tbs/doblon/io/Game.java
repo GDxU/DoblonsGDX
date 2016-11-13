@@ -7,12 +7,19 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.sun.corba.se.impl.orbutil.ObjectWriter;
 
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 public class Game extends GameBase {
@@ -253,7 +260,7 @@ public class Game extends GameBase {
             shapeRenderer(fill).strokeStyle = darkColor;
             shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
             var tmpOff = (s * tmpIsl.offsets[0]);
-            
+
             shapeRenderer(fill).moveTo((tmpOff * Math.cos(0)), (tmpOff * Math.sin(0)));
 
             // ISLAND BASE:
@@ -1033,74 +1040,74 @@ public class Game extends GameBase {
         //Todo might have to do keys[]
         if (keys.r == 0 && keys.l == 0)
             turnDir = 0;
-        if (keys.u==0 && keys.d ==0)
+        if (keys.u == 0 && keys.d == 0)
             speedInc = 0;
         SocketManager.socket.emit("4", turnDir, speedInc);
     }
 
     public static void renderGameObject(Obstacle tmpObj) {
 
-           //Todo tmpCanvas.width = (tmpObj.s * 2) + 10;
-            shapeRenderer(fill).strokeStyle = darkColor;
-            shapeRenderer(fill).lineWidth = 8.5;
-            shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
-            final Color color = Utility.tmpColor;
-            if (tmpObj.c == 0) {
-                color.set(0x797979) ;
-            } else if (tmpObj.c == 1) {
-                color.set(0xe89360 );
-            } else if (tmpObj.c == 2) {
-                color.set(0xc8c8c8 );
-            } else if (tmpObj.c == 3) {
-                color.set(0xe9cd5f );
-            } else if (tmpObj.c == 4) {
-                color.set(0xEB6565 );
-            } else if (tmpObj.c == 5) {
-                color.set(0x6FE8E2 );
-            } else if (tmpObj.c == 6) {
-                color.set(0x7BE86F );
+        //Todo tmpCanvas.width = (tmpObj.s * 2) + 10;
+        shapeRenderer(fill).strokeStyle = darkColor;
+        shapeRenderer(fill).lineWidth = 8.5;
+        shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
+        final Color color = Utility.tmpColor;
+        if (tmpObj.c == 0) {
+            color.set(0x797979);
+        } else if (tmpObj.c == 1) {
+            color.set(0xe89360);
+        } else if (tmpObj.c == 2) {
+            color.set(0xc8c8c8);
+        } else if (tmpObj.c == 3) {
+            color.set(0xe9cd5f);
+        } else if (tmpObj.c == 4) {
+            color.set(0xEB6565);
+        } else if (tmpObj.c == 5) {
+            color.set(0x6FE8E2);
+        } else if (tmpObj.c == 6) {
+            color.set(0x7BE86F);
+        }
+        if (tmpObj.shp == 1) {
+            int spikes = 6;
+            float rot = (float) Math.PI / 2 * 3;
+            float rad = tmpObj.s / 2;
+            float step = (float) Math.PI / spikes;
+
+            shapeRenderer(fill).moveTo(0, -rad);
+            for (int s = 0; s < spikes; s++) {
+                shapeRenderer(fill).lineTo(Math.cos(rot) * rad, Math.sin(rot) * rad);
+                rot += step;
+                shapeRenderer(fill).lineTo(Math.cos(rot) * (rad * 0.8), Math.sin(rot) * (rad * 0.8));
+                rot += step;
             }
-            if (tmpObj.shp == 1) {
-                int spikes = 6;
-                float rot = (float) Math.PI / 2 * 3;
-                float rad = tmpObj.s / 2;
-                float step = (float) Math.PI / spikes;
-                
-                shapeRenderer(fill).moveTo(0, -rad);
-                for (int s = 0; s < spikes; s++) {
-                    shapeRenderer(fill).lineTo(Math.cos(rot) * rad, Math.sin(rot) * rad);
-                    rot += step;
-                    shapeRenderer(fill).lineTo(Math.cos(rot) * (rad * 0.8), Math.sin(rot) * (rad * 0.8));
-                    rot += step;
-                }
-                shapeRenderer(fill).lineTo(0, -rad);
-                shapeRenderer(fill).closePath();
-                shapeRenderer(fill).stroke();
-                shapeRenderer(fill).fill();
-            } else if (tmpObj.shp == 2) {
-                float rad = tmpObj.s / 1.6f;
-                
-                shapeRenderer(fill).moveTo(0, -rad);
-                shapeRenderer(fill).lineTo(rad, 0);
-                shapeRenderer(fill).lineTo(0, rad);
-                shapeRenderer(fill).lineTo(-rad, 0);
-                shapeRenderer(fill).closePath();
-                shapeRenderer(fill).stroke();
-                shapeRenderer(fill).fill();
-            } else if (tmpObj.shp == 3) {
-                float rad = tmpObj.s / 1.6f;
-                
-                shapeRenderer(fill).moveTo(0, -rad);
-                shapeRenderer(fill).lineTo(rad / 1.5, 0);
-                shapeRenderer(fill).lineTo(0, rad);
-                shapeRenderer(fill).lineTo(-rad / 1.5, 0);
-                shapeRenderer(fill).closePath();
-                shapeRenderer(fill).stroke();
-                shapeRenderer(fill).fill();
-            } else {
-                
-                shapeRenderer(fill).circle(tmpObj.x, tmpObj.y,  tmpObj.s / 2);
-            }
+            shapeRenderer(fill).lineTo(0, -rad);
+            shapeRenderer(fill).closePath();
+            shapeRenderer(fill).stroke();
+            shapeRenderer(fill).fill();
+        } else if (tmpObj.shp == 2) {
+            float rad = tmpObj.s / 1.6f;
+
+            shapeRenderer(fill).moveTo(0, -rad);
+            shapeRenderer(fill).lineTo(rad, 0);
+            shapeRenderer(fill).lineTo(0, rad);
+            shapeRenderer(fill).lineTo(-rad, 0);
+            shapeRenderer(fill).closePath();
+            shapeRenderer(fill).stroke();
+            shapeRenderer(fill).fill();
+        } else if (tmpObj.shp == 3) {
+            float rad = tmpObj.s / 1.6f;
+
+            shapeRenderer(fill).moveTo(0, -rad);
+            shapeRenderer(fill).lineTo(rad / 1.5, 0);
+            shapeRenderer(fill).lineTo(0, rad);
+            shapeRenderer(fill).lineTo(-rad / 1.5, 0);
+            shapeRenderer(fill).closePath();
+            shapeRenderer(fill).stroke();
+            shapeRenderer(fill).fill();
+        } else {
+
+            shapeRenderer(fill).circle(tmpObj.x, tmpObj.y, tmpObj.s / 2);
+        }
     }
 
     public static String instructionsText = "";
@@ -1119,4 +1126,29 @@ public class Game extends GameBase {
                     instructionsIndex = 0;
             }
         }
-    }}
+    }
+}
+
+    public static boolean getIP() {
+        try {
+           final URL dob = new URL("http://doblons.io/getMobileIP?connectToServer");
+           final URLConnection yc = dob.openConnection();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(
+                            yc.getInputStream()));
+          //Todo  String inputLine =  in.toString();
+            String inputLine;
+            Utility.log("lines >> ");
+            while ((inputLine = in.readLine()) != null)
+                Utility.log(inputLine);
+            Utility.log("full >> ");
+            Utility.log(in.toString());
+            in.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            Utility.log("getIP IO exception: ");
+            e.printStackTrace();
+        }
+        return true;
+    }
