@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class Player extends GameObject {
     float aimDir;
     int autoCannons, bigCannon;
-    float cannonLength, cannonWidth, cannonSpeed;
+    float cannonLength, cannonWidth, cannonSpeed,rowRot,rowSpeed;
     int cannons, chaseCannons, classIndex;
     boolean dead;
     float dir;

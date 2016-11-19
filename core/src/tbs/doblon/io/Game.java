@@ -245,52 +245,45 @@ public class Game extends GameBase {
     }
 
     public static void drawIsland(float x, float y, float s, int indx) {
-        var tmpIndx = (s + "-" + indx);
-        var tmpSprt = islandSprites[tmpIndx];
-        if (!tmpSprt) {
-            tmpIsl = islandInfo[indx];
-            if (!tmpIsl) {
+        //Todo render islands onto sprite sheet
+        final ShapeRenderer renderer = shapeRenderer(fill);
+          IslandInfo tmpIsl = islandInfo[indx];
+
+            if (tmpIsl == null) {
                 tmpIsl = islandInfo[0];
             }
-            var tmpCanvas = document.createElement("canvas");
-            var shapeRenderer (fill) = tmpCanvas.getContext("2d");
-            tmpCanvas.width = (s * 2) + (indx < 3 ? 300 : 10);
-            tmpCanvas.height = tmpCanvas.width;
-            shapeRenderer(fill).fillStyle = tmpIsl.color;
-            shapeRenderer(fill).strokeStyle = darkColor;
-            shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
-            var tmpOff = (s * tmpIsl.offsets[0]);
+// Todo           tmpCanvas.width = (s * 2) + (indx < 3 ? 300 : 10);
+           renderer.setColor(Utility.tmpColor.set(tmpIsl.color));
+//       Todo     renderer.strokeStyle = darkColor;
+            float tmpOff = (s * tmpIsl.offsets[0]);
 
-            shapeRenderer(fill).moveTo((tmpOff * Math.cos(0)), (tmpOff * Math.sin(0)));
+            renderer.moveTo((tmpOff * Math.cos(0)), (tmpOff * Math.sin(0)));
 
             // ISLAND BASE:
-            var offIndx = 0;
-            for (var i = 1; i <= tmpIsl.sides - 1; i++) {
+            int offIndx = 0;
+            for (int i = 1; i <= tmpIsl.sides - 1; i++) {
                 offIndx++;
                 if (offIndx >= tmpIsl.offsets.length - 1)
                     offIndx = 0;
-                var tmpOff = (s * tmpIsl.offsets[offIndx]);
-                shapeRenderer(fill).lineTo((tmpOff * Math.cos(i * 2 * Math.PI / tmpIsl.sides)), (tmpOff * Math.sin(i * 2 * Math.PI / tmpIsl.sides)));
+                float tmpOff1 = (s * tmpIsl.offsets[offIndx]);
+                renderer.lineTo((tmpOff1 * Math.cos(i * 2 * Math.PI / tmpIsl.sides)), (tmpOff1 * Math.sin(i * 2 * Math.PI / tmpIsl.sides)));
             }
-            shapeRenderer(fill).closePath();
+//  Todo          renderer.closePath();
             if (indx < 3) {
-                shapeRenderer(fill).lineWidth = 300;
-                shapeRenderer(fill).globalAlpha = 0.1;
-                shapeRenderer(fill).stroke();
-                shapeRenderer(fill).lineWidth = 120;
-                shapeRenderer(fill).stroke();
+                renderer.lineWidth = 300;
+                renderer.globalAlpha = 0.1;
+                renderer.stroke();
+                renderer.lineWidth = 120;
+                renderer.stroke();
             }
-            shapeRenderer(fill).lineWidth = 8.5;
-            shapeRenderer(fill).globalAlpha = 1;
-            shapeRenderer(fill).stroke();
-            shapeRenderer(fill).fill();
+            renderer.lineWidth = 8.5;
+            renderer.globalAlpha = 1;
 
             // PALM TREES:
 
 
             islandSprites[tmpIndx] = tmpCanvas;
             tmpSprt = islandSprites[tmpIndx];
-        }
         spriteBatch().draw(tmpSprt, x - tmpSprt.width / 2, y - tmpSprt.height / 2,
                 tmpSprt.width, tmpSprt.height);
     }
@@ -327,49 +320,42 @@ public class Game extends GameBase {
     }
 
     public static void unlockSkins(int indx) {
-        if (!indx) {
-            skinInfo.style.display = "inline-block";
-            skinSelector.style.display = "inline-block";
-            if (hasStorage) {
-                Utility.saveString("isFollDob", 1);
-            }
+        if (indx!=0) {
+//      todo      skinInfo.style.display = "inline-block";
+//            skinSelector.style.display = "inline-block";
+                Utility.saveInt("isFollDob", 1);
         }
     }
 
     static int darkColor = 0x4d4d4d;
 
     // PAGE IS READY:
-    public static void getURLParam(name, url) {
-        if (!url) url = location.href;
-        name = name.replace( /[\[]/,"\\\[").replace( /[\]]/,"\\\]");
-        var regexS = "[\\?&]" + name + "=([^&#]*)";
-        var regex = new RegExp(regexS);
-        var results = regex.exec(url);
-        return results == null ? null : results[1];
-    }
+//    public static void getURLParam(name, url) {
+//        if (!url) url = location.href;
+//        name = name.replace( /[\[]/,"\\\[").replace( /[\]]/,"\\\]");
+//        var regexS = "[\\?&]" + name + "=([^&#]*)";
+//        var regex = new RegExp(regexS);
+//        var results = regex.exec(url);
+//        return results == null ? null : results[1];
+//    }
 
-    public static String lobbyURLIP = getURLParam("l");
-    if(lobbyURLIP)
-
-    {
-        var tmpL = lobbyURLIP.split("-");
-        lobbyURLIP = tmpL[0];
-        lobbyRoomID = tmpL[1];
-    }
+//    public static String lobbyURLIP = getURLParam("l");
+//    if(lobbyURLIP)
+//    {
+//        String tmpL = lobbyURLIP.split("-");
+//        lobbyURLIP = tmpL.get(0);
+//        lobbyRoomID = tmpL.get(1);
+//    }
 
 
     boolean activePopup;
 
     public static void showWeaponPopup(int indx) {
         for (int i = 0; i < 4; i++) {
-            var tmpDiv = document.getElementById("popupRow" + i);
-            if (tmpDiv) {
-                if (i != indx || tmpDiv.style.visibility == "visible") {
-                    tmpDiv.style.visibility = "hidden";
-                } else {
-                    tmpDiv.style.visibility = "visible";
-                }
-            }
+//     todo       final Button tmpDiv = document.getElementById("popupRow" + i);
+//            if (tmpDiv!=null ) {
+//            tmpDiv.visible = !tmpDiv.visible;
+//            }
         }
     }
 
@@ -407,20 +393,19 @@ public class Game extends GameBase {
         scoreCountdown = scoreDisplayTime;
     }
 
-    int skinDisplayIconSize = 200;
+    static int skinDisplayIconSize = 200;
 
     public static void changeSkin(int val) {
+        final ShapeRenderer renderer = shapeRenderer(fill);
         skinIndex += val;
         if (skinIndex >= userSkins.size())
             skinIndex = 0;
         else if (skinIndex < 0)
-            skinIndex = userSkins.length - 1;
+            skinIndex = userSkins.size() - 1;
         if (renderedSkins.get(skinIndex) != null) {
-            tmpCanvas.width = tmpCanvas.height = skinDisplayIconSize;
-            var shapeRenderer (fill) = tmpCanvas.getContext("2d");
-            shapeRenderer(fill).translate((tmpCanvas.width / 2), (tmpCanvas.height / 2));
-            shapeRenderer(fill).lineJoin = "round";
-            renderPlayer(shapeRenderer(fill), {
+           //Todo w= skinDisplayIconSize
+            renderPlayer();
+            renderPlayer(renderer, {
                     dir:(Math.PI),
                     width:60,
                     length:125,
@@ -429,14 +414,12 @@ public class Game extends GameBase {
                     cannonLength:18,
                     cannonWidth:28,
                     cannons:1
-            },0, 0, userSkins[skinIndex]);
-            renderedSkins[skinIndex] = tmpCanvas.toDataURL();
+            },0, 0, userSkins.get(skinIndex));
+            renderedSkins.get(skinIndex) = tmpCanvas.toDataURL();
         }
-        skinIcon.src = renderedSkins[skinIndex];
-        skinName.innerHTML = userSkins[skinIndex].name;
-        if (hasStorage) {
+        skinIcon.src = renderedSkins.get(skinIndex);
+        skinName = userSkins.get(skinIndex).name;
             Utility.saveString("sknInx", skinIndex);
-        }
     }
 
     // SHOW A TEXT IN THE MENU:
@@ -500,7 +483,7 @@ public class Game extends GameBase {
 
     public static int mouseX, mouseY;
     public static boolean forceTarget = true, shooting;
-    String userNameInput = Utility.getString("lstnmdbl");
+    public static String userNameInput = Utility.getString("lstnmdbl");
 
     public static void toggleUpgrades() {
 
@@ -511,57 +494,55 @@ public class Game extends GameBase {
     }
 
     public static void renderPlayer(Player tmpObj, float tmpX, float tmpY, Skin tmpS, float delta) {
-
+        final ShapeRenderer render = shapeRenderer(fill);
         // RENDER PLAYER SHIP:
-        contxt.lineWidth = 8.5;
-
+//        contxt.lineWidth = 8.5;
+final  float lineWidth = 8.5f;
         // SIDE ITEMS:
         if (true) {
-            contxt.fillStyle = tmpS.color2;
-            contxt.strokeStyle = darkColor;
-            var tmpL = (tmpObj.length - (tmpObj.rearLength + tmpObj.noseLength));
-            var cW = ((tmpObj.cannonLength * 2) + tmpObj.width + contxt.lineWidth) * (tmpObj.animMults ? (tmpObj.animMults[0].mult || 1) : 1);
+            render.setColor(Utility.tmpColor.set(tmpS.color2));
+//            contxt.strokeStyle = darkColor;
+            float tmpL = (tmpObj.length - (tmpObj.rearLength + tmpObj.noseLength));
+            float cW = ((tmpObj.cannonLength * 2) + tmpObj.w + lineWidth) * (tmpObj.animMults!=null ? (tmpObj.animMults.get(0).mult ==0? 1:tmpObj.animMults.get(0).mult) : 1);
 
             // REGULAR CANNONS:
-            if (tmpObj.cannons) {
-                var cY = -(tmpObj.cannons - 1) * ((tmpL / tmpObj.cannons + 1) / 2);
-                for (var c = 0; c < tmpObj.cannons; ++c) {
-                    contxt.roundRect(-cW / 2, cY + ((tmpL / tmpObj.cannons) * c) - (tmpObj.cannonWidth / 2), cW, tmpObj.cannonWidth, 0).stroke();
-                    contxt.fill();
+            if (tmpObj.cannons<0) {
+                float cY = -(tmpObj.cannons - 1) * ((tmpL / tmpObj.cannons + 1) / 2);
+                for (int c = 0; c < tmpObj.cannons; ++c) {
+                    render.rect(-cW / 2, cY + ((tmpL / tmpObj.cannons) * c) - (tmpObj.cannonWidth / 2), cW, tmpObj.cannonWidth);
                 }
             }
 
             // SCATTER CANNONS:
-            if (tmpObj.scatterCannons) {
-                contxt.save();
-                contxt.rotate(Math.PI / 2);
-                var cY = -(tmpObj.scatterCannons - 1) * ((tmpL / tmpObj.scatterCannons + 1) / 2);
-                for (var c = 0; c < tmpObj.scatterCannons; ++c) {
-                    for (var c2 = 0; c2 < 2; ++c2) {
-                        contxt.roundRect(cY + ((tmpL / tmpObj.scatterCannons) * c) - (tmpObj.cannonWidth / 2), -cW / 2.4, tmpObj.cannonWidth, cW / 2.4, 0, 1.3).stroke();
-                        contxt.fill();
-                        contxt.rotate(Math.PI);
+            if (tmpObj.scatterCannons<0) {
+               //Todo contxt.rotate(Math.PI / 2);
+                float cY = -(tmpObj.scatterCannons - 1) * ((tmpL / tmpObj.scatterCannons + 1) / 2);
+                for (int c = 0; c < tmpObj.scatterCannons; ++c) {
+                    for (int c2 = 0; c2 < 2; ++c2) {
+                        //Todo double check why s is 1.3f
+                        roundRect(cY + ((tmpL / tmpObj.scatterCannons) * c) - (tmpObj.cannonWidth / 2), -cW / 2.4f, tmpObj.cannonWidth, cW / 2.4f,0);
+//                        contxt.rotate(Math.PI);
                     }
                 }
-                contxt.restore();
             }
 
             // ROWS:
-            if (tmpObj.rows) {
-                if (!tmpObj.rowRot) {
+            if (tmpObj.rows!=0) {
+                if (tmpObj.rowRot!=0) {
                     tmpObj.rowRot = 0;
                 }
-                if (!tmpObj.rowSpeed) {
-                    tmpObj.rowSpeed = 0.002;
+                
+                if (tmpObj.rowSpeed!=0) {
+                    tmpObj.rowSpeed = 0.002f;
                 }
                 tmpObj.rowRot += tmpObj.rowSpeed * delta;
-                if (tmpObj.rowRot >= 0.3) {
-                    tmpObj.rowRot = 0.3;
-                    tmpObj.rowSpeed = -0.001;
+                if (tmpObj.rowRot >= 0.3f) {
+                    tmpObj.rowRot = 0.3f;
+                    tmpObj.rowSpeed = -0.001f;
                 }
-                if (tmpObj.rowRot <= -0.35) {
-                    tmpObj.rowRot = -0.35;
-                    tmpObj.rowSpeed = 0.002;
+                if (tmpObj.rowRot <= -0.35f) {
+                    tmpObj.rowRot = -0.35f;
+                    tmpObj.rowSpeed = 0.002f;
                 }
                 var cY = (tmpObj.rows - 1) * ((tmpL / tmpObj.rows + 1) / 2);
                 var tmpW = tmpObj.width / 5;
@@ -614,10 +595,10 @@ public class Game extends GameBase {
             // RAM:
             if (tmpObj.ramLength) {
                 contxt.beginPath();
-                contxt.moveTo((tmpObj.width / 2.5), (tmpObj.length / 2) - tmpObj.noseLength);
-                contxt.lineTo((tmpObj.width / 20), (tmpObj.length / 2) + tmpObj.ramLength);
-                contxt.lineTo(-((tmpObj.width / 20)), (tmpObj.length / 2) + tmpObj.ramLength);
-                contxt.lineTo(-(tmpObj.width / 2.5), (tmpObj.length / 2) - tmpObj.noseLength);
+                contxt.moveTo((tmpObj.width / 2.5f), (tmpObj.length / 2) - tmpObj.noseLength);
+                contxt.lineTo((tmpObj.width / 20f), (tmpObj.length / 2) + tmpObj.ramLength);
+                contxt.lineTo(-((tmpObj.width / 20f)), (tmpObj.length / 2) + tmpObj.ramLength);
+                contxt.lineTo(-(tmpObj.width / 2.5f), (tmpObj.length / 2) - tmpObj.noseLength);
                 contxt.closePath();
                 contxt.stroke();
                 contxt.fill();
@@ -634,7 +615,7 @@ public class Game extends GameBase {
         }
 
         // HULL:
-        var nsLngthPls = (tmpObj.length / 1.85);
+        float nsLngthPls = (tmpObj.length / 1.85f);
         contxt.fillStyle = tmpS.color1;
         contxt.beginPath();
         contxt.moveTo(0, -(tmpObj.length / 2));
@@ -652,24 +633,23 @@ public class Game extends GameBase {
 
         // DECK:
         if (true) {
-            var tmpVal, tmpDir, cY;
-            tmpL = tmpObj.length;
-            contxt.fillStyle = tmpS.color2;
+            float tmpVal, tmpDir, cY;
+            float tmpL = tmpObj.length;
+            Utility.tmpColor.set(tmpS.color2);
 
             // CROWS NEST:
-            if (!tmpObj.swivelCannons && !tmpObj.gatlinCannons
-                    && !tmpObj.twinCannons && !tmpObj.quadCannons && !tmpObj.autoCannons
-                    && !tmpObj.bigCannon && !tmpObj.sniperCannon && !tmpObj.trippleCannons) {
-                drawCircle(0, 0, (tmpObj.cannonWidth / 1.8), contxt);
+            if (tmpObj.swivelCannons ==0&& tmpObj.gatlinCannons==0
+                    && tmpObj.twinCannons==0 && tmpObj.quadCannons==0 && tmpObj.autoCannons==0
+                    && tmpObj.bigCannon==0 && tmpObj.sniperCannon ==0&& tmpObj.trippleCannons==0) {
+                drawCircle(0, 0, (tmpObj.cannonWidth / 1.8f));
             } else {
 
                 // GATLIN CANNONS:
-                var tmpMax = tmpObj.gatlinCannons;
+                int tmpMax = tmpObj.gatlinCannons;
                 if (tmpMax) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
-                    tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
-                    for (var c = 0; c < tmpObj.gatlinCannons; ++c) {
-                        contxt.save();
+                    tmpDir = (float) (((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2);
+                    for (int c = 0; c < tmpObj.gatlinCannons; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
                         contxt.translate(0, tmpVal);
                         contxt.rotate(tmpDir);
@@ -680,8 +660,7 @@ public class Game extends GameBase {
                         contxt.lineTo((tmpObj.cannonLength * 2.1) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), 0);
                         contxt.closePath();
                         contxt.stroke();
-                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.8), contxt);
-                        contxt.restore();
+                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.8f));
                     }
                 }
 
@@ -691,24 +670,21 @@ public class Game extends GameBase {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
                     tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
                     for (var c = 0; c < tmpObj.bigCannon; ++c) {
-                        contxt.save();
                         tmpVal = cY - ((tmpL / tmpMax) * c);
                         contxt.translate(0, tmpVal);
                         contxt.rotate(tmpDir - (Math.PI / 2));
                         contxt.roundRect(-(tmpObj.cannonWidth / 2), 0, (tmpObj.cannonWidth / 2) * 2, (tmpObj.cannonLength * 3) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), 0, 1.2).stroke();
                         contxt.fill();
-                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.2), contxt);
-                        contxt.restore();
+                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.2f));
                     }
                 }
 
                 // SNIPER CANNON:
-                var tmpMax = tmpObj.sniperCannon;
+                int tmpMax = tmpObj.sniperCannon;
                 if (tmpMax) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
                     tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
-                    for (var c = 0; c < tmpObj.sniperCannon; ++c) {
-                        contxt.save();
+                    for (int c = 0; c < tmpObj.sniperCannon; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
                         contxt.translate(0, tmpVal);
                         contxt.rotate(tmpDir - (Math.PI / 2));
@@ -716,25 +692,22 @@ public class Game extends GameBase {
                         contxt.fill();
                         contxt.roundRect(-(tmpObj.cannonWidth / 2), 0, (tmpObj.cannonWidth / 2) * 2, (tmpObj.cannonLength * 2.5) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), 0, 1.2).stroke();
                         contxt.fill();
-                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.2), contxt);
-                        contxt.restore();
+                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.2f));
                     }
                 }
 
                 // SWIVEL CANNONS:
-                var tmpMax = tmpObj.swivelCannons;
+                 tmpMax = tmpObj.swivelCannons;
                 if (tmpMax) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
-                    tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
-                    for (var c = 0; c < tmpObj.swivelCannons; ++c) {
-                        contxt.save();
+                    tmpDir = (float) (((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2);
+                    for (int c = 0; c < tmpObj.swivelCannons; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
                         contxt.translate(0, tmpVal);
                         contxt.rotate(tmpDir);
                         contxt.roundRect(0, -(tmpObj.cannonWidth / 2.4), (tmpObj.cannonLength * 2) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), tmpObj.cannonWidth / 1.2, 0).stroke();
                         contxt.fill();
-                        drawCircle(0, 0, MathMAX((tmpObj.cannonWidth / 1.8), 13), contxt);
-                        contxt.restore();
+                        drawCircle(0, 0, Math.max((tmpObj.cannonWidth / 1.8f), 13));
                     }
                 }
 
@@ -742,16 +715,15 @@ public class Game extends GameBase {
                 tmpMax = (tmpObj.twinCannons || tmpObj.quadCannons);
                 if (tmpMax) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
-                    var tmpCount = 2;
-                    var rotPlus = Math.PI;
-                    if (tmpObj.quadCannons) {
+                    int tmpCount = 2;
+                    float rotPlus = (float) Math.PI;
+                    if (tmpObj.quadCannons!=0) {
                         tmpCount = 4;
                         rotPlus /= 2;
                     }
                     tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
-                    for (var c = 0; c < tmpMax; ++c) {
+                    for (int c = 0; c < tmpMax; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        contxt.save();
                         contxt.translate(0, tmpVal);
                         contxt.rotate(tmpDir);
                         for (var c2 = 0; c2 < tmpCount; ++c2) {
@@ -759,28 +731,25 @@ public class Game extends GameBase {
                             contxt.fill();
                             contxt.rotate(rotPlus);
                         }
-                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.4), contxt);
-                        contxt.restore();
+                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.4f));
                     }
                 }
 
                 // TRIPPLE CANNONS:
                 tmpMax = tmpObj.trippleCannons;
-                if (tmpMax) {
-                    var tmpS = tmpObj.cannonWidth / 1.3;
+                if (tmpMax!=0) {
+                    float tmpS = tmpObj.cannonWidth / 1.3f;
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
                     tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
-                    for (var c = 0; c < tmpMax; ++c) {
+                    for (int c = 0; c < tmpMax; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        contxt.save();
                         contxt.translate(0, tmpVal);
                         contxt.rotate(tmpDir);
                         contxt.roundRect(0, -tmpS, (tmpObj.cannonLength * 2.1) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), (tmpS / 1.4), 0).stroke();
                         contxt.fill();
                         contxt.roundRect(0, tmpS - (tmpS / 1.4), (tmpObj.cannonLength * 2.1) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), (tmpS / 1.4), 0).stroke();
                         contxt.fill();
-                        drawCircle(0, 0, tmpS, contxt);
-                        contxt.restore();
+                        drawCircle(0, 0, tmpS);
                     }
                 }
 
@@ -788,28 +757,22 @@ public class Game extends GameBase {
                 tmpMax = tmpObj.autoCannons;
                 if (tmpMax) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
-                    for (var c = 0; c < tmpObj.autoCannons; ++c) {
-                        contxt.save();
+                    for (int c = 0; c < tmpObj.autoCannons; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        tmpDir = tmpObj.aimDir - tmpObj.dir + Math.PI / 2;
-                        contxt.translate(0, tmpVal);
-                        contxt.rotate(tmpDir);
-                        contxt.roundRect(0, -(tmpObj.cannonWidth / 2.6), (tmpObj.cannonLength * 2) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), tmpObj.cannonWidth / 1.3, 0).stroke();
-                        contxt.fill();
-                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.85), contxt);
-                        contxt.restore();
+                        tmpDir =(float) (tmpObj.aimDir - tmpObj.dir + Math.PI / 2);
+//                     Todo   contxt.rotate(tmpDir);
+//                        contxt.translate(0, tmpVal);
+                        roundRect(0, -(tmpObj.cannonWidth / 2.6f), (tmpObj.cannonLength * 2) * ((tmpObj.animMults!=null) ? tmpObj.animMults.get(1).mult : 1), tmpObj.cannonWidth / 1.3f, 0);
+                        drawCircle(0, 0, (tmpObj.cannonWidth / 1.85f));
                     }
                 }
             }
         }
 
         // EFFECT OVERLAY:
-        if (tmpS.overlay) {
-            contxt.globalCompositeOperation = "source-atop";
-            contxt.fillStyle = tmpS.overlay;
-            contxt.fillRect(-playerCanvas.width / 2, -playerCanvas.height / 2, playerCanvas.width,
-                    playerCanvas.height);
-            contxt.globalCompositeOperation = "source-over";
+        if (tmpS.overlay!=0) {
+            render.rect(player.x-player.w / 2,player.y -player.h / 2, player.w,
+                    player.h);
         }
     }
 
@@ -817,13 +780,12 @@ public class Game extends GameBase {
     // GAME INPUT:
     public static void enterGame() {
         if (SocketManager.isConnected()) {
-            showMainMenuText(randomLoadingTexts[UTILS.randInt(0, randomLoadingTexts.length - 1)]);
-            socket.emit("respawn", {
-                    name:userNameInput.value,
-                    skin:skinIndex
-            });
-            Utility.saveString("lstnmdbl", userNameInput.value);
-            mainCanvas.focus();
+            showMainMenuText(randomLoadingTexts[Utility.randInt(0, randomLoadingTexts.length - 1)]);
+            final JSONObject obj = new JSONObject();
+            obj.put("name", userNameInput);
+            obj.put("skin", skinIndex);
+            SocketManager.socket.emit("respawn",obj);
+            Utility.saveString("lstnmdbl", userNameInput);
         }
     }
 
@@ -1048,9 +1010,9 @@ public class Game extends GameBase {
     public static void renderGameObject(Obstacle tmpObj) {
 
         //Todo tmpCanvas.width = (tmpObj.s * 2) + 10;
-        shapeRenderer(fill).strokeStyle = darkColor;
-        shapeRenderer(fill).lineWidth = 8.5;
-        shapeRenderer(fill).translate(tmpCanvas.width / 2, tmpCanvas.height / 2);
+//        renderer.strokeStyle = darkColor;
+//        renderer.lineWidth = 8.5;
+        final ShapeRenderer renderer = shapeRenderer(fill);
         final Color color = Utility.tmpColor;
         if (tmpObj.c == 0) {
             color.set(0x797979);
@@ -1067,46 +1029,53 @@ public class Game extends GameBase {
         } else if (tmpObj.c == 6) {
             color.set(0x7BE86F);
         }
+
+        renderer.setColor(color);
         if (tmpObj.shp == 1) {
             int spikes = 6;
             float rot = (float) Math.PI / 2 * 3;
             float rad = tmpObj.s / 2;
             float step = (float) Math.PI / spikes;
 
-            shapeRenderer(fill).moveTo(0, -rad);
+            float startX = tmpObj.x, startY = tmpObj.y-rad;
             for (int s = 0; s < spikes; s++) {
-                shapeRenderer(fill).lineTo(Math.cos(rot) * rad, Math.sin(rot) * rad);
+                renderer.line(startX, startY, tmpObj.x + (float) Math.cos(rot) * rad, tmpObj.y +(float)  Math.sin(rot) * rad);
                 rot += step;
-                shapeRenderer(fill).lineTo(Math.cos(rot) * (rad * 0.8), Math.sin(rot) * (rad * 0.8));
+
+                startX =  tmpObj.x + (float) Math.cos(rot) * rad;
+                startY = (float)  Math.sin(rot) * rad;
+
+                renderer.line(startX, startY, tmpObj.x + (float) Math.cos(rot) * (rad * 0.8f), tmpObj.y +(float) Math.sin(rot) * (rad * 0.8f));
                 rot += step;
+
+                startX = tmpObj.x + (float) Math.cos(rot) * (rad * 0.8f);
+                startY = tmpObj.y + (float) Math.sin(rot) * (rad * 0.8f);
             }
-            shapeRenderer(fill).lineTo(0, -rad);
-            shapeRenderer(fill).closePath();
-            shapeRenderer(fill).stroke();
-            shapeRenderer(fill).fill();
+            renderer.line(startX, startY, tmpObj.x, tmpObj.y-rad);
+// Todo           renderer.closePath();
+//            renderer.stroke();
+//            renderer.fill();
         } else if (tmpObj.shp == 2) {
             float rad = tmpObj.s / 1.6f;
 
-            shapeRenderer(fill).moveTo(0, -rad);
-            shapeRenderer(fill).lineTo(rad, 0);
-            shapeRenderer(fill).lineTo(0, rad);
-            shapeRenderer(fill).lineTo(-rad, 0);
-            shapeRenderer(fill).closePath();
-            shapeRenderer(fill).stroke();
-            shapeRenderer(fill).fill();
+            renderer.line(tmpObj.x, tmpObj.y-rad, tmpObj.x + rad, tmpObj.y);
+            renderer.line(tmpObj.x + rad, tmpObj.y, tmpObj.x, tmpObj.y+rad);
+            renderer.line(tmpObj.x, tmpObj.y+rad, tmpObj.x-rad, tmpObj.y);
+// Todo           renderer.closePath();
+//            renderer.stroke();
+//            renderer.fill();
         } else if (tmpObj.shp == 3) {
             float rad = tmpObj.s / 1.6f;
 
-            shapeRenderer(fill).moveTo(0, -rad);
-            shapeRenderer(fill).lineTo(rad / 1.5, 0);
-            shapeRenderer(fill).lineTo(0, rad);
-            shapeRenderer(fill).lineTo(-rad / 1.5, 0);
-            shapeRenderer(fill).closePath();
-            shapeRenderer(fill).stroke();
-            shapeRenderer(fill).fill();
+            renderer.line(tmpObj.x,tmpObj.y -rad, tmpObj.x+(rad / 1.5f), tmpObj.y);
+            renderer.line(tmpObj.x+(rad / 1.5f), tmpObj.y, tmpObj.x,tmpObj.y+ rad);
+            renderer.line(tmpObj.x,tmpObj.y+ rad, tmpObj.x-(rad / 1.5f), tmpObj.y);
+//  todo          renderer.closePath();
+//            renderer.stroke();
+//            renderer.fill();
         } else {
 
-            shapeRenderer(fill).circle(tmpObj.x, tmpObj.y, tmpObj.s / 2);
+            renderer.circle(tmpObj.x, tmpObj.y, tmpObj.s / 2);
         }
     }
 

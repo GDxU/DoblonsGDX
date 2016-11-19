@@ -550,7 +550,6 @@ public class SocketManager {
         socket.emit("6", "cont", 1);
         controlIndex = 1;
         socket.connect();
-
     }
 
     public void send() {
@@ -559,8 +558,6 @@ public class SocketManager {
         obj.put("hello", "server");
         obj.put("binary", new byte[42]);
         socket.emit("foo", obj);
-
-
     }
 
     public void receive() {
