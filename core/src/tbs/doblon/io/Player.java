@@ -59,8 +59,8 @@ public class Player extends GameObject {
     }
 
     public void updateData(JSONObject p) {
-        Utility.log("updateData > ");
-        Utility.log(p.toString());
+//        Utility.log("updateData > ");
+//        Utility.log(p.toString());
         if (p.has("aimDir"))
             aimDir = (float) p.getDouble("aimDir");
         if (p.has("autoCannons"))
@@ -141,10 +141,8 @@ public class Player extends GameObject {
             rows = p.getInt("rows");
         if (p.has("scatterCannons"))
             scatterCannons = p.getInt("scatterCannons");
-        if (p.has("sid")) {
+        if (p.has("sid"))
             sid = p.getInt("sid");
-            Utility.log("setSID: "+sid);
-        }
         if (p.has("skin"))
             skin = p.getInt("skin");
         if (p.has("sniperCannon"))

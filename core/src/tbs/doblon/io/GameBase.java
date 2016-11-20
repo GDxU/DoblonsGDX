@@ -82,13 +82,16 @@ public abstract class GameBase extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
+        onResize(width,height);
+        super.resize(width, height);
+    }
+
+    public static void onResize(int width, int height){
         screenWidth = width;
         screenHeight = height;
         if (level == null) {
             level = new Level();
         }
-
-        super.resize(width, height);
     }
 
     @Override

@@ -114,7 +114,8 @@ public class Game extends GameBase {
     //Todo set this value in pause/resume
     static boolean paused;
     // SCALING:
-    static int viewMult = 1, maxScreenWidth = 2208, maxScreenHeight = 1242; // 1080;
+    static float viewMult = 1;
+    static int  maxScreenWidth = 2208, maxScreenHeight = 1242; // 1080;
     static int originalScreenWidth = maxScreenWidth, originalScreenHeight = maxScreenHeight;
 
     public static void showAd() {
