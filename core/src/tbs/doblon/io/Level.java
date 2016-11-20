@@ -17,6 +17,7 @@ import static tbs.doblon.io.Game.player;
 import static tbs.doblon.io.Game.screenSkX;
 import static tbs.doblon.io.Game.screenSkY;
 import static tbs.doblon.io.Game.skullIconSize;
+import static tbs.doblon.io.Game.userNameInput;
 import static tbs.doblon.io.Game.userSkins;
 import static tbs.doblon.io.Game.users;
 import static tbs.doblon.io.GameBase.fill;
@@ -30,6 +31,11 @@ public class Level {
     public static ArrayList<Player> players = new ArrayList<Player>();
 
     public static void update(float delta) {
+        if (users.size()<1){
+//            Utility.log("no users");
+            return;
+        }
+
         for (Player player : players) {
             player.update(Game.delta);
         }
@@ -55,6 +61,10 @@ public class Level {
 
         ShapeRenderer renderer = shapeRenderer(fill);
         // SET OFFSET:
+        //Todo
+//        if (true)
+//            return;
+
         Player tmpPlayer = users.get(Game.getPlayerIndex(player.sid));
         float xOffset = 0, yOffset = 0;
         if (tmpPlayer != null) {
@@ -235,14 +245,10 @@ public class Level {
         }
 
         // DAY/NIGHT TIME:
-        if (dayTimeValue < 0) {
+        if (dayTimeValue !=null) {
             // NIGHT:
-            renderer.setColor(Utility.tmpColor.set(0, 0, 0, (dayTimeValue * -1)));
-            renderer.rect(0, 0, maxScreenWidth, maxScreenHeight);
-        } else if (dayTimeValue > 0) {
-            // DAY:
-            renderer.setColor(Utility.tmpColor.set(1, 1, 1, (dayTimeValue)));
-            renderer.rect(0, 0, maxScreenWidth, maxScreenHeight);
+//todo            renderer.setColor(Utility.tmpColor.set(1, 1, 1, (dayTimeValue)));
+//            renderer.rect(0, 0, maxScreenWidth, maxScreenHeight);
         }
 
         // UPDATE TEXTS:

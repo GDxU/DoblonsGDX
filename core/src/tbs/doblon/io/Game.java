@@ -26,7 +26,9 @@ public class Game extends GameBase {
     @Override
     public void create() {
         super.create();
-        SocketManager.init();
+        skinIndex = Utility.getInt("sknInx");
+        userNameInput = Utility.getString("lstnmdbl");
+        getIP();
     }
 
     @Override
@@ -66,7 +68,7 @@ public class Game extends GameBase {
     public static String socket;
     public static String scoreText;
     public static String upgradesText;
-    public static String coinDisplayText;
+    public static String coinDisplayText, lobbyURLIP;
     public static int lobbyRoomID;
     public static GameController gameController = new GameController();
 
@@ -90,11 +92,11 @@ public class Game extends GameBase {
     };
     public static String partyKey;
     public static Player player = null;
-    public static ArrayList<String> modeList;
+    public static final ArrayList<String> modeList = new ArrayList<String>();
     public static String modeIndex = null;
     public static String leaderboardText = null;
     public static String currentMode = null;
-    public static float dayTimeValue = 0;
+    public static String dayTimeValue = "";
     public static final ArrayList<Player> users = new ArrayList<Player>();
     public static final ArrayList<Obstacle> gameObjects = new ArrayList<Obstacle>();
     public static float target = 0;
@@ -235,7 +237,6 @@ public class Game extends GameBase {
 
         // RENDER:
 
-
         for (int i = 0; i < animTexts.size(); ++i) {
             final AnimText animText = animTexts.get(i);
             animText.update(delta);
@@ -246,46 +247,46 @@ public class Game extends GameBase {
 
     public static void drawIsland(float x, float y, float s, int indx) {
         //Todo render islands onto sprite sheet
-        final ShapeRenderer renderer = shapeRenderer(fill);
-          IslandInfo tmpIsl = islandInfo[indx];
-
-            if (tmpIsl == null) {
-                tmpIsl = islandInfo[0];
-            }
-// Todo           tmpCanvas.width = (s * 2) + (indx < 3 ? 300 : 10);
-           renderer.setColor(Utility.tmpColor.set(tmpIsl.color));
-//       Todo     renderer.strokeStyle = darkColor;
-            float tmpOff = (s * tmpIsl.offsets[0]);
-
-            renderer.moveTo((tmpOff * Math.cos(0)), (tmpOff * Math.sin(0)));
-
-            // ISLAND BASE:
-            int offIndx = 0;
-            for (int i = 1; i <= tmpIsl.sides - 1; i++) {
-                offIndx++;
-                if (offIndx >= tmpIsl.offsets.length - 1)
-                    offIndx = 0;
-                float tmpOff1 = (s * tmpIsl.offsets[offIndx]);
-                renderer.lineTo((tmpOff1 * Math.cos(i * 2 * Math.PI / tmpIsl.sides)), (tmpOff1 * Math.sin(i * 2 * Math.PI / tmpIsl.sides)));
-            }
-//  Todo          renderer.closePath();
-            if (indx < 3) {
-                renderer.lineWidth = 300;
-                renderer.globalAlpha = 0.1;
-                renderer.stroke();
-                renderer.lineWidth = 120;
-                renderer.stroke();
-            }
-            renderer.lineWidth = 8.5;
-            renderer.globalAlpha = 1;
-
-            // PALM TREES:
-
-
-            islandSprites[tmpIndx] = tmpCanvas;
-            tmpSprt = islandSprites[tmpIndx];
-        spriteBatch().draw(tmpSprt, x - tmpSprt.width / 2, y - tmpSprt.height / 2,
-                tmpSprt.width, tmpSprt.height);
+//Todo        final ShapeRenderer renderer = shapeRenderer(fill);
+//          IslandInfo tmpIsl = islandInfo[indx];
+//
+//            if (tmpIsl == null) {
+//                tmpIsl = islandInfo[0];
+//            }
+//// Todo           tmpCanvas.width = (s * 2) + (indx < 3 ? 300 : 10);
+//           renderer.setColor(Utility.tmpColor.set(tmpIsl.color));
+////       Todo     renderer.strokeStyle = darkColor;
+//            float tmpOff = (s * tmpIsl.offsets[0]);
+//
+//            renderer.moveTo((tmpOff * Math.cos(0)), (tmpOff * Math.sin(0)));
+//
+//            // ISLAND BASE:
+//            int offIndx = 0;
+//            for (int i = 1; i <= tmpIsl.sides - 1; i++) {
+//                offIndx++;
+//                if (offIndx >= tmpIsl.offsets.length - 1)
+//                    offIndx = 0;
+//                float tmpOff1 = (s * tmpIsl.offsets[offIndx]);
+//                renderer.lineTo((tmpOff1 * Math.cos(i * 2 * Math.PI / tmpIsl.sides)), (tmpOff1 * Math.sin(i * 2 * Math.PI / tmpIsl.sides)));
+//            }
+////  Todo          renderer.closePath();
+//            if (indx < 3) {
+//                renderer.lineWidth = 300;
+//                renderer.globalAlpha = 0.1;
+//                renderer.stroke();
+//                renderer.lineWidth = 120;
+//                renderer.stroke();
+//            }
+//            renderer.lineWidth = 8.5;
+//            renderer.globalAlpha = 1;
+//
+//            // PALM TREES:
+//
+//
+//            islandSprites[tmpIndx] = tmpCanvas;
+//            tmpSprt = islandSprites[tmpIndx];
+//        spriteBatch().draw(tmpSprt, x - tmpSprt.width / 2, y - tmpSprt.height / 2,
+//                tmpSprt.width, tmpSprt.height);
     }
 
     public static void showAnimText(float x, float y, String txt, float scale, long fadeDelay, String type, float sclPlus) {
@@ -310,6 +311,8 @@ public class Game extends GameBase {
     // UPDATE OR PUSH PLAYER:
     public static void updateOrPushUser(JSONObject obj) {
         //Todo check
+        Utility.log("push > ");
+        Utility.log(obj.toString());
         int tmpIndx = getPlayerIndex(obj.getInt("sid"));
         if (tmpIndx >= 0) {
             final Player player = users.get(tmpIndx);
@@ -320,10 +323,10 @@ public class Game extends GameBase {
     }
 
     public static void unlockSkins(int indx) {
-        if (indx!=0) {
+        if (indx != 0) {
 //      todo      skinInfo.style.display = "inline-block";
 //            skinSelector.style.display = "inline-block";
-                Utility.saveInt("isFollDob", 1);
+            Utility.saveInt("isFollDob", 1);
         }
     }
 
@@ -360,7 +363,7 @@ public class Game extends GameBase {
     }
 
     public static final ArrayList<TextureRegion> renderedSkins = new ArrayList<TextureRegion>();
-    public static int skinIndex = Utility.getInt("sknInx");
+    public static int skinIndex ;
 
     // NOTIFICATIONS:
     public static void hideNotifByType(String type) {
@@ -403,63 +406,67 @@ public class Game extends GameBase {
         else if (skinIndex < 0)
             skinIndex = userSkins.size() - 1;
         if (renderedSkins.get(skinIndex) != null) {
-           //Todo w= skinDisplayIconSize
-            renderPlayer();
-            renderPlayer(renderer, {
-                    dir:(Math.PI),
-                    width:60,
-                    length:125,
-                    rearLength:25,
-                    noseLength:35,
-                    cannonLength:18,
-                    cannonWidth:28,
-                    cannons:1
-            },0, 0, userSkins.get(skinIndex));
-            renderedSkins.get(skinIndex) = tmpCanvas.toDataURL();
+            //Todo w= skinDisplayIconSize
+
+//   Todo         renderPlayer(renderer, {
+//                    dir:(Math.PI),
+//                    width:60,
+//                    length:125,
+//                    rearLength:25,
+//                    noseLength:35,
+//                    cannonLength:18,
+//                    cannonWidth:28,
+//                    cannons:1
+//            },0, 0, userSkins.get(skinIndex));
+//            renderedSkins.get(skinIndex) = tmpCanvas.toDataURL();
         }
-        skinIcon.src = renderedSkins.get(skinIndex);
+        skinIcon = renderedSkins.get(skinIndex);
         skinName = userSkins.get(skinIndex).name;
-            Utility.saveString("sknInx", skinIndex);
+        Utility.saveInt("sknInx", skinIndex);
     }
+
+    public static TextureRegion skinIcon;
+    public static String skinName;
 
     // SHOW A TEXT IN THE MENU:
     public static void showMainMenuText(String text) {
-        userInfoContainer.style.display = "none";
-        loadingContainer.style.display = "block";
-        loadingContainer.innerHTML = text;
+//  todo      userInfoContainer.style.display = "none";
+//        loadingContainer.style.display = "block";
+//        loadingContainer.innerHTML = text;
     }
 
     public static void hideMainMenuText() {
-        userInfoContainer.style.display = "block";
-        loadingContainer.style.display = "none";
+//   todo     userInfoContainer.style.display = "block";
+//        loadingContainer.style.display = "none";
     }
 
     // TOGGLE UI:
     public static void toggleGameUI(boolean visible) {
-        var display = visible ? "block" : "none";
-        gameUiContainer.style.display = display;
+//  todo      var display = visible ? "block" : "none";
+//        gameUiContainer.style.display = display;
     }
 
     public static void toggleMenuUI(boolean visible) {
 
         // SHOWING MAIN MENU:
         if (visible) {
-            menuContainer.style.display = "flex";
-            darkener.style.display = "block";
+// todo           menuContainer.style.display = "flex";
+//            darkener.style.display = "block";
             // linksContainer.style.display = "block";
-            target[2] = 0;
+//            target[2] = 0;
         }
 
         // HIDING MENU:
         else {
-            menuContainer.style.display = "none";
-            darkener.style.display = "none";
+//            menuContainer.style.display = "none";
+//            darkener.style.display = "none";
             // linksContainer.style.display = "none";
         }
     }
 
     public static void initAds() {
-        ShowAds.initInterstitialAd({adId:"ca-app-pub-6350309116730071/9878078741", isTest:true});
+        //Todo
+        final String adID = "ca-app-pub-6350309116730071/9878078741";
     }
 
     public static final String treasureMap = "2B=TK:KAB,SSV:100K";
@@ -483,7 +490,7 @@ public class Game extends GameBase {
 
     public static int mouseX, mouseY;
     public static boolean forceTarget = true, shooting;
-    public static String userNameInput = Utility.getString("lstnmdbl");
+    public static String userNameInput ;
 
     public static void toggleUpgrades() {
 
@@ -497,16 +504,16 @@ public class Game extends GameBase {
         final ShapeRenderer render = shapeRenderer(fill);
         // RENDER PLAYER SHIP:
 //        contxt.lineWidth = 8.5;
-final  float lineWidth = 8.5f;
+        final float lineWidth = 8.5f;
         // SIDE ITEMS:
         if (true) {
             render.setColor(Utility.tmpColor.set(tmpS.color2));
 //            contxt.strokeStyle = darkColor;
             float tmpL = (tmpObj.length - (tmpObj.rearLength + tmpObj.noseLength));
-            float cW = ((tmpObj.cannonLength * 2) + tmpObj.w + lineWidth) * (tmpObj.animMults!=null ? (tmpObj.animMults.get(0).mult ==0? 1:tmpObj.animMults.get(0).mult) : 1);
+            float cW = ((tmpObj.cannonLength * 2) + tmpObj.w + lineWidth) * (tmpObj.animMults != null ? (tmpObj.animMults.get(0).mult == 0 ? 1 : tmpObj.animMults.get(0).mult) : 1);
 
             // REGULAR CANNONS:
-            if (tmpObj.cannons<0) {
+            if (tmpObj.cannons < 0) {
                 float cY = -(tmpObj.cannons - 1) * ((tmpL / tmpObj.cannons + 1) / 2);
                 for (int c = 0; c < tmpObj.cannons; ++c) {
                     render.rect(-cW / 2, cY + ((tmpL / tmpObj.cannons) * c) - (tmpObj.cannonWidth / 2), cW, tmpObj.cannonWidth);
@@ -514,25 +521,25 @@ final  float lineWidth = 8.5f;
             }
 
             // SCATTER CANNONS:
-            if (tmpObj.scatterCannons<0) {
-               //Todo contxt.rotate(Math.PI / 2);
+            if (tmpObj.scatterCannons < 0) {
+                //Todo contxt.rotate(Math.PI / 2);
                 float cY = -(tmpObj.scatterCannons - 1) * ((tmpL / tmpObj.scatterCannons + 1) / 2);
                 for (int c = 0; c < tmpObj.scatterCannons; ++c) {
                     for (int c2 = 0; c2 < 2; ++c2) {
                         //Todo double check why s is 1.3f
-                        roundRect(cY + ((tmpL / tmpObj.scatterCannons) * c) - (tmpObj.cannonWidth / 2), -cW / 2.4f, tmpObj.cannonWidth, cW / 2.4f,0);
+                        roundRect(cY + ((tmpL / tmpObj.scatterCannons) * c) - (tmpObj.cannonWidth / 2), -cW / 2.4f, tmpObj.cannonWidth, cW / 2.4f, 0);
 //                        contxt.rotate(Math.PI);
                     }
                 }
             }
 
             // ROWS:
-            if (tmpObj.rows!=0) {
-                if (tmpObj.rowRot!=0) {
+            if (tmpObj.rows != 0) {
+                if (tmpObj.rowRot != 0) {
                     tmpObj.rowRot = 0;
                 }
-                
-                if (tmpObj.rowSpeed!=0) {
+
+                if (tmpObj.rowSpeed != 0) {
                     tmpObj.rowSpeed = 0.002f;
                 }
                 tmpObj.rowRot += tmpObj.rowSpeed * delta;
@@ -544,20 +551,16 @@ final  float lineWidth = 8.5f;
                     tmpObj.rowRot = -0.35f;
                     tmpObj.rowSpeed = 0.002f;
                 }
-                var cY = (tmpObj.rows - 1) * ((tmpL / tmpObj.rows + 1) / 2);
-                var tmpW = tmpObj.width / 5;
-                cW = (9 + tmpObj.width);
-                for (var c = 0; c < tmpObj.rows; ++c) {
-                    var tmpVal = cY - ((tmpL / tmpObj.rows) * c);
-                    contxt.save();
-                    contxt.translate(0, tmpVal);
-                    contxt.rotate(tmpObj.rowRot);
-                    contxt.roundRect(0, -(tmpW / 2), cW, tmpW, 0).stroke();
-                    contxt.fill();
-                    contxt.rotate(-(tmpObj.rowRot * 2) - Math.PI);
-                    contxt.roundRect(0, -(tmpW / 2), cW, tmpW, 0).stroke();
-                    contxt.fill();
-                    contxt.restore();
+                float cY = (tmpObj.rows - 1) * ((tmpL / tmpObj.rows + 1) / 2);
+                float tmpW = tmpObj.w / 5;
+                cW = (9 + tmpObj.w);
+                for (int c = 0; c < tmpObj.rows; ++c) {
+                    float tmpVal = cY - ((tmpL / tmpObj.rows) * c);
+//      todo              contxt.translate(0, tmpVal);
+//                    contxt.rotate(tmpObj.rowRot);
+                    roundRect(0, -(tmpW / 2), cW, tmpW, 0);
+//          todo          contxt.rotate(-(tmpObj.rowRot * 2) - Math.PI);
+                    roundRect(0, -(tmpW / 2), cW, tmpW, 0);
                 }
             }
         }
@@ -566,26 +569,20 @@ final  float lineWidth = 8.5f;
         if (true) {
 
             // MINE DROPPER:
-            if (tmpObj.mineDropper) {
-                contxt.roundRect(-(tmpObj.width / 2) * 0.55, -(tmpObj.length / 2) - (15 * (tmpObj.animMults ? (tmpObj.animMults[2].mult || 1) : 1)) + 2,
-                        tmpObj.width * 0.55, 17, 0, 1.2).stroke();
-                contxt.fill();
+            if (tmpObj.mineDropper != 0) {
+                roundRect(-(tmpObj.w / 2) * 0.55f, -(tmpObj.length / 2) - (15 * (tmpObj.animMults.size() > 2 ? (tmpObj.animMults.get(2).mult == 0 ? 1 : tmpObj.animMults.get(2).mult) : 1)) + 2,
+                        tmpObj.w * 0.55f, 17, 1.2f);
             }
 
             // REAR CANNON:
-            if (tmpObj.rearCannon) {
-                contxt.roundRect(-(tmpObj.width / 2) * 0.55, -(tmpObj.length / 2) - (15 * (tmpObj.animMults ? (tmpObj.animMults[2].mult || 1) : 1)) + 2,
-                        tmpObj.width * 0.55, 17, 0).stroke();
-                contxt.fill();
+            if (tmpObj.rearCannon != 0) {
+                roundRect(-(tmpObj.w / 2) * 0.55f, -(tmpObj.length / 2) - (15 * (tmpObj.animMults.size() > 1 ? (tmpObj.animMults.get(2).mult == 0 ? 1 : tmpObj.animMults.get(2).mult) : 1)) + 2, tmpObj.w * 0.55f, 17, 0);
             }
 
             // RUDDER:
-            if (tmpObj.rudder) {
-                contxt.save();
-                contxt.translate(0, -(tmpObj.length / 2));
-                contxt.roundRect(-4, -tmpObj.rudder, 8, tmpObj.rudder, 0).stroke();
-                contxt.fill();
-                contxt.restore();
+            if (tmpObj.rudder != 0) {
+//         todo       contxt.translate(0, -(tmpObj.length / 2));
+                roundRect(-4, -tmpObj.rudder, 8, tmpObj.rudder, 0);
             }
         }
 
@@ -593,43 +590,38 @@ final  float lineWidth = 8.5f;
         if (true) {
 
             // RAM:
-            if (tmpObj.ramLength) {
-                contxt.beginPath();
-                contxt.moveTo((tmpObj.width / 2.5f), (tmpObj.length / 2) - tmpObj.noseLength);
-                contxt.lineTo((tmpObj.width / 20f), (tmpObj.length / 2) + tmpObj.ramLength);
-                contxt.lineTo(-((tmpObj.width / 20f)), (tmpObj.length / 2) + tmpObj.ramLength);
-                contxt.lineTo(-(tmpObj.width / 2.5f), (tmpObj.length / 2) - tmpObj.noseLength);
-                contxt.closePath();
-                contxt.stroke();
-                contxt.fill();
+            if (tmpObj.ramLength != 0) {
+//     todo           contxt.moveTo((tmpObj.w / 2.5f), (tmpObj.length / 2) - tmpObj.noseLength);
+//                render.line((tmpObj.w / 20f), (tmpObj.length / 2) + tmpObj.ramLength);
+//                render.line(-((tmpObj.w / 20f)), (tmpObj.length / 2) + tmpObj.ramLength);
+//                render.line(-(tmpObj.w / 2.5f), (tmpObj.length / 2) - tmpObj.noseLength);
+//                contxt.closePath();
+//                contxt.stroke();
+//                contxt.fill();
             }
 
             // CHASE CANNONS:
-            if (tmpObj.chaseCannons) {
-                var cWid = tmpObj.cannonWidth / 2.5;
-                contxt.roundRect(-(tmpObj.width / 2), 0, cWid, ((tmpObj.length / 2) - tmpObj.noseLength) + ((tmpObj.cannonLength * 2.3) * (tmpObj.animMults ? (tmpObj.animMults[3].mult || 1) : 1)), 0).stroke();
-                contxt.fill();
-                contxt.roundRect((tmpObj.width / 2) - cWid, 0, cWid, ((tmpObj.length / 2) - tmpObj.noseLength) + ((tmpObj.cannonLength * 2.3) * (tmpObj.animMults ? (tmpObj.animMults[3].mult || 1) : 1)), 0).stroke();
-                contxt.fill();
+            if (tmpObj.chaseCannons != 0) {
+                float cWid = tmpObj.cannonWidth / 2.5f;
+                roundRect(-(tmpObj.w / 2), 0, cWid, ((tmpObj.length / 2) - tmpObj.noseLength) + ((tmpObj.cannonLength * 2.3f) * (tmpObj.animMults.size() > 3 ? (tmpObj.animMults.get(3).mult == 0 ? 1 : tmpObj.animMults.get(3).mult) : 1)), 0);
+                roundRect((tmpObj.w / 2) - cWid, 0, cWid, ((tmpObj.length / 2) - tmpObj.noseLength) + ((tmpObj.cannonLength * 2.3f) * (tmpObj.animMults.size() > 3 ? (tmpObj.animMults.get(3).mult == 0 ? 1 : tmpObj.animMults.get(3).mult) : 1)), 0);
             }
         }
 
         // HULL:
         float nsLngthPls = (tmpObj.length / 1.85f);
-        contxt.fillStyle = tmpS.color1;
-        contxt.beginPath();
-        contxt.moveTo(0, -(tmpObj.length / 2));
-        contxt.lineTo((tmpObj.width / 2) * 0.55, -(tmpObj.length / 2));
-        contxt.lineTo((tmpObj.width / 2), -(tmpObj.length / 2) + tmpObj.rearLength);
-        contxt.lineTo((tmpObj.width / 2), (tmpObj.length / 2) - tmpObj.noseLength);
-        contxt.quadraticCurveTo((tmpObj.width / 2), nsLngthPls - (tmpObj.noseLength / 2), 0, nsLngthPls);
-        contxt.quadraticCurveTo(-(tmpObj.width / 2), nsLngthPls - (tmpObj.noseLength / 2),
-                -(tmpObj.width / 2), nsLngthPls - tmpObj.noseLength);
-        contxt.lineTo(-(tmpObj.width / 2), -(tmpObj.length / 2) + tmpObj.rearLength);
-        contxt.lineTo(-(tmpObj.width / 2) * 0.55, -(tmpObj.length / 2));
-        contxt.closePath();
-        contxt.stroke();
-        contxt.fill();
+        render.setColor(Utility.tmpColor.set(tmpS.color1));
+//    todo    contxt.moveTo(0, -(tmpObj.length / 2));
+//        contxt.lineTo((tmpObj.w / 2) * 0.55f, -(tmpObj.length / 2));
+//        contxt.lineTo((tmpObj.w / 2), -(tmpObj.length / 2) + tmpObj.rearLength);
+//        contxt.lineTo((tmpObj.w / 2), (tmpObj.length / 2) - tmpObj.noseLength);
+//        contxt.quadraticCurveTo((tmpObj.w / 2), nsLngthPls - (tmpObj.noseLength / 2), 0, nsLngthPls);
+//        contxt.quadraticCurveTo(-(tmpObj.w / 2), nsLngthPls - (tmpObj.noseLength / 2),
+//                -(tmpObj.w / 2), nsLngthPls - tmpObj.noseLength);
+//        contxt.lineTo(-(tmpObj.w / 2), -(tmpObj.length / 2) + tmpObj.rearLength);
+//        contxt.lineTo(-(tmpObj.w / 2) * 0.55f, -(tmpObj.length / 2));
+//        contxt.closePath();
+        //Todo contxt.stroke();
 
         // DECK:
         if (true) {
@@ -638,98 +630,91 @@ final  float lineWidth = 8.5f;
             Utility.tmpColor.set(tmpS.color2);
 
             // CROWS NEST:
-            if (tmpObj.swivelCannons ==0&& tmpObj.gatlinCannons==0
-                    && tmpObj.twinCannons==0 && tmpObj.quadCannons==0 && tmpObj.autoCannons==0
-                    && tmpObj.bigCannon==0 && tmpObj.sniperCannon ==0&& tmpObj.trippleCannons==0) {
+            if (tmpObj.swivelCannons == 0 && tmpObj.gatlinCannons == 0
+                    && tmpObj.twinCannons == 0 && tmpObj.quadCannons == 0 && tmpObj.autoCannons == 0
+                    && tmpObj.bigCannon == 0 && tmpObj.sniperCannon == 0 && tmpObj.trippleCannons == 0) {
                 drawCircle(0, 0, (tmpObj.cannonWidth / 1.8f));
             } else {
 
                 // GATLIN CANNONS:
                 int tmpMax = tmpObj.gatlinCannons;
-                if (tmpMax) {
+                if (tmpMax != 0) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
                     tmpDir = (float) (((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2);
                     for (int c = 0; c < tmpObj.gatlinCannons; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        contxt.translate(0, tmpVal);
-                        contxt.rotate(tmpDir);
-                        contxt.roundRect(0, -(tmpObj.cannonWidth / 2.5), (tmpObj.cannonLength * 2.1) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), (tmpObj.cannonWidth / 1.25), 0).stroke();
-                        contxt.fill();
-                        contxt.beginPath();
-                        contxt.moveTo(0, 0);
-                        contxt.lineTo((tmpObj.cannonLength * 2.1) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), 0);
-                        contxt.closePath();
-                        contxt.stroke();
+//                 todo       contxt.translate(0, tmpVal);
+//                        contxt.rotate(tmpDir);
+                        roundRect(0, -(tmpObj.cannonWidth / 2.5f), (tmpObj.cannonLength * 2.1f) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1), (tmpObj.cannonWidth / 1.25f), 0);
+//     todo                   contxt.moveTo(0, 0);
+                        render.line(0, 0, (tmpObj.cannonLength * 2.1f) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1), 0);
+//      todo                  contxt.closePath();
+//                        contxt.stroke();
                         drawCircle(0, 0, (tmpObj.cannonWidth / 1.8f));
                     }
                 }
 
                 // BIG CANNON:
                 tmpMax = tmpObj.bigCannon;
-                if (tmpMax) {
+                if (tmpMax != 0) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
-                    tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
-                    for (var c = 0; c < tmpObj.bigCannon; ++c) {
+                    tmpDir = (float) (((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2);
+                    for (int c = 0; c < tmpObj.bigCannon; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        contxt.translate(0, tmpVal);
-                        contxt.rotate(tmpDir - (Math.PI / 2));
-                        contxt.roundRect(-(tmpObj.cannonWidth / 2), 0, (tmpObj.cannonWidth / 2) * 2, (tmpObj.cannonLength * 3) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), 0, 1.2).stroke();
-                        contxt.fill();
+//                    todo    contxt.translate(0, tmpVal);
+//                        contxt.rotate(tmpDir - (Math.PI / 2));
+                        roundRect(-(tmpObj.cannonWidth / 2), 0, (tmpObj.cannonWidth / 2) * 2, (tmpObj.cannonLength * 3) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1), 1.2f);
                         drawCircle(0, 0, (tmpObj.cannonWidth / 1.2f));
                     }
                 }
 
                 // SNIPER CANNON:
-                int tmpMax = tmpObj.sniperCannon;
-                if (tmpMax) {
+                tmpMax = tmpObj.sniperCannon;
+                if (tmpMax != 0) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
-                    tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
+                    tmpDir = (float) (((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2);
                     for (int c = 0; c < tmpObj.sniperCannon; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        contxt.translate(0, tmpVal);
-                        contxt.rotate(tmpDir - (Math.PI / 2));
-                        contxt.roundRect(-(tmpObj.cannonWidth / 2.2), 0, (tmpObj.cannonWidth / 2.2) * 2, (tmpObj.cannonLength * 3.5) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), 0).stroke();
-                        contxt.fill();
-                        contxt.roundRect(-(tmpObj.cannonWidth / 2), 0, (tmpObj.cannonWidth / 2) * 2, (tmpObj.cannonLength * 2.5) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), 0, 1.2).stroke();
-                        contxt.fill();
+//                      Todo  contxt.translate(0, tmpVal);
+//                        contxt.rotate(tmpDir - (Math.PI / 2));
+                        roundRect(-(tmpObj.cannonWidth / 2.2f), 0, (tmpObj.cannonWidth / 2.2f) * 2, (tmpObj.cannonLength * 3.5f) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1) : 1), 0);
+                        roundRect(-(tmpObj.cannonWidth / 2), 0, (tmpObj.cannonWidth / 2) * 2, (tmpObj.cannonLength * 2.5f) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1) : 1), 1.2f);
                         drawCircle(0, 0, (tmpObj.cannonWidth / 1.2f));
                     }
                 }
 
                 // SWIVEL CANNONS:
-                 tmpMax = tmpObj.swivelCannons;
-                if (tmpMax) {
+                tmpMax = tmpObj.swivelCannons;
+                if (tmpMax != 0) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
                     tmpDir = (float) (((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2);
                     for (int c = 0; c < tmpObj.swivelCannons; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        contxt.translate(0, tmpVal);
-                        contxt.rotate(tmpDir);
-                        contxt.roundRect(0, -(tmpObj.cannonWidth / 2.4), (tmpObj.cannonLength * 2) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), tmpObj.cannonWidth / 1.2, 0).stroke();
-                        contxt.fill();
+//             todo           contxt.translate(0, tmpVal);
+//                        contxt.rotate(tmpDir);
+                        roundRect(0, -(tmpObj.cannonWidth / 2.4f), (tmpObj.cannonLength * 2) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1) : 1), tmpObj.cannonWidth / 1.2f, 0);
                         drawCircle(0, 0, Math.max((tmpObj.cannonWidth / 1.8f), 13));
                     }
                 }
 
                 // TWIN/QUAD CANNONS:
-                tmpMax = (tmpObj.twinCannons || tmpObj.quadCannons);
-                if (tmpMax) {
+                tmpMax = (tmpObj.twinCannons == 0 ? tmpObj.quadCannons : tmpObj.twinCannons);
+                if (tmpMax != 0) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
                     int tmpCount = 2;
                     float rotPlus = (float) Math.PI;
-                    if (tmpObj.quadCannons!=0) {
+                    if (tmpObj.quadCannons != 0) {
                         tmpCount = 4;
                         rotPlus /= 2;
                     }
-                    tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
+                    tmpDir = (float) (((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2);
                     for (int c = 0; c < tmpMax; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        contxt.translate(0, tmpVal);
-                        contxt.rotate(tmpDir);
-                        for (var c2 = 0; c2 < tmpCount; ++c2) {
-                            contxt.roundRect(0, -(tmpObj.cannonWidth / 2.4), (tmpObj.cannonLength * 2.1) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), (tmpObj.cannonWidth / 1.25), 0).stroke();
-                            contxt.fill();
-                            contxt.rotate(rotPlus);
+//                   todo     contxt.translate(0, tmpVal);
+//                        contxt.rotate(tmpDir);
+                        for (int c2 = 0; c2 < tmpCount; ++c2) {
+                            roundRect(0, -(tmpObj.cannonWidth / 2.4f), (tmpObj.cannonLength * 2.1f) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1) : 1), (tmpObj.cannonWidth / 1.25f), 0);
+//                    todo        contxt.rotate(rotPlus);
                         }
                         drawCircle(0, 0, (tmpObj.cannonWidth / 1.4f));
                     }
@@ -737,32 +722,30 @@ final  float lineWidth = 8.5f;
 
                 // TRIPPLE CANNONS:
                 tmpMax = tmpObj.trippleCannons;
-                if (tmpMax!=0) {
-                    float tmpS = tmpObj.cannonWidth / 1.3f;
+                if (tmpMax != 0) {
+                    float tmpS1 = tmpObj.cannonWidth / 1.3f;
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
-                    tmpDir = ((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2;
+                    tmpDir = (float) (((player.sid == tmpObj.sid) ? target : tmpObj.targetDir) - tmpObj.dir + Math.PI / 2);
                     for (int c = 0; c < tmpMax; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        contxt.translate(0, tmpVal);
-                        contxt.rotate(tmpDir);
-                        contxt.roundRect(0, -tmpS, (tmpObj.cannonLength * 2.1) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), (tmpS / 1.4), 0).stroke();
-                        contxt.fill();
-                        contxt.roundRect(0, tmpS - (tmpS / 1.4), (tmpObj.cannonLength * 2.1) * (tmpObj.animMults ? (tmpObj.animMults[1].mult || 1) : 1), (tmpS / 1.4), 0).stroke();
-                        contxt.fill();
-                        drawCircle(0, 0, tmpS);
+//        todo                contxt.translate(0, tmpVal);
+//                        contxt.rotate(tmpDir);
+                        roundRect(0, -tmpS1, (tmpObj.cannonLength * 2.1f) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1) : 1), (tmpS1 / 1.4f), 0);
+                        roundRect(0, tmpS1 - (tmpS1 / 1.4f), (tmpObj.cannonLength * 2.1f) * (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.size() > 0 ? (tmpObj.animMults.get(1).mult == 0 ? 1 : tmpObj.animMults.get(1).mult) : 1) : 1), (tmpS1 / 1.4f), 0);
+                        drawCircle(0, 0, tmpS1);
                     }
                 }
 
                 // AUTO CANNONS:
                 tmpMax = tmpObj.autoCannons;
-                if (tmpMax) {
+                if (tmpMax != 0) {
                     cY = (tmpMax - 1) * ((tmpL / tmpMax + 1) / 2);
                     for (int c = 0; c < tmpObj.autoCannons; ++c) {
                         tmpVal = cY - ((tmpL / tmpMax) * c);
-                        tmpDir =(float) (tmpObj.aimDir - tmpObj.dir + Math.PI / 2);
+                        tmpDir = (float) (tmpObj.aimDir - tmpObj.dir + Math.PI / 2);
 //                     Todo   contxt.rotate(tmpDir);
 //                        contxt.translate(0, tmpVal);
-                        roundRect(0, -(tmpObj.cannonWidth / 2.6f), (tmpObj.cannonLength * 2) * ((tmpObj.animMults!=null) ? tmpObj.animMults.get(1).mult : 1), tmpObj.cannonWidth / 1.3f, 0);
+                        roundRect(0, -(tmpObj.cannonWidth / 2.6f), (tmpObj.cannonLength * 2) * ((tmpObj.animMults != null) ? tmpObj.animMults.get(1).mult : 1), tmpObj.cannonWidth / 1.3f, 0);
                         drawCircle(0, 0, (tmpObj.cannonWidth / 1.85f));
                     }
                 }
@@ -770,12 +753,11 @@ final  float lineWidth = 8.5f;
         }
 
         // EFFECT OVERLAY:
-        if (tmpS.overlay!=0) {
-            render.rect(player.x-player.w / 2,player.y -player.h / 2, player.w,
+        if (tmpS.overlay != 0) {
+            render.rect(player.x - player.w / 2, player.y - player.h / 2, player.w,
                     player.h);
         }
     }
-
 
     // GAME INPUT:
     public static void enterGame() {
@@ -784,7 +766,7 @@ final  float lineWidth = 8.5f;
             final JSONObject obj = new JSONObject();
             obj.put("name", userNameInput);
             obj.put("skin", skinIndex);
-            SocketManager.socket.emit("respawn",obj);
+            SocketManager.socket.emit("respawn", obj);
             Utility.saveString("lstnmdbl", userNameInput);
         }
     }
@@ -974,7 +956,7 @@ final  float lineWidth = 8.5f;
     public static void sendTarget(boolean force) {
         long tmpTime = currentTime;
         if (player != null && !player.dead) {
-            target = (float) Math.atan2(mouseY - (screenHeight / 2), mouseX - (screenWidth / 2));
+            target = (float) (Math.atan2(mouseY - (screenHeight / 2), mouseX - (screenWidth / 2)));
             if (force || tmpTime - lastUpdated > tUpdateFrequency) {
                 if (controlIndex == 1) {
                     targetD = (float) Math.sqrt(Math.pow(mouseY - (screenHeight / 2), 2) + Math.pow(mouseX - screenWidth / 2, 2));
@@ -1037,39 +1019,39 @@ final  float lineWidth = 8.5f;
             float rad = tmpObj.s / 2;
             float step = (float) Math.PI / spikes;
 
-            float startX = tmpObj.x, startY = tmpObj.y-rad;
+            float startX = tmpObj.x, startY = tmpObj.y - rad;
             for (int s = 0; s < spikes; s++) {
-                renderer.line(startX, startY, tmpObj.x + (float) Math.cos(rot) * rad, tmpObj.y +(float)  Math.sin(rot) * rad);
+                renderer.line(startX, startY, tmpObj.x + (float) Math.cos(rot) * rad, tmpObj.y + (float) Math.sin(rot) * rad);
                 rot += step;
 
-                startX =  tmpObj.x + (float) Math.cos(rot) * rad;
-                startY = (float)  Math.sin(rot) * rad;
+                startX = tmpObj.x + (float) Math.cos(rot) * rad;
+                startY = (float) Math.sin(rot) * rad;
 
-                renderer.line(startX, startY, tmpObj.x + (float) Math.cos(rot) * (rad * 0.8f), tmpObj.y +(float) Math.sin(rot) * (rad * 0.8f));
+                renderer.line(startX, startY, tmpObj.x + (float) Math.cos(rot) * (rad * 0.8f), tmpObj.y + (float) Math.sin(rot) * (rad * 0.8f));
                 rot += step;
 
                 startX = tmpObj.x + (float) Math.cos(rot) * (rad * 0.8f);
                 startY = tmpObj.y + (float) Math.sin(rot) * (rad * 0.8f);
             }
-            renderer.line(startX, startY, tmpObj.x, tmpObj.y-rad);
+            renderer.line(startX, startY, tmpObj.x, tmpObj.y - rad);
 // Todo           renderer.closePath();
 //            renderer.stroke();
 //            renderer.fill();
         } else if (tmpObj.shp == 2) {
             float rad = tmpObj.s / 1.6f;
 
-            renderer.line(tmpObj.x, tmpObj.y-rad, tmpObj.x + rad, tmpObj.y);
-            renderer.line(tmpObj.x + rad, tmpObj.y, tmpObj.x, tmpObj.y+rad);
-            renderer.line(tmpObj.x, tmpObj.y+rad, tmpObj.x-rad, tmpObj.y);
+            renderer.line(tmpObj.x, tmpObj.y - rad, tmpObj.x + rad, tmpObj.y);
+            renderer.line(tmpObj.x + rad, tmpObj.y, tmpObj.x, tmpObj.y + rad);
+            renderer.line(tmpObj.x, tmpObj.y + rad, tmpObj.x - rad, tmpObj.y);
 // Todo           renderer.closePath();
 //            renderer.stroke();
 //            renderer.fill();
         } else if (tmpObj.shp == 3) {
             float rad = tmpObj.s / 1.6f;
 
-            renderer.line(tmpObj.x,tmpObj.y -rad, tmpObj.x+(rad / 1.5f), tmpObj.y);
-            renderer.line(tmpObj.x+(rad / 1.5f), tmpObj.y, tmpObj.x,tmpObj.y+ rad);
-            renderer.line(tmpObj.x,tmpObj.y+ rad, tmpObj.x-(rad / 1.5f), tmpObj.y);
+            renderer.line(tmpObj.x, tmpObj.y - rad, tmpObj.x + (rad / 1.5f), tmpObj.y);
+            renderer.line(tmpObj.x + (rad / 1.5f), tmpObj.y, tmpObj.x, tmpObj.y + rad);
+            renderer.line(tmpObj.x, tmpObj.y + rad, tmpObj.x - (rad / 1.5f), tmpObj.y);
 //  todo          renderer.closePath();
 //            renderer.stroke();
 //            renderer.fill();
@@ -1096,28 +1078,38 @@ final  float lineWidth = 8.5f;
             }
         }
     }
-}
 
-    public static boolean getIP() {
+
+
+    public static void getIP() {
+        //Todo
+        if (true){
+            SocketManager.init("10.0.0.38", "5000");
+            return;
+        }
         try {
-           final URL dob = new URL("http://doblons.io/getMobileIP?connectToServer");
-           final URLConnection yc = dob.openConnection();
+            final URL dob = new URL("http://doblons.io/getMobileIP?connectToServer");
+            final URLConnection yc = dob.openConnection();
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(
                             yc.getInputStream()));
-          //Todo  String inputLine =  in.toString();
-            String inputLine;
-            Utility.log("lines >> ");
-            while ((inputLine = in.readLine()) != null)
-                Utility.log(inputLine);
-            Utility.log("full >> ");
-            Utility.log(in.toString());
+            //Todo  String inputLine =  in.toString();
+            String inputLine, ip = "", port = "";
+            String[] inputLines;
+            while ((inputLine = in.readLine()) != null) {
+                inputLines = inputLine.replace("connectToServer({\"ip\":\"", "").split("\",\"port\":");
+                ip = inputLines[0];
+                port = inputLines[1].replace("})", "");
+            }
+
             in.close();
+            SocketManager.init(ip, port);
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             Utility.log("getIP IO exception: ");
             e.printStackTrace();
         }
-        return true;
     }
+}

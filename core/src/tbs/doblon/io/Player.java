@@ -12,8 +12,8 @@ import java.util.ArrayList;
 public class Player extends GameObject {
     float aimDir;
     int autoCannons, bigCannon;
-    float cannonLength, cannonWidth, cannonSpeed,rowRot,rowSpeed;
-    int cannons, chaseCannons, classIndex;
+    float cannonLength, cannonWidth, cannonSpeed, rowRot, rowSpeed;
+    int cannons, chaseCannons, classIndex, rudder;
     boolean dead;
     float dir;
     float cannonDmg;
@@ -24,7 +24,8 @@ public class Player extends GameObject {
     float reloadDiv;
     float healthRegen;
     float flashAlpha, flashInc;
-    int forcePos, gatlinCannons, health;
+    int forcePos, gatlinCannons;
+    float health;
     String id;
     float length;
     float localX, localY;
@@ -58,6 +59,8 @@ public class Player extends GameObject {
     }
 
     public void updateData(JSONObject p) {
+        Utility.log("updateData > ");
+        Utility.log(p.toString());
         if (p.has("aimDir"))
             aimDir = (float) p.getDouble("aimDir");
         if (p.has("autoCannons"))

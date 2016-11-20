@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public abstract class GameBase extends ApplicationAdapter {
-    private static final Color bg = new Color(0xa3da4bff);
+    private static final Color bg = new Color(0x8c93b2ff);
     public static int screenWidth, screenHeight;
     private static Level level;
     private static SpriteBatch spriteBatch;

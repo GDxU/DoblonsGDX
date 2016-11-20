@@ -13,12 +13,12 @@ public class DesktopLauncher {
 		final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		final Dimension screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
 		if (screenDimension != null) {
-			final int h = Math.round(screenDimension.height * 0.75f);
-			config.height = h;
-			config.width = (h * 9) / 16;
+			final int w = Math.round(screenDimension.width * 0.75f);
+			config.width = w;
+			config.height = (w * 9) / 16;
 		} else {
-			config.height = 960;
-			config.width = 540;
+			config.width = 960;
+			config.height = 540;
 		}
 
 		config.resizable = false;

@@ -4,6 +4,7 @@ package tbs.doblon.io;
 import com.badlogic.gdx.utils.ObjectFloatMap;
 import com.badlogic.gdx.utils.StringBuilder;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 
@@ -48,7 +49,7 @@ public class SocketManager {
 
     static int numReconnect = 0;
 
-    public static void init() {
+    public static void init(String ip, String port) {
         IO.Options opts = new IO.Options();
         opts.forceNew = true;
         opts.timeout = 2500;
@@ -56,44 +57,23 @@ public class SocketManager {
         opts.query = "rmid=" + Game.lobbyRoomID + "&apid=19ytahhsb";
         try {
 //            socket = IO.socket(data.ip + ":+ + data.port, opts);
-            socket = IO.socket("http://10.0.0.38:5000", opts);
+            socket = IO.socket("http://" + ip + ":" + port, opts);
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
-
-        socket.on("mds", new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-                Utility.log("connected");
-                String a = "";
-                for (Object arg : args) {
-                    a += String.valueOf(arg) + " , ";
-                }
-                Utility.log(String.valueOf(a));
-            }
-
-        });
-
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
+                Utility.print("socket.on: connected");
                 numReconnect = 0;
-                socket.emit("foo", "hi");
-                socket.disconnect();
-            }
-
-        }).on("event", new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
             }
 
         }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
+                Utility.print("socket.on: disconnected");
                 numReconnect++;
                 if (numReconnect < 15)
                     socket.connect();
@@ -102,6 +82,7 @@ public class SocketManager {
         }).on("connect_error", new Emitter.Listener() {
                     @Override
                     public void call(Object... args) {
+                        Utility.print("socket.on: connection_error");
                         numReconnect++;
                         if (numReconnect < 15)
                             socket.connect();
@@ -119,6 +100,7 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
+                Utility.print("socket.on: disconnect");
                 Game.kickPlayer("Disconnected.> reason");
             }
         }).on("error", new Emitter.Listener() {
@@ -126,6 +108,7 @@ public class SocketManager {
                     @Override
                     public void call(Object... args) {
                         Game.kickPlayer("Disconnected. The server may have updated. [" + String.valueOf(args[0]) + "]");
+                        Utility.print("socket.on: error");
                     }
                 }
         ).on("kick", new Emitter.Listener()
@@ -134,13 +117,14 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
-
+                Utility.print("socket.on: kick");
                 Game.kickPlayer(String.valueOf(args[0]));
             }
         }).on("lk", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
+                Utility.print("socket.on: lk");
                 Game.partyKey = String.valueOf(args[0]);
             }
 
@@ -148,10 +132,12 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
+                Utility.print("socket.on: mds");
                 Game.modeList.clear();
-                final Object[] modes = (Object[]) args[0];
-                for (int i = 0; i < modes.length; i++)
-                    Game.modeList.add(String.valueOf(modes[i]));
+                JSONArray a = new JSONArray();
+                final JSONArray modes = (JSONArray) args[0];
+                for (int i = 0; i < modes.length(); i++)
+                    Game.modeList.add(String.valueOf(modes.get(i)));
                 // Todo modeSelector.innerHTML = data[crnt].name + "  <i style="vertical-align: middle;" class="material-icons">&#xE5C5;</i>";
                 Game.modeIndex = String.valueOf(args[1]);
                 Game.currentMode = Game.modeList.get(Integer.parseInt(String.valueOf(args[1])));
@@ -160,6 +146,7 @@ public class SocketManager {
 
             @Override
             public void call(Object... args) {
+                Utility.print("socket.on: v");
                 //Todo sw, sh, mult
                 Utility.log(".on(v)> " + Arrays.toString(args));
 //                if (Game.viewMult != Game.mult) {
@@ -173,6 +160,7 @@ public class SocketManager {
         }).on("spawn", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
+                Utility.print("socket.on: spawn");
                 //Todo gameObject, data
                 final JSONObject tmpPlayer = new JSONObject(String.valueOf(args[0]));
                 Player foundPlayer = Game.getPlayerIndexById(tmpPlayer.getString("id"));
@@ -207,6 +195,7 @@ public class SocketManager {
             @Override
             public void call(Object... args) {
                 //todo id
+                Utility.print("socket.on: d");
                 final Player tmpIndx = Game.getPlayerIndexById(String.valueOf(args[0]));
 
                 if (tmpIndx != null) {
@@ -217,17 +206,16 @@ public class SocketManager {
 
                     @Override
                     public void call(Object... args) {
+                        Utility.print("socket.on: dnt");
                         //todo timeStr, dnt
                         // timeDisplay.innerHTML = timeStr;
-                        Game.dayTimeValue = Float.parseFloat(String.valueOf(args[0]));
+                        Game.dayTimeValue = String.valueOf(args[0]);
                     }
                 }
-
         ).on("0", new Emitter.Listener() {
-
             @Override
             public void call(Object... args) {
-
+//         working       Utility.print("socket.on: 0");
                 //Todo 0
                 // :
                 // 2
@@ -244,46 +232,54 @@ public class SocketManager {
                 //Todo list
                 int rank = 1;
                 int pos = -1;
-                final Object[] list = (Object[]) args[0];
-                for (int i = 0; i < list.length; ) {
-                    if ((((Integer) list[i]) == player.sid))
+                final JSONArray list = (JSONArray) args[0];
+                Utility.print(list.toString());
+                for (int i = 0; i < list.length(); ) {
+                    if (player != null && (((Integer) list.get(i)) == player.sid))
                         pos = rank;
                     i += 4;
                     rank++;
                 }
-
                 Game.leaderboardText = "pos " + (pos < 0 ? "10+" : pos) + " of " + rank;
             }
-
         }).on("1", new Emitter.Listener() {
-
                     @Override
                     public void call(Object... args) {
-
+                        Utility.print("socket.on: 1");
+                        //Todo updateUserData
+                        Utility.log("updateUserData");
+                    }
+                }
+        ).on("1", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        Utility.print("socket.on: 1");
+                        //Todo updateUserData
+                        Utility.log("updateUserData");
                     }
                 }
         ).on("2", new Emitter.Listener() {
 
                     @Override
                     public void call(Object... args) {
+                        Utility.print("socket.on: 2");
                         //todo  upgrC, fleetC, data, points
-                        final Object[] data = (Object[]) (args[2]);
+                        final JSONArray data = (JSONArray) (args[2]);
                         if (data != null) {
-                            if (Game.upgradeItems.size() < (data.length / 4))
-                                for (int i = 0; i < (data.length / 4) - Game.upgradeItems.size(); i++)
+                            if (Game.upgradeItems.size() < (data.length() / 4))
+                                for (int i = 0; i < (data.length() / 4) - Game.upgradeItems.size(); i++)
                                     Game.upgradeItems.add(new UpgradeItem());
-
 
                             Game.upgradesText = "~ Upgrades " + String.valueOf(args[0]) + " ~ Fleet " + String.valueOf(args[1]);
                             int num = 1;
-                            for (int i = 0; i < data.length; ) {
+                            for (int i = 0; i < data.length(); ) {
 
                                 final UpgradeItem upgradeItem = Game.upgradeItems.get(num - 1);
 
-                                upgradeItem.name = String.valueOf(data[i]);
-                                upgradeItem.price = (Integer) (data[i + 1]);
-                                upgradeItem.progress = (Integer) (data[i + 2]);
-                                upgradeItem.maxProgress = (Integer) (data[i + 3]);
+                                upgradeItem.name = String.valueOf(data.get(i));
+                                upgradeItem.price = (Integer) (data.get(i + 1));
+                                upgradeItem.progress = (Integer) (data.get(i + 2));
+                                upgradeItem.maxProgress = (Integer) (data.get(i + 3));
 
                                 //Todo doUpgrade(" + (num - 1) + ", 0, 1)
 
@@ -298,6 +294,7 @@ public class SocketManager {
         ).on("8", new Emitter.Listener() {
                     @Override
                     public void call(Object... args) {
+                        Utility.print("socket.on: 8");
                         //todo data, points, prog
 //                        if (!data && points == undefined && prog == undefined) {
 //                            weaponsProgress.style.display = "none";
@@ -367,47 +364,47 @@ public class SocketManager {
                     @Override
                     public void call(Object... args) {
                         //todo sid, values
-
+                        Utility.print("socket.on: 3");
                         final int tmpIndx = Game.getPlayerIndex((Integer) (args[0]));
-                        final Object[] values = (Object[]) args[1];
+                        final JSONArray values = (JSONArray) args[1];
                         if (tmpIndx >= 0) {
                             final Player tmpUser = users.get(tmpIndx);
                             if (tmpUser != null)
-                                for (int i = 0; i < values.length; ) {
+                                for (int i = 0; i < values.length(); ) {
 
-                                    final String key = String.valueOf(values[i]);
+                                    final String key = String.valueOf(values.get(i));
                                     if (key.equals("lvl")) {
-                                        tmpUser.lvl = String.valueOf(values[i + 1]);
+                                        tmpUser.lvl = String.valueOf(values.get(i + 1));
 
                                     } else if (key.equals("maxHealth")) {
-                                        tmpUser.maxHealth = (Integer) (values[i + 1]);
+                                        tmpUser.maxHealth = (Integer) (values.get(i + 1));
 
                                     } else if (key.equals("health")) {
-                                        tmpUser.health = (Integer) (values[i + 1]);
+                                        tmpUser.health = (Integer) (values.get(i + 1));
                                     } else if (key.equals("speedDiv")) {
-                                        tmpUser.speedDiv = (Float) (values[i + 1]);
+                                        tmpUser.speedDiv = (Float) (values.get(i + 1));
                                     } else if (key.equals("width")) {
-                                        tmpUser.w = (Float) (values[i + 1]);
+                                        tmpUser.w = (Float) (values.get(i + 1));
                                     } else if (key.equals("healthRegen")) {
-                                        tmpUser.healthRegen = (Float) (values[i + 1]);
+                                        tmpUser.healthRegen = (Float) (values.get(i + 1));
                                     } else if (key.equals("cannonSpeed")) {
-                                        tmpUser.cannonSpeed = (Float) (values[i + 1]);
+                                        tmpUser.cannonSpeed = (Float) (values.get(i + 1));
                                     } else if (key.equals("cannonWidth")) {
-                                        tmpUser.cannonWidth = (Float) (values[i + 1]);
+                                        tmpUser.cannonWidth = (Float) (values.get(i + 1));
                                     } else if (key.equals("cannonLength")) {
-                                        tmpUser.cannonLength = (Float) (values[i + 1]);
+                                        tmpUser.cannonLength = (Float) (values.get(i + 1));
                                     } else if (key.equals("cannonDmg")) {
-                                        tmpUser.cannonDmg = (Float) (values[i + 1]);
+                                        tmpUser.cannonDmg = (Float) (values.get(i + 1));
                                     } else if (key.equals("length")) {
-                                        tmpUser.length = (Float) (values[i + 1]);
+                                        tmpUser.length = (Float) (values.get(i + 1));
                                     } else if (key.equals("reloadDiv")) {
-                                        tmpUser.reloadDiv = (Float) (values[i + 1]);
+                                        tmpUser.reloadDiv = (Float) (values.get(i + 1));
                                     } else if (key.equals("speed")) {
-                                        tmpUser.speed = (Float) (values[i + 1]);
+                                        tmpUser.speed = (Float) (values.get(i + 1));
                                     } else if (key.equals("turnSpeed")) {
-                                        tmpUser.turnSpeed = (Float) (values[i + 1]);
+                                        tmpUser.turnSpeed = (Float) (values.get(i + 1));
                                     } else if (key.equals("crashDamage")) {
-                                        tmpUser.crashDamage = (Float) (values[i + 1]);
+                                        tmpUser.crashDamage = (Float) (values.get(i + 1));
                                     }
                                     i += 2;
                                 }
@@ -418,18 +415,18 @@ public class SocketManager {
                     @Override
                     public void call(Object... args) {
                         //todo indx, data
-
+                        Utility.print("socket.on: 4");
                         final Obstacle tmpObj = gameObjects.get((Integer) args[0]);
-                        final Object[] data = (Object[]) args[1];
+                        final JSONArray data = (JSONArray) args[1];
                         if (tmpObj != null) {
                             if (data != null) {
-                                tmpObj.x = (Integer) data[0];
-                                tmpObj.xS = (Integer) data[1];
-                                tmpObj.y = (Integer) data[2];
-                                tmpObj.yS = (Integer) data[3];
-                                tmpObj.s = (Integer) data[4];
-                                tmpObj.c = (Integer) data[5];
-                                tmpObj.shp = (Integer) data[6];
+                                tmpObj.x = (Integer) data.get(0);
+                                tmpObj.xS = (Integer) data.get(1);
+                                tmpObj.y = (Integer) data.get(2);
+                                tmpObj.yS = (Integer) data.get(3);
+                                tmpObj.s = (Integer) data.get(4);
+                                tmpObj.c = (Integer) data.get(5);
+                                tmpObj.shp = (Integer) data.get(6);
                                 tmpObj.active = true;
                             } else {
                                 tmpObj.active = false;
@@ -438,10 +435,9 @@ public class SocketManager {
                     }
                 }
         ).on("5", new Emitter.Listener() {
-
                     @Override
-                    public void call(Object...
-                                             args) {
+                    public void call(Object... args) {
+//                   working     Utility.print("socket.on: 5");
                         //Todo sid, wpnIndex
                         int tmpIndx = Game.getPlayerIndex((Integer) args[0]);
                         int wpnIndex = Game.getPlayerIndex((Integer) args[1]);
@@ -454,15 +450,17 @@ public class SocketManager {
                         }
                     }
                 }
-
         ).on("6", new Emitter.Listener() {
-
                     @Override
                     public void call(Object... args) {
+                        final String val = String.valueOf(args[1]);
+                        if (args.length<2 || val.equals("null"))
+                            return;
                         //Todo  sid, value
                         final int sid = (Integer) args[0];
                         int tmpIndx = Game.getPlayerIndex(sid);
-                        int value = (Integer) args[1];
+//           working             Utility.print("socket.on: 6");
+                        float value = Float.parseFloat(val);
                         if (tmpIndx >= 0) {
                             final Player tmpUser = users.get(tmpIndx);
                             tmpUser.health = value;
@@ -485,6 +483,7 @@ public class SocketManager {
                     @Override
                     public void call
                             (Object... args) {
+                        Utility.print("socket.on: 7");
                         //Todo value
                         Game.scoreText = String.valueOf(args[0]);
                     }
@@ -495,6 +494,7 @@ public class SocketManager {
                     @Override
                     public void call
                             (Object... args) {
+                        Utility.print("socket.on: n");
                         //todo txt
                         Game.showNotification(String.valueOf(args[0]));
                     }
@@ -505,6 +505,7 @@ public class SocketManager {
                     @Override
                     public void call(Object... args) {
                         //todo val
+                        Utility.print("socket.on: s");
                         Game.showScoreNotif((Integer) (args[0]));
                     }
                 }
@@ -516,23 +517,24 @@ public class SocketManager {
                             (Object...
                                      args) {
                         //Todo data
-                        final Object[] data = (Object[]) args[0];
-                        final int numItems = data.length / 4;
+                        Utility.print("socket.on: m");
+                        final JSONArray data = (JSONArray) args[0];
+                        final int numItems = data.length() / 4;
                         if (miniMapItems.size() < numItems)
                             for (int i = 0; i < miniMapItems.size() - numItems; i++)
                                 miniMapItems.add(new MiniMapItem());
                         int item = 0;
-                        for (int i = 0; i < data.length; ) {
+                        for (int i = 0; i < data.length(); ) {
                             final MiniMapItem miniMapItem = miniMapItems.get(i);
                             if (item >= numItems) {
                                 miniMapItem.active = false;
                             } else {
                                 miniMapItem.active = true;
-                                miniMapItem.color = Game.pingColors[(Integer) data[i]];
-                                miniMapItem.w = Game.pingColors[(Integer) data[i]];
-                                miniMapItem.x = (((Float) data[i + 1] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width;
-                                miniMapItem.y = (((Float) data[i + 2] + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height;
-                                miniMapItem.w = ((Float) data[i + 3]) * 2;
+                                miniMapItem.color = Game.pingColors[(Integer) data.get(i)];
+                                miniMapItem.w = Game.pingColors[(Integer) data.get(i)];
+                                miniMapItem.x = (((Float) data.get(i + 1) + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.width;
+                                miniMapItem.y = (((Float) data.get(i + 2) + gameData.mapScale) / (gameData.mapScale * 2)) * minimap.height;
+                                miniMapItem.w = ((Float) data.get(i + 3)) * 2;
                                 miniMapItem.h = miniMapItem.w;
                             }
 
@@ -572,7 +574,7 @@ public class SocketManager {
     }
 
     // GET USER DATA:
-    public void updateUserData(Object singleObject, Object[] listObj) {
+    public void updateUserData(Object singleObject, JSONArray listObj) {
         final JSONObject obj = (JSONObject) singleObject;
 
         if (singleObject != null) {
@@ -584,15 +586,15 @@ public class SocketManager {
                     users.get(i).forcePos = 1;
                 users.get(i).visible = false;
             }
-            for (int i = 0; i < listObj.length; ) {
-                final int tmpIndx = Game.getPlayerIndex((Integer) listObj[i]);
+            for (int i = 0; i < listObj.length(); ) {
+                final int tmpIndx = Game.getPlayerIndex((Integer) listObj.get(i));
                 final Player p = users.get(tmpIndx);
                 if (tmpIndx >= 0) {
-                    p.x = (Float) listObj[i + 1];
-                    p.y = (Float) listObj[i + 2];
-                    p.dir = (Float) listObj[i + 3];
-                    p.targetDir = (Float) listObj[i + 4];
-                    p.aimDir = (Float) listObj[i + 5];
+                    p.x = (Float) listObj.get(i + 1);
+                    p.y = (Float) listObj.get(i + 2);
+                    p.dir = (Float) listObj.get(i + 3);
+                    p.targetDir = (Float) listObj.get(i + 4);
+                    p.aimDir = (Float) listObj.get(i + 5);
                     p.visible = true;
                 }
                 i += 6;
