@@ -16,6 +16,7 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
+import static tbs.doblon.io.Game.coinDisplayText;
 import static tbs.doblon.io.Game.controlIndex;
 import static tbs.doblon.io.Game.gameData;
 import static tbs.doblon.io.Game.gameObjects;
@@ -25,6 +26,7 @@ import static tbs.doblon.io.Game.leaveGame;
 import static tbs.doblon.io.Game.minimap;
 import static tbs.doblon.io.Game.player;
 import static tbs.doblon.io.Game.showAd;
+import static tbs.doblon.io.Game.upgradeItems;
 import static tbs.doblon.io.Game.users;
 import static tbs.doblon.io.GameBase.fill;
 import static tbs.doblon.io.MiniMap.miniMapItems;
@@ -49,7 +51,7 @@ public class SocketManager {
 
     static int numReconnect = 0;
 
-    public static void init(String ip, String port) {
+    public static void init(final String ip, String port) {
         IO.Options opts = new IO.Options();
         opts.forceNew = true;
         opts.timeout = 2500;
@@ -62,15 +64,12 @@ public class SocketManager {
             e.printStackTrace();
         }
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-
             @Override
             public void call(Object... args) {
                 Utility.print("socket.on: connected");
                 numReconnect = 0;
             }
-
         }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-
             @Override
             public void call(Object... args) {
                 Utility.print("socket.on: disconnected");
@@ -78,7 +77,6 @@ public class SocketManager {
                 if (numReconnect < 15)
                     socket.connect();
             }
-
         }).on("connect_error", new Emitter.Listener() {
                     @Override
                     public void call(Object... args) {
@@ -94,26 +92,20 @@ public class SocketManager {
                         }
                     }
                 }
-        ).on("disconnect", new Emitter.Listener()
-
-        {
-
+        ).on("disconnect", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 Utility.print("socket.on: disconnect");
                 Game.kickPlayer("Disconnected.> reason");
             }
         }).on("error", new Emitter.Listener() {
-
                     @Override
                     public void call(Object... args) {
                         Game.kickPlayer("Disconnected. The server may have updated. [" + String.valueOf(args[0]) + "]");
                         Utility.print("socket.on: error");
                     }
                 }
-        ).on("kick", new Emitter.Listener()
-
-        {
+        ).on("kick", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
@@ -121,15 +113,12 @@ public class SocketManager {
                 Game.kickPlayer(String.valueOf(args[0]));
             }
         }).on("lk", new Emitter.Listener() {
-
             @Override
             public void call(Object... args) {
                 Utility.print("socket.on: lk");
                 Game.partyKey = String.valueOf(args[0]);
             }
-
         }).on("mds", new Emitter.Listener() {
-
             @Override
             public void call(Object... args) {
                 Utility.print("socket.on: mds");
@@ -143,7 +132,6 @@ public class SocketManager {
                 Game.currentMode = Game.modeList.get(Integer.parseInt(String.valueOf(args[1])));
             }
         }).on("v", new Emitter.Listener() {
-
             @Override
             public void call(Object... args) {
                 Utility.print("socket.on: v");
@@ -156,7 +144,6 @@ public class SocketManager {
 //                    Game.resize();
 //                }
             }
-
         }).on("spawn", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
@@ -191,7 +178,6 @@ public class SocketManager {
                 Game.resetKeys();
             }
         }).on("d", new Emitter.Listener() {
-
             @Override
             public void call(Object... args) {
                 //todo id
@@ -203,13 +189,13 @@ public class SocketManager {
                 }
             }
         }).on("dnt", new Emitter.Listener() {
-
                     @Override
                     public void call(Object... args) {
                         Utility.print("socket.on: dnt");
                         //todo timeStr, dnt
                         // timeDisplay.innerHTML = timeStr;
                         Game.dayTimeValue = String.valueOf(args[0]);
+                        Game.enterGame();
                     }
                 }
         ).on("0", new Emitter.Listener() {
@@ -245,36 +231,38 @@ public class SocketManager {
         }).on("1", new Emitter.Listener() {
                     @Override
                     public void call(Object... args) {
-                        Utility.print("socket.on: 1");
-                        //Todo updateUserData
-                        Utility.log("updateUserData");
-                    }
-                }
-        ).on("1", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        Utility.print("socket.on: 1");
-                        //Todo updateUserData
-                        Utility.log("updateUserData");
+//                        Utility.print("socket.on: 1");
+                        if (args.length > 1)
+                            updateUserData(args[0], (JSONArray) args[1]);
+                        else
+                            updateUserData(args[0], null);
                     }
                 }
         ).on("2", new Emitter.Listener() {
-
                     @Override
                     public void call(Object... args) {
                         Utility.print("socket.on: 2");
                         //todo  upgrC, fleetC, data, points
                         final JSONArray data = (JSONArray) (args[2]);
                         if (data != null) {
-                            if (Game.upgradeItems.size() < (data.length() / 4))
-                                for (int i = 0; i < (data.length() / 4) - Game.upgradeItems.size(); i++)
-                                    Game.upgradeItems.add(new UpgradeItem());
+                            final int numItems = (data.length() / 4);
+                            final int diff = upgradeItems.size() - numItems;
+
+                            if (diff > 0)
+                                for (int i = 0; i < diff; i++)
+                                    upgradeItems.add(new UpgradeItem());
+                            else if (diff < 0)
+                                for (int i = 0; i < Math.abs(diff); i++)
+                                    try {
+                                        upgradeItems.remove(upgradeItems.size() - 1);
+                                    } catch (Exception e) {
+                                    }
 
                             Game.upgradesText = "~ Upgrades " + String.valueOf(args[0]) + " ~ Fleet " + String.valueOf(args[1]);
-                            int num = 1;
-                            for (int i = 0; i < data.length(); ) {
+                            int num = 0;
+                            for (int i = 0; num < upgradeItems.size(); ) {
 
-                                final UpgradeItem upgradeItem = Game.upgradeItems.get(num - 1);
+                                final UpgradeItem upgradeItem = Game.upgradeItems.get(num);
 
                                 upgradeItem.name = String.valueOf(data.get(i));
                                 upgradeItem.price = (Integer) (data.get(i + 1));
@@ -290,7 +278,6 @@ public class SocketManager {
                         Game.coinDisplayText = "Coins: $" + args[3];
                     }
                 }
-
         ).on("8", new Emitter.Listener() {
                     @Override
                     public void call(Object... args) {
@@ -358,9 +345,7 @@ public class SocketManager {
 //                        }
                     }
                 }
-
         ).on("3", new Emitter.Listener() {
-
                     @Override
                     public void call(Object... args) {
                         //todo sid, values
@@ -416,17 +401,25 @@ public class SocketManager {
                     public void call(Object... args) {
                         //todo indx, data
                         Utility.print("socket.on: 4");
-                        final Obstacle tmpObj = gameObjects.get((Integer) args[0]);
+                        final int index = (Integer) args[0];
+                        final int diff = index - gameObjects.size();
+
+                        if (diff > 0)
+                            for (int i = 0; i < diff + 5; i++)
+                                gameObjects.add(new Obstacle());
+                        final Obstacle tmpObj = gameObjects.get(index);
+                        if (args.length < 2)
+                            return;
                         final JSONArray data = (JSONArray) args[1];
                         if (tmpObj != null) {
                             if (data != null) {
-                                tmpObj.x = (Integer) data.get(0);
-                                tmpObj.xS = (Integer) data.get(1);
-                                tmpObj.y = (Integer) data.get(2);
-                                tmpObj.yS = (Integer) data.get(3);
-                                tmpObj.s = (Integer) data.get(4);
-                                tmpObj.c = (Integer) data.get(5);
-                                tmpObj.shp = (Integer) data.get(6);
+                                tmpObj.x = ((Double) Double.parseDouble(String.valueOf(data.get(0)))).intValue();
+                                tmpObj.xS = ((Double) Double.parseDouble(String.valueOf(data.get(1)))).intValue();
+                                tmpObj.y = ((Double) Double.parseDouble(String.valueOf(data.get(2)))).intValue();
+                                tmpObj.yS = ((Double) Double.parseDouble(String.valueOf(data.get(3)))).intValue();
+                                tmpObj.s = ((Double) Double.parseDouble(String.valueOf(data.get(4)))).intValue();
+                                tmpObj.c = ((Double) Double.parseDouble(String.valueOf(data.get(5)))).intValue();
+                                tmpObj.shp = ((Double) Double.parseDouble(String.valueOf(data.get(6)))).intValue();
                                 tmpObj.active = true;
                             } else {
                                 tmpObj.active = false;
@@ -454,7 +447,7 @@ public class SocketManager {
                     @Override
                     public void call(Object... args) {
                         final String val = String.valueOf(args[1]);
-                        if (args.length<2 || val.equals("null"))
+                        if (args.length < 2 || val.equals("null"))
                             return;
                         //Todo  sid, value
                         final int sid = (Integer) args[0];
@@ -524,7 +517,8 @@ public class SocketManager {
                             for (int i = 0; i < miniMapItems.size() - numItems; i++)
                                 miniMapItems.add(new MiniMapItem());
                         int item = 0;
-                        for (int i = 0; i < data.length(); ) {
+                        //Todo might have to add minimapItems
+                        for (int i = 0; item < miniMapItems.size(); ) {
                             final MiniMapItem miniMapItem = miniMapItems.get(i);
                             if (item >= numItems) {
                                 miniMapItem.active = false;
@@ -574,10 +568,10 @@ public class SocketManager {
     }
 
     // GET USER DATA:
-    public void updateUserData(Object singleObject, JSONArray listObj) {
-        final JSONObject obj = (JSONObject) singleObject;
+    public static void updateUserData(Object singleObject, JSONArray listObj) {
 
-        if (singleObject != null) {
+        if (singleObject != null && String.valueOf(singleObject).length() > 5) {
+            final JSONObject obj = (JSONObject) singleObject;
             obj.put("visible", true);
             Game.updateOrPushUser(obj);
         } else if (listObj != null) {
@@ -588,6 +582,8 @@ public class SocketManager {
             }
             for (int i = 0; i < listObj.length(); ) {
                 final int tmpIndx = Game.getPlayerIndex((Integer) listObj.get(i));
+                if (tmpIndx < 0 || tmpIndx >= users.size())
+                    continue;
                 final Player p = users.get(tmpIndx);
                 if (tmpIndx >= 0) {
                     p.x = (Float) listObj.get(i + 1);

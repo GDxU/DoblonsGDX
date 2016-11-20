@@ -65,7 +65,7 @@ public class Level {
 //        if (true)
 //            return;
 
-        Player tmpPlayer = users.get(Game.getPlayerIndex(player.sid));
+        Player tmpPlayer = player;
         float xOffset = 0, yOffset = 0;
         if (tmpPlayer != null) {
             xOffset = tmpPlayer.localX;
@@ -240,9 +240,9 @@ public class Level {
             }
         }
 
-        if (Game.iconsList[1] != null) {
-            spriteBatch().draw(Game.iconsList[1], 500, 500, skullIconSize, skullIconSize);
-        }
+//    Todo    if (Game.iconsList[1] != null) {
+//            spriteBatch().draw(Game.iconsList[1], 500, 500, skullIconSize, skullIconSize);
+//        }
 
         // DAY/NIGHT TIME:
         if (dayTimeValue !=null) {

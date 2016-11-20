@@ -115,7 +115,7 @@ public class Game extends GameBase {
     static boolean paused;
     // SCALING:
     static int viewMult = 1, maxScreenWidth = 2208, maxScreenHeight = 1242; // 1080;
-    static int originalScreenWidth = maxScreenWidth, originalScreenHeight = maxScreenHeight, screenWidth, screenHeight;
+    static int originalScreenWidth = maxScreenWidth, originalScreenHeight = maxScreenHeight;
 
     public static void showAd() {
         Utility.log("showAds");

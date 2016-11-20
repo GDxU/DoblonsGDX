@@ -39,8 +39,12 @@ public abstract class GameBase extends ApplicationAdapter {
 
         if (!shapeRenderer.isDrawing())
             shapeRenderer.begin(shapeType);
-        else
-            shapeRenderer.set(shapeType);
+        else {
+            if (shapeType != shapeRenderer.getCurrentType()) {
+                shapeRenderer.end();
+                shapeRenderer.begin(shapeType);
+            }
+        }
 
         return shapeRenderer;
     }

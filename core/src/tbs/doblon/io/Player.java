@@ -72,13 +72,13 @@ public class Player extends GameObject {
         if (p.has("cannonWidth"))
             cannonWidth = (float) p.getDouble("cannonWidth");
         if (p.has("cannonSpeed"))
-            cannonSpeed = (float) p.getDouble("");
+            cannonSpeed = (float) p.getDouble("cannonSpeed");
         if (p.has("cannons"))
             cannons = p.getInt("cannons");
         if (p.has("chaseCannons"))
             chaseCannons = p.getInt("chaseCannons");
         if (p.has("classIndex"))
-            classIndex = p.getInt("");
+            classIndex = p.getInt("classIndex");
         if (p.has("dead"))
             dead = p.getBoolean("dead");
         if (p.has("dir"))
@@ -120,14 +120,13 @@ public class Player extends GameObject {
         if (p.has("maxHealth"))
             maxHealth = p.getInt("maxHealth");
         if (p.has("mineDropper"))
-            mineDropper = p.getInt("");
+            mineDropper = p.getInt("mineDropper");
         if (p.has("name"))
             name = p.getString("name");
-
         if (p.has("nameSpriteID"))
             nameSpriteID = p.getString("nameSpriteID");
         if (p.has("noseLength"))
-            noseLength = p.getInt("");
+            noseLength = p.getInt("noseLength");
         if (p.has("ownerID"))
             ownerID = p.getInt("ownerID");
         if (p.has("quadCannons"))
@@ -142,8 +141,10 @@ public class Player extends GameObject {
             rows = p.getInt("rows");
         if (p.has("scatterCannons"))
             scatterCannons = p.getInt("scatterCannons");
-        if (p.has("sid"))
+        if (p.has("sid")) {
             sid = p.getInt("sid");
+            Utility.log("setSID: "+sid);
+        }
         if (p.has("skin"))
             skin = p.getInt("skin");
         if (p.has("sniperCannon"))
