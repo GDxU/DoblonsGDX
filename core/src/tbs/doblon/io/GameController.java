@@ -7,48 +7,96 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 
-import tbs.doblon.io.views.HUDManager;
-
-import static tbs.doblon.io.Game.enterGame;
 import static tbs.doblon.io.Game.forceTarget;
 import static tbs.doblon.io.Game.keys;
 import static tbs.doblon.io.Game.player;
-import static tbs.doblon.io.Game.screenHeight;
-import static tbs.doblon.io.Game.screenWidth;
 import static tbs.doblon.io.Game.sendMoveTarget;
 import static tbs.doblon.io.Game.shooting;
 import static tbs.doblon.io.Game.speedInc;
-import static tbs.doblon.io.Game.toggleUpgrades;
 import static tbs.doblon.io.Game.turnDir;
 import static tbs.doblon.io.SocketManager.socket;
 
 public class GameController extends InputMultiplexer {
-    private static InputMultiplexer multiplexer = new InputMultiplexer();
-    private static GestureDetector gestureDetector;
-    private static final InputProcessor inputProcessor = new InputProcessor() {
+    private static final GestureDetector.GestureListener gestureListener = new GestureDetector.GestureListener() {
+        @Override
+        public boolean touchDown(float x, float y, int pointer, int button) {
+            return false;
+        }
 
         @Override
+        public boolean tap(float x, float y, int count, int button) {
+            return GameController.click((int) x, (int) y);
+        }
+
+        @Override
+        public boolean longPress(float x, float y) {
+            return longPress(x, y);
+        }
+
+        @Override
+        public boolean fling(float velocityX, float velocityY, int button) {
+            return GameController.fling(velocityX, velocityY);
+        }
+
+        @Override
+        public void pinchStop() {
+
+        }
+
+        @Override
+        public boolean pan(float x, float y, float deltaX, float deltaY) {
+            return false;
+        }
+
+        @Override
+        public boolean panStop(float x, float y, int pointer, int button) {
+            return false;
+        }
+
+        @Override
+        public boolean zoom(float initialDistance, float distance) {
+            return GameController.zoom(initialDistance / distance);
+        }
+
+        @Override
+        public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
+            //Todo calculate zoom
+            return false;
+        }
+    };
+    private static InputMultiplexer multiplexer = new InputMultiplexer();
+    private static GestureDetector gestureDetector;
+    private static KeyListener keyListener;
+    private static final InputProcessor inputProcessor = new InputProcessor() {
+        @Override
         public boolean keyDown(int keycode) {
-            Utility.log("keyDown >> "+Input.Keys.toString(keycode));
-            keyPress(keycode);
+            if (keycode == Input.Keys.BACKSPACE) {
+                if (keyListener != null) {
+                    keyListener.onBackSpace();
+                }
+            } else
+                keyPress(keycode);
             return false;
         }
 
         @Override
         public boolean keyUp(int keycode) {
-
             GameController.keyRelease(keycode);
             return false;
         }
 
         @Override
         public boolean keyTyped(char character) {
+            if (keyListener != null) {
+                keyListener.onKeyPresses(character);
+            }
             return false;
         }
 
         @Override
         public boolean touchDown(int x, int y, int pointer, int button) {
-            if (UIManager.touchDown(x,y)){
+            keyListener = null;
+            if (UIManager.touchDown(x, y)) {
                 return false;
             }
             return false;
@@ -56,7 +104,7 @@ public class GameController extends InputMultiplexer {
 
         @Override
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-            if (UIManager.touchUp(screenX,screenY)){
+            if (UIManager.touchUp(screenX, screenY)) {
                 return false;
             }
             click(screenX, screenY);
@@ -110,7 +158,7 @@ public class GameController extends InputMultiplexer {
     }
 
     private static void keyPress(int keyNum) {
-        if (SocketManager.isConnected() && player!=null && !player.dead) {
+        if (SocketManager.isConnected() && player != null && !player.dead) {
 
             // START SHOOTING:
             if (!shooting && keyNum == 32) {
@@ -119,56 +167,83 @@ public class GameController extends InputMultiplexer {
             }
 
             // MOVEMENT:
-            if ((keyNum == 65 || keyNum == 37) && keys.l==0) {
+            if ((keyNum == 65 || keyNum == 37) && keys.l == 0) {
                 keys.l = 1;
                 keys.r = 0;
                 turnDir = -1;
                 sendMoveTarget();
             }
-            if ((keyNum == 68 || keyNum == 39) && keys.r==0) {
+            if ((keyNum == 68 || keyNum == 39) && keys.r == 0) {
                 keys.r = -1;
                 keys.l = 0;
                 turnDir = 1;
                 sendMoveTarget();
             }
-            if ((keyNum == 87 || keyNum == 38) && keys.u==0) {
+            if ((keyNum == 87 || keyNum == 38) && keys.u == 0) {
                 keys.u = 1;
                 keys.d = 0;
                 speedInc = 1;
                 sendMoveTarget();
             }
-            if ((keyNum == 83 || keyNum == 40) && keys.d==0) {
+            if ((keyNum == 83 || keyNum == 40) && keys.d == 0) {
                 keys.d = 1;
                 keys.u = 0;
                 speedInc = -1;
                 sendMoveTarget();
             }
         }
+    }
 
+    public static void setKeyListener(KeyListener keyListener) {
+        GameController.keyListener = keyListener;
     }
 
     private static void keyRelease(int keyNum) {
-        if (SocketManager.isConnected() && player !=null&& !player.dead) {
+        if (SocketManager.isConnected() && player != null && !player.dead) {
 
             // UPGRADES:
-                int num =-1;
-                switch (keyNum){
-                    case 48: num =  9;  break;
-                            case 49: num =  0;  break;
-                            case 50: num =  1;  break;
-                            case 51: num =  2;  break;
-                            case 52: num =  3;  break;
-                            case 53: num =  4;  break;
-                            case 54: num =  5;  break;
-                            case 55: num =  6;  break;
-                            case 56: num =  7;  break;
-                            case 57: num =  8;  break;
-                            case 84: num =  10;  break;
-                            case 89: num =  11; break;
+            int num = -1;
+            switch (keyNum) {
+                case 48:
+                    num = 9;
+                    break;
+                case 49:
+                    num = 0;
+                    break;
+                case 50:
+                    num = 1;
+                    break;
+                case 51:
+                    num = 2;
+                    break;
+                case 52:
+                    num = 3;
+                    break;
+                case 53:
+                    num = 4;
+                    break;
+                case 54:
+                    num = 5;
+                    break;
+                case 55:
+                    num = 6;
+                    break;
+                case 56:
+                    num = 7;
+                    break;
+                case 57:
+                    num = 8;
+                    break;
+                case 84:
+                    num = 10;
+                    break;
+                case 89:
+                    num = 11;
+                    break;
 
-                }
+            }
 
-                Game.doUpgrade(num, 0, 1);
+            Game.doUpgrade(num, 0, 1);
 
 
             // STOP SHOOTING:
@@ -219,53 +294,10 @@ public class GameController extends InputMultiplexer {
 
     }
 
-    private static final GestureDetector.GestureListener gestureListener = new GestureDetector.GestureListener() {
-        @Override
-        public boolean touchDown(float x, float y, int pointer, int button) {
-            return false;
-        }
+    public interface KeyListener {
+        void onKeyPresses(char keycode);
 
-        @Override
-        public boolean tap(float x, float y, int count, int button) {
-            return GameController.click((int) x, (int) y);
-        }
-
-        @Override
-        public boolean longPress(float x, float y) {
-            return longPress(x, y);
-        }
-
-        @Override
-        public boolean fling(float velocityX, float velocityY, int button) {
-            return GameController.fling(velocityX, velocityY);
-        }
-
-        @Override
-        public void pinchStop() {
-
-        }
-
-        @Override
-        public boolean pan(float x, float y, float deltaX, float deltaY) {
-            return false;
-        }
-
-        @Override
-        public boolean panStop(float x, float y, int pointer, int button) {
-            return false;
-        }
-
-        @Override
-        public boolean zoom(float initialDistance, float distance) {
-            return GameController.zoom(initialDistance / distance);
-        }
-
-        @Override
-        public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
-            //Todo calculate zoom
-            return false;
-        }
-    };
-
+        void onBackSpace();
+    }
 
 }

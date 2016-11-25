@@ -44,13 +44,10 @@ public static ArrayList<Button> weaponButtons = new ArrayList<Button>();
                 }else if (text.contains("fishing")){
                 }else if (text.contains("battles")){
                 }else if (text.contains("man of war")){
-
                 }
                 return true;
             }
         }
-
-
         return false;
     }
 
