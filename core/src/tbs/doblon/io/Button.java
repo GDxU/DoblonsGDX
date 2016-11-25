@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Rectangle;
 public class Button {
     private static final Rectangle r1 = new Rectangle(), r2 = new Rectangle();
     float x,y,h,w;
+    public boolean visible;
+    public String text;
 
     public boolean click(float x, float y){
         r1.set(x,y,w,h);

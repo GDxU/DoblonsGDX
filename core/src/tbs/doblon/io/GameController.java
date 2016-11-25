@@ -7,6 +7,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 
+import tbs.doblon.io.views.HUDManager;
+
 import static tbs.doblon.io.Game.enterGame;
 import static tbs.doblon.io.Game.forceTarget;
 import static tbs.doblon.io.Game.keys;
@@ -27,12 +29,14 @@ public class GameController extends InputMultiplexer {
 
         @Override
         public boolean keyDown(int keycode) {
+            Utility.log("keyDown >> "+Input.Keys.toString(keycode));
             keyPress(keycode);
             return false;
         }
 
         @Override
         public boolean keyUp(int keycode) {
+
             GameController.keyRelease(keycode);
             return false;
         }

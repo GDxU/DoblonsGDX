@@ -2,8 +2,10 @@ package tbs.doblon.io;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -22,13 +24,32 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
+import tbs.doblon.io.views.HUDManager;
+
 public class Game extends GameBase {
+    public static OrthographicCamera camera = new OrthographicCamera();
     @Override
     public void create() {
         super.create();
+        HUDManager.getHUDManager();
         skinIndex = Utility.getInt("sknInx");
         userNameInput = Utility.getString("lstnmdbl");
+        MyTextInputListener listener = new MyTextInputListener();
+//        Gdx.input.getTextInput(listener, "Dialog Title", "Initial Textfield Value", "Hint Value");
+        Gdx.input.setOnscreenKeyboardVisible(true);
         getIP();
+    }
+
+    public static class MyTextInputListener implements Input.TextInputListener {
+        @Override
+        public void input(String text) {
+            Utility.print("input: " + text);
+        }
+
+        @Override
+        public void canceled() {
+
+        }
     }
 
     @Override
@@ -40,6 +61,9 @@ public class Game extends GameBase {
 
     @Override
     public void resize(int width, int height) {
+        HUDManager.camera.setToOrtho(false, width, height);
+        HUDManager.camera.position.set(width / 2, height / 2, 0);
+        HUDManager.camera.update();
         super.resize(width, height);
     }
 
@@ -115,7 +139,7 @@ public class Game extends GameBase {
     static boolean paused;
     // SCALING:
     static float viewMult = 1;
-    static int  maxScreenWidth = 2208, maxScreenHeight = 1242; // 1080;
+    static int maxScreenWidth = 2208, maxScreenHeight = 1242; // 1080;
     static int originalScreenWidth = maxScreenWidth, originalScreenHeight = maxScreenHeight;
 
     public static void showAd() {
@@ -364,7 +388,7 @@ public class Game extends GameBase {
     }
 
     public static final ArrayList<TextureRegion> renderedSkins = new ArrayList<TextureRegion>();
-    public static int skinIndex ;
+    public static int skinIndex;
 
     // NOTIFICATIONS:
     public static void hideNotifByType(String type) {
@@ -491,7 +515,7 @@ public class Game extends GameBase {
 
     public static int mouseX, mouseY;
     public static boolean forceTarget = true, shooting;
-    public static String userNameInput ;
+    public static String userNameInput;
 
     public static void toggleUpgrades() {
 
@@ -1081,10 +1105,9 @@ public class Game extends GameBase {
     }
 
 
-
     public static void getIP() {
         //Todo
-        if (true){
+        if (true) {
             SocketManager.init("10.0.0.38", "5000");
             return;
         }

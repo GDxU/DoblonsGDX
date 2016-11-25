@@ -28,7 +28,7 @@ public class AnimText extends GameObject {
             final Color color = Utility.tmpColor;
             color.set(Color.WHITE);
             color.a = alpha;
-            Utility.drawCenteredText(Game.spriteBatch(), color, text, x, y, scale);
+            Utility.drawCenteredText(Game.spriteBatch(), text, color, x, y, scale);
         }
     }
 

@@ -3,15 +3,24 @@ package tbs.doblon.io;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.StringBuilder;
 
 import java.util.Random;
+
+import tbs.doblon.io.views.HUDManager;
+import tbs.doblon.io.views.Rect;
+
+import static tbs.doblon.io.views.View.clipBounds;
 
 
 public class Utility {
@@ -21,7 +30,12 @@ public class Utility {
     private static final Color c2 = new Color();
     public static final Color tmpColor = new Color();
     private static final int[] ints = new int[2];
-    private static final GlyphLayout glyphLayout = new GlyphLayout();
+
+    public static int[] getInts() {
+        return ints;
+    }
+
+    public static final GlyphLayout glyphLayout = new GlyphLayout();
     private static final float[] textSize = new float[2];
     private static boolean isFontInit;
     private static BitmapFont font;
@@ -83,7 +97,7 @@ public class Utility {
 
     public static void drawCenteredText(SpriteBatch batch, int color, String text, float x, float y, float scale) {
         c.set(color);
-        drawCenteredText(batch, c, text, x, y, scale);
+        drawCenteredText(batch, text, c, x, y, scale);
     }
 
     public static GlyphLayout measureText(String text, float scale) {
@@ -92,37 +106,6 @@ public class Utility {
         return glyphLayout;
     }
 
-    public static void drawCenteredText(SpriteBatch batch, Color color, String text, float x, float y, float scale) {
-
-        if (text == null || text.length() < 1) {
-            return;
-        }
-//        font.getData().setScale(scale);
-//        textToMeasure = "" + player.score;
-//        glyphLayout.setText(font, textToMeasure);
-//        color.set(0xFFFFFFFF);
-        final BitmapFont font = getFont();
-        font.getData().setScale(scale);
-
-        glyphLayout.setText(font, text);
-        final float textWidth = glyphLayout.width;
-        final float left = x - (textWidth / 2);
-        final float textHeight = font.getLineHeight();
-        font.setColor(color);
-        font.draw(batch, text, left, y + (textHeight / 2));
-    }
-
-    public static void drawLeftText(SpriteBatch batch, Color color, String text, float x, float y, float scale) {
-
-        if (text == null || text.length() < 1) {
-            return;
-        }
-
-        final BitmapFont font = getFont();
-        font.getData().setScale(scale * 1.25f);
-        font.setColor(color);
-        font.draw(batch, text, x, y + font.getLineHeight());
-    }
 
     public static boolean customBool(int i) {
         for (int ii = 0; ii < i; ii++) {
@@ -219,6 +202,155 @@ public class Utility {
             return null;
         }
         return p;
+    }
+
+    public static void drawCenteredText(SpriteBatch batch, String text, Color color, float scale, float x, float y) {
+        final BitmapFont font = getFont();
+        if (text == null || text.length() < 1 || font == null || batch == null)
+            return;
+        final GlyphLayout layout = glyphLayout;
+
+        font.setColor(color);
+        font.getData().setScale(scale);
+
+        layout.setText(font, text);
+        final float w = layout.width;
+        final float h = layout.height;
+
+        x = x - (w / 2);
+        y = y + (h / 2);
+
+        if (!batch.isDrawing())
+            batch.begin();
+        font.draw(batch, text, x, y);
+    }
+
+    public static void drawCenterLeftText(SpriteBatch batch, String text, Color color, float scale, float x, float y) {
+        final BitmapFont font = getFont();
+        if (text == null || text.length() < 1 || font == null || batch == null)
+            return;
+
+        font.setColor(color);
+        font.getData().setScale(scale);
+        final GlyphLayout layout = glyphLayout;
+
+        layout.setText(font, text);
+        final float w = layout.width;
+        final float h = layout.height;
+
+        y = y + (h / 2);
+
+        if (!batch.isDrawing())
+            batch.begin();
+        font.draw(batch, text, x, y);
+    }
+
+
+    public static ShapeRenderer initShapeRenderer(SpriteBatch batch, ShapeRenderer renderer, Rectangle scissors, Rectangle clipBounds) {
+        if (batch.isDrawing())
+            try {
+                try {
+                    batch.end();
+                } catch (Exception e) {
+                }
+                try {
+                    ScissorStack.popScissors();
+                } catch (Exception e) {
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        if (!renderer.isDrawing()) {
+            try {
+                ScissorStack.calculateScissors(HUDManager.camera, renderer.getTransformMatrix(), clipBounds, scissors);
+                ScissorStack.pushScissors(scissors);
+                renderer.begin(ShapeRenderer.ShapeType.Filled);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                renderer.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                ScissorStack.popScissors();
+            } catch (Exception e) {
+            }
+        }
+
+        return renderer;
+    }
+
+
+    public static SpriteBatch initSpriteBatch(SpriteBatch batch, ShapeRenderer renderer, Rectangle scissors, Rectangle clipBounds) {
+        if (renderer.isDrawing())
+            try {
+                try {
+                    renderer.end();
+                } catch (Exception e) {
+                }
+                try {
+                    ScissorStack.popScissors();
+                } catch (Exception e) {
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        if (!batch.isDrawing()) {
+            try {
+                ScissorStack.calculateScissors(HUDManager.camera, batch.getTransformMatrix(), clipBounds, scissors);
+                ScissorStack.pushScissors(scissors);
+                batch.begin();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                batch.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                ScissorStack.popScissors();
+            } catch (Exception e) {
+            }
+        }
+
+        return batch;
+    }
+
+    public static void drawBottomLeftText(SpriteBatch batch, String text, Color color, float scale, float x, float y) {
+        if (text == null || text.length() < 1 || font == null || batch == null)
+            return;
+
+        if (!batch.isDrawing())
+            batch.begin();
+
+        final BitmapFont font = getFont();
+        font.setColor(color);
+        font.getData().setScale(scale);
+
+        glyphLayout.setText(font, text);
+        final float h = glyphLayout.height;
+
+        font.setColor(color);
+        font.draw(batch, text, x, y + h);
+    }
+
+    private static final Rectangle scissors = new Rectangle();
+
+    public static void drawWithClippping(OrthographicCamera camera, SpriteBatch batch, Rectangle clipBounds) {
+        scissors.set(0, 0, 0, 0);
+
+        ScissorStack.calculateScissors(camera, batch.getTransformMatrix(), clipBounds, scissors);
+        ScissorStack.pushScissors(scissors);
+
+        batch.flush();
+        ScissorStack.popScissors();
     }
 
     public static float getDistance(float a, float b, float c, float d) {
