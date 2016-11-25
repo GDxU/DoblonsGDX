@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
-import com.badlogic.gdx.scenes.scene2d.utils.UIUtils;
 
 import java.util.ArrayList;
 
@@ -125,19 +124,23 @@ public class HUDManager implements InteractiveObject, Viewable {
     }
 
     @Override
-    public boolean click( int xPos, int yPos) {
+    public boolean click(int xPos, int yPos) {
         continueCheckingClicks = true;
+
 //        switch (touchType) {
 //            case CLICK:
-                for (int i = (views.size() - 1); i >= 0; i--) {
-                    if (!continueCheckingClicks) {
-                        return true;
-                    }
-                    final View view = views.get(i);
-                    if (view.click(xPos, yPos)) {
-                        continueCheckingClicks = false;
-                    }
-                }
+
+
+        for (int i = (views.size() - 1); i >= 0; i--) {
+            final View view = views.get(i);
+            if (view.click(xPos, yPos)) {
+                Utility.log("checkClik > " + xPos + ", " + yPos + " | viewNum: " + views.size());
+                continueCheckingClicks = false;
+                return true;
+            } else {
+                Utility.log("failed > " + view.toString() + " | " + xPos + ", " + yPos);
+            }
+        }
 //                break;
 //            case TOUCH_DOWN:
 //                setTouchDown(xPos, yPos);
@@ -150,7 +153,7 @@ public class HUDManager implements InteractiveObject, Viewable {
     }
 
     @Override
-    public boolean longClick( int xPos, int yPos) {
+    public boolean longClick(int xPos, int yPos) {
         continueChceckingForLongClicks = true;
         for (int i = (views.size() - 1); i >= 0; i--) {
             if (!continueChceckingForLongClicks) {
@@ -197,7 +200,6 @@ public class HUDManager implements InteractiveObject, Viewable {
     }
 
     public void draw(final SpriteBatch batch, final ShapeRenderer renderer) {
-        Utility.print("draw");
         shapeRenderer = renderer;
         spriteBatch = batch;
 

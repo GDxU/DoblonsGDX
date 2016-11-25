@@ -7,6 +7,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 
+import tbs.doblon.io.views.HUDManager;
+
 import static tbs.doblon.io.Game.forceTarget;
 import static tbs.doblon.io.Game.keys;
 import static tbs.doblon.io.Game.player;
@@ -99,6 +101,9 @@ public class GameController extends InputMultiplexer {
             if (UIManager.touchDown(x, y)) {
                 return false;
             }
+
+            if (keyListener == null)
+                Gdx.input.setOnscreenKeyboardVisible(false);
             return false;
         }
 
@@ -115,7 +120,7 @@ public class GameController extends InputMultiplexer {
         public boolean touchDragged(int screenX, int screenY, int pointer) {
             Game.mouseX = screenX;
             Game.mouseY = screenY;
-            Game.sendTarget(false || forceTarget);
+            Game.sendTarget(forceTarget);
             forceTarget = false;
             return false;
         }
@@ -124,7 +129,7 @@ public class GameController extends InputMultiplexer {
         public boolean mouseMoved(int screenX, int screenY) {
             Game.mouseX = screenX;
             Game.mouseY = screenY;
-            Game.sendTarget(false || forceTarget);
+            Game.sendTarget(forceTarget);
             forceTarget = false;
             return false;
         }
@@ -137,8 +142,7 @@ public class GameController extends InputMultiplexer {
     };
 
     private static boolean click(int x, int y) {
-
-        return false;
+        return HUDManager.getHUDManager().click(x, y);
     }
 
     private static boolean scroll(float dy) {

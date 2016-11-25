@@ -22,7 +22,7 @@ public abstract class ViewGroup extends View {
                 return true;
             }
         }
-        return super.click( xPos, yPos);
+        return super.click(xPos, yPos);
     }
 
     public boolean cullView(final View v) {

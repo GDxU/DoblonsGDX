@@ -111,13 +111,15 @@ public abstract class View implements InteractiveObject, Viewable {
 
     @Override
     public boolean click( int xPos, int yPos) {
-        if (state == State.DISABLED || (onTouchListener == null))
-            return false;
+//        if (state == State.DISABLED || (onTouchListener == null))
+//            return false;
         rect.set(lastRelX + x, lastRelY + y, w, h);
         final boolean clicked = rect.contains(xPos, yPos);
 
         if (clicked) {
          //Todo
+            if (onClickListener != null)
+                onClickListener.onClick(this, xPos, yPos);
         }
         return clicked;
     }

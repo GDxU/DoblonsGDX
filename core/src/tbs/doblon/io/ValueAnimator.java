@@ -96,8 +96,7 @@ public class ValueAnimator {
                         (-43.6 * Math.pow(x, 5)) +
                                 (102.46 * Math.pow(x, 4)) +
                                 (-76.88 * Math.pow(x, 3)) +
-                                (18.83 * Math.pow(x, 2)) +
-                                (1.806 * x)
+                                (18.83 * Math.pow(x, 2)) + (1.806 * x)
                 );
                 break;
         }
@@ -138,7 +137,6 @@ public class ValueAnimator {
         void onAnimationStart();
 
         void onAnimationFinish();
-
 
     }
 

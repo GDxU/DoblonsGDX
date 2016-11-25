@@ -1,18 +1,12 @@
 package tbs.doblon.io;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.StringBuilder;
-import com.sun.corba.se.impl.orbutil.ObjectWriter;
 
 import org.json.JSONObject;
 
@@ -24,105 +18,55 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
+import tbs.doblon.io.views.EditText;
 import tbs.doblon.io.views.HUDManager;
 
 public class Game extends GameBase {
+    public static final String[] instructionsList = {
+            "use A & D or Arrow Keys control the direction of your ship",
+            "use your mouse to aim and fire your cannons",
+            "destroy enemy ships and collect doblons to upgrade your ship"
+    };
+    public static final ArrayList<String> modeList = new ArrayList<String>();
+    public static final ArrayList<Player> users = new ArrayList<Player>();
+    public static final ArrayList<Obstacle> gameObjects = new ArrayList<Obstacle>();
+    public static final IslandInfo[] islandInfo = {
+            new IslandInfo(17, 0xe0cca7, new float[]{0.92f, 0.95f, 1, 1.05f, 1, 0.85f, 0.95f, 1, 1.1f, 1, 0.96f}),
+            new IslandInfo(17, 0xd4c19e, new float[]{1, 0.94f, 1, 1.13f, 0.98f, 1.05f, 1.1f, 1, 0.96f}),
+            new IslandInfo(17, 0xc7b694, new float[]{1.05f, 0.92f, 1, 1.06f, 1, 0.98f, 1, 0.92f}),
+            new IslandInfo(5, 0xa4a4a4, new float[]{1.05f, 0.92f, 1, 1.06f, 1, 0.98f, 1, 0.92f})
+    };
+    public static final ArrayList<TextureRegion> renderedSkins = new ArrayList<TextureRegion>();
+    public static final String treasureMap = "2B=TK:KAB,SSV:100K";
+    public static final MiniMap minimap = new MiniMap();
+    // ANIM TEXT:
+    static final ArrayList<AnimText> animTexts = new ArrayList<AnimText>();
+    static final int[] pingColors = {0xffffff, 0xffffff, 0xff6363, 0xff6363, 0x67ff3e66, 0xffffff88, 0x63b0ff};
+    private static final int sendFrequency = 10, tUpdateFrequency = 10;
     public static OrthographicCamera camera = new OrthographicCamera();
-    @Override
-    public void create() {
-        super.create();
-        HUDManager.getHUDManager();
-        skinIndex = Utility.getInt("sknInx");
-        userNameInput = Utility.getString("lstnmdbl");
-        MyTextInputListener listener = new MyTextInputListener();
-//        Gdx.input.getTextInput(listener, "Dialog Title", "Initial Textfield Value", "Hint Value");
-        Gdx.input.setOnscreenKeyboardVisible(true);
-        getIP();
-    }
-
-    public static class MyTextInputListener implements Input.TextInputListener {
-        @Override
-        public void input(String text) {
-            Utility.print("input: " + text);
-        }
-
-        @Override
-        public void canceled() {
-
-        }
-    }
-
-    @Override
-    public void resume() {
-        super.resume();
-//        resumeSounds();
-        paused = false;
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        HUDManager.camera.setToOrtho(false, width, height);
-        HUDManager.camera.position.set(width / 2, height / 2, 0);
-        HUDManager.camera.update();
-        super.resize(width, height);
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-    }
-
-    @Override
-    public void render() {
-        super.render();
-    }
-
-    @Override
-    protected void onDraw() {
-
-    }
-
-    @Override
-    public void pause() {
-//        pauseSounds();
-        paused = true;
-        super.pause();
-    }
-
     public static String socket;
     public static String scoreText;
     public static String upgradesText;
     public static String coinDisplayText, lobbyURLIP;
     public static int lobbyRoomID;
     public static GameController gameController = new GameController();
-
     public static ArrayList<UpgradeItem> upgradeItems = new ArrayList<UpgradeItem>(12);
     public static int port;
     public static int controlIndex = 0;
     public static int targetFPS = 60;
     public static float delta, delta2;
     public static long currentTime, oldTime;
-    private static final int sendFrequency = 10, tUpdateFrequency = 10;
-    private static long lastUpdated = 0, lastSent = 0;
     public static int gameState = 0;
     public static GameData gameData;
     public static boolean upgradesHidden = false;
     public static int instructionsSpeed = 5500;
     public static int insturctionsCountdown = 0;
-    public static final String[] instructionsList = {
-            "use A & D or Arrow Keys control the direction of your ship",
-            "use your mouse to aim and fire your cannons",
-            "destroy enemy ships and collect doblons to upgrade your ship"
-    };
     public static String partyKey;
     public static Player player = null;
-    public static final ArrayList<String> modeList = new ArrayList<String>();
     public static String modeIndex = null;
     public static String leaderboardText = null;
     public static String currentMode = null;
     public static String dayTimeValue = "";
-    public static final ArrayList<Player> users = new ArrayList<Player>();
-    public static final ArrayList<Obstacle> gameObjects = new ArrayList<Obstacle>();
     public static float target = 0;
     public static float targetD = 1;
     public static float turnDir = 0;
@@ -133,7 +77,18 @@ public class Game extends GameBase {
             "discovering treasure...",
             "setting sail..."
     };
-
+    public static float playerCanvasScale = 430, maxFlashAlpha = 0.25f;
+    public static Texture[] iconsList = {};
+    public static int skinIndex;
+    public static TextureRegion skinIcon;
+    public static String skinName;
+    public static Keys keys = new Keys();//l,r,u,d
+    public static String cid;
+    public static int mouseX, mouseY;
+    public static boolean forceTarget = true, shooting;
+    public static String userNameInput;
+    public static ArrayList<Skin> userSkins = new ArrayList<Skin>();
+    public static String instructionsText = "";
     static long lastAdShown = System.currentTimeMillis();
     //Todo set this value in pause/resume
     static boolean paused;
@@ -141,6 +96,36 @@ public class Game extends GameBase {
     static float viewMult = 1;
     static int maxScreenWidth = 2208, maxScreenHeight = 1242; // 1080;
     static int originalScreenWidth = maxScreenWidth, originalScreenHeight = maxScreenHeight;
+    // SCREEN SHAKE:
+    static float screenSkX, screenShackeScale, screenSkY, screenSkRed, screenSkDir = 0;
+    // SKULL ICONS:
+    static int iconsCount = 5;
+
+//    initIconList();
+
+    //    static void initIconList() {
+//        for (int i = 1; i < iconsCount; ++i) {
+//            var tmpImg = new Image();
+//            tmpImg.onload = (public static void(val) {
+//            return public static void() {
+//                this.onLoad = null;
+//                iconsList[val] = this;
+//            }
+//            })(i);
+//            tmpImg.src = ".././img/icons/skull_" + i + ".png";
+//        }
+//    }
+    static float skullIconSize = 50;
+    static int animTextIndex = 0;
+    static int darkColor = 0x4d4d4d;
+    static int lastScore;
+    static long scoreCountdown, scoreDisplayTime;
+    static int skinDisplayIconSize = 200;
+    private static long lastUpdated = 0, lastSent = 0;
+    private static short a = initAnimTexts();
+    String kickReason;
+    boolean activePopup;
+    int o = initSkins();
 
     public static void showAd() {
         Utility.log("showAds");
@@ -174,6 +159,24 @@ public class Game extends GameBase {
         return false;
     }
 
+    // PAGE IS READY:
+//    public static void getURLParam(name, url) {
+//        if (!url) url = location.href;
+//        name = name.replace( /[\[]/,"\\\[").replace( /[\]]/,"\\\]");
+//        var regexS = "[\\?&]" + name + "=([^&#]*)";
+//        var regex = new RegExp(regexS);
+//        var results = regex.exec(url);
+//        return results == null ? null : results[1];
+//    }
+
+//    public static String lobbyURLIP = getURLParam("l");
+//    if(lobbyURLIP)
+//    {
+//        String tmpL = lobbyURLIP.split("-");
+//        lobbyURLIP = tmpL.get(0);
+//        lobbyRoomID = tmpL.get(1);
+//    }
+
     // FIND PLAYER INDEX:
     public static int getPlayerIndex(int sid) {
 
@@ -186,9 +189,6 @@ public class Game extends GameBase {
 
         return -1;
     }
-
-    // SCREEN SHAKE:
-    static float screenSkX, screenShackeScale, screenSkY, screenSkRed, screenSkDir = 0;
 
     public static void screenShake(float scl, float dir) {
         if (screenShackeScale < scl) {
@@ -206,41 +206,6 @@ public class Game extends GameBase {
                 screenShackeScale = 0;
         }
     }
-
-    public static float playerCanvasScale = 430, maxFlashAlpha = 0.25f;
-
-    // SKULL ICONS:
-    static int iconsCount = 5;
-    static float skullIconSize = 50;
-    public static Texture[] iconsList = {};
-
-//    initIconList();
-
-//    static void initIconList() {
-//        for (int i = 1; i < iconsCount; ++i) {
-//            var tmpImg = new Image();
-//            tmpImg.onload = (public static void(val) {
-//            return public static void() {
-//                this.onLoad = null;
-//                iconsList[val] = this;
-//            }
-//            })(i);
-//            tmpImg.src = ".././img/icons/skull_" + i + ".png";
-//        }
-//    }
-
-    public static final IslandInfo[] islandInfo = {
-            new IslandInfo(17, 0xe0cca7, new float[]{0.92f, 0.95f, 1, 1.05f, 1, 0.85f, 0.95f, 1, 1.1f, 1, 0.96f}),
-            new IslandInfo(17, 0xd4c19e, new float[]{1, 0.94f, 1, 1.13f, 0.98f, 1.05f, 1.1f, 1, 0.96f}),
-            new IslandInfo(17, 0xc7b694, new float[]{1.05f, 0.92f, 1, 1.06f, 1, 0.98f, 1, 0.92f}),
-            new IslandInfo(5, 0xa4a4a4, new float[]{1.05f, 0.92f, 1, 1.06f, 1, 0.98f, 1, 0.92f})
-    };
-
-    // ANIM TEXT:
-    static final ArrayList<AnimText> animTexts = new ArrayList<AnimText>();
-    static int animTextIndex = 0;
-
-    private static short a = initAnimTexts();
 
     public static short initAnimTexts() {
         for (int i = 0; i < 20; ++i) {
@@ -323,15 +288,11 @@ public class Game extends GameBase {
             animTextIndex = 0;
     }
 
-    String kickReason;
-
     public static void kickPlayer(String reason) {
         leaveGame();
         showMainMenuText(reason);
         SocketManager.socket.close();
     }
-
-    static final int[] pingColors = {0xffffff, 0xffffff, 0xff6363, 0xff6363, 0x67ff3e66, 0xffffff88, 0x63b0ff};
 
     // UPDATE OR PUSH PLAYER:
     public static void updateOrPushUser(JSONObject obj) {
@@ -355,29 +316,6 @@ public class Game extends GameBase {
         }
     }
 
-    static int darkColor = 0x4d4d4d;
-
-    // PAGE IS READY:
-//    public static void getURLParam(name, url) {
-//        if (!url) url = location.href;
-//        name = name.replace( /[\[]/,"\\\[").replace( /[\]]/,"\\\]");
-//        var regexS = "[\\?&]" + name + "=([^&#]*)";
-//        var regex = new RegExp(regexS);
-//        var results = regex.exec(url);
-//        return results == null ? null : results[1];
-//    }
-
-//    public static String lobbyURLIP = getURLParam("l");
-//    if(lobbyURLIP)
-//    {
-//        String tmpL = lobbyURLIP.split("-");
-//        lobbyURLIP = tmpL.get(0);
-//        lobbyRoomID = tmpL.get(1);
-//    }
-
-
-    boolean activePopup;
-
     public static void showWeaponPopup(int indx) {
         for (int i = 0; i < 4; i++) {
 //     todo       final Button tmpDiv = document.getElementById("popupRow" + i);
@@ -386,9 +324,6 @@ public class Game extends GameBase {
 //            }
         }
     }
-
-    public static final ArrayList<TextureRegion> renderedSkins = new ArrayList<TextureRegion>();
-    public static int skinIndex;
 
     // NOTIFICATIONS:
     public static void hideNotifByType(String type) {
@@ -411,17 +346,12 @@ public class Game extends GameBase {
         showAnimText(maxScreenWidth / 2, screenHeight / 3, text, 130, 1000, "bNotif", 0.26f);
     }
 
-    static int lastScore;
-    static long scoreCountdown, scoreDisplayTime;
-
     public static void showScoreNotif(int value) {
         hideNotifByType("sNotif");
         lastScore += value;
         showAnimText(maxScreenWidth / 2, maxScreenHeight / 1.34f, ("+" + lastScore), 35, scoreDisplayTime, "sNotif", 0.16f);
         scoreCountdown = scoreDisplayTime;
     }
-
-    static int skinDisplayIconSize = 200;
 
     public static void changeSkin(int val) {
         final ShapeRenderer renderer = shapeRenderer(fill);
@@ -449,9 +379,6 @@ public class Game extends GameBase {
         skinName = userSkins.get(skinIndex).name;
         Utility.saveInt("sknInx", skinIndex);
     }
-
-    public static TextureRegion skinIcon;
-    public static String skinName;
 
     // SHOW A TEXT IN THE MENU:
     public static void showMainMenuText(String text) {
@@ -494,28 +421,10 @@ public class Game extends GameBase {
         final String adID = "ca-app-pub-6350309116730071/9878078741";
     }
 
-    public static final String treasureMap = "2B=TK:KAB,SSV:100K";
-
-    public static Keys keys = new Keys();//l,r,u,d
-
     public static void resetKeys() {
         keys.l = 0;
         keys.r = 0;
     }
-
-    public static String cid;
-
-    public void getStorage() {
-        cid = Utility.getString("sckt");
-        if (cid.length() < 2) {
-//            cid = Utility.getUniqueID();
-            Utility.saveString("sckt", cid);
-        }
-    }
-
-    public static int mouseX, mouseY;
-    public static boolean forceTarget = true, shooting;
-    public static String userNameInput;
 
     public static void toggleUpgrades() {
 
@@ -974,10 +883,6 @@ public class Game extends GameBase {
         //[0] = name, [1] = color1, [2] = color2;
     }
 
-    int o = initSkins();
-    public static final MiniMap minimap = new MiniMap();
-    public static ArrayList<Skin> userSkins = new ArrayList<Skin>();
-
     public static void sendTarget(boolean force) {
         long tmpTime = currentTime;
         if (player != null && !player.dead) {
@@ -1086,8 +991,6 @@ public class Game extends GameBase {
         }
     }
 
-    public static String instructionsText = "";
-
     // UPDATE MENU:
     public static void updateMenuLoop(float delta) {
         if (gameState != 1) {
@@ -1103,7 +1006,6 @@ public class Game extends GameBase {
             }
         }
     }
-
 
     public static void getIP() {
         //Todo
@@ -1134,6 +1036,83 @@ public class Game extends GameBase {
         } catch (IOException e) {
             Utility.log("getIP IO exception: ");
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void create() {
+        super.create();
+        HUDManager.getHUDManager();
+
+        skinIndex = Utility.getInt("sknInx");
+        userNameInput = Utility.getString("lstnmdbl");
+        MyTextInputListener listener = new MyTextInputListener();
+//        Gdx.input.getTextInput(listener, "Dialog Title", "Initial Textfield Value", "Hint Value");
+        Gdx.input.setOnscreenKeyboardVisible(true);
+        getIP();
+    }
+
+    @Override
+    public void resume() {
+        super.resume();
+//        resumeSounds();
+        paused = false;
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        HUDManager.camera.setToOrtho(false, width, height);
+        HUDManager.camera.position.set(width / 2, height / 2, 0);
+        HUDManager.camera.update();
+        super.resize(width, height);
+        final EditText editText = new EditText();
+        editText.w = screenWidth / 2;
+        editText.h = screenHeight / 2;
+        editText.x = screenWidth / 4;
+        editText.y = screenHeight / 4;
+
+        HUDManager.addView(editText);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+    }
+
+    @Override
+    public void render() {
+        super.render();
+    }
+
+    @Override
+    protected void onDraw() {
+        HUDManager.getHUDManager().draw(spriteBatch(), shapeRenderer(fill));
+    }
+
+    @Override
+    public void pause() {
+//        pauseSounds();
+        paused = true;
+        super.pause();
+    }
+
+    public void getStorage() {
+        cid = Utility.getString("sckt");
+        if (cid.length() < 2) {
+//            cid = Utility.getUniqueID();
+            Utility.saveString("sckt", cid);
+        }
+    }
+
+    public static class MyTextInputListener implements Input.TextInputListener {
+        @Override
+        public void input(String text) {
+            Utility.print("input: " + text);
+        }
+
+        @Override
+        public void canceled() {
+
         }
     }
 }
